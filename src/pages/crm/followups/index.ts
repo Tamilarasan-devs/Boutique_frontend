@@ -1,0 +1,1 @@
+export { default as Followups } from './Followups';\n

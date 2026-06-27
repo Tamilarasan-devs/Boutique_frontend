@@ -1,0 +1,16 @@
+import React from 'react';
+
+export interface __NAME__Props {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+const __NAME__: React.FC<__NAME__Props> = ({ className, children }) => {
+  return (
+    <div className={className || ''}>
+      {children || '__NAME__ Component'}
+    </div>
+  );
+};
+
+export default __NAME__;

@@ -1,0 +1,1 @@
+export { default as PermissionsSettings } from './PermissionsSettings';\n

@@ -1,0 +1,1 @@
+export { default as Tailors } from './Tailors';\n

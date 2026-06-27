@@ -1,0 +1,1 @@
+export { default as DataTable } from './DataTable';\nexport { default as LeadTable } from './LeadTable';\nexport { default as CustomerTable } from './CustomerTable';\nexport { default as OrderTable } from './OrderTable';\nexport { default as InventoryTable } from './InventoryTable';\nexport { default as PaymentTable } from './PaymentTable';\n

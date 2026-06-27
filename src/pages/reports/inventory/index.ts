@@ -1,0 +1,1 @@
+export { default as InventoryReport } from './InventoryReport';\n

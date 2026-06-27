@@ -1,0 +1,1 @@
+export { default as Loyalty } from './Loyalty';\n
