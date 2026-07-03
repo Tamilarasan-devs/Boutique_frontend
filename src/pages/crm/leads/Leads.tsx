@@ -1,95 +1,376 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Phone, ChevronRight, X, Loader2 } from 'lucide-react';
+import { leadApi, Lead } from '../../../api/leadApi';
+import { customerApi } from '../../../api/customerApi';
+
+// ────────────────────────────────────────────────────────────
+// Palette (matches Boutique Overview):
+// Ink #1C2430 · Parchment #FAF7F1 · Terracotta #C1652F
+// Gold #C99A3E · Pine #2F5D4F · Rosewood #9B3B43 · Plum #7A5AA8
+// ────────────────────────────────────────────────────────────
+
+const columnStyles: Record<Lead['status'], { dot: string; head: string; chip: string }> = {
+  New:       { dot: 'bg-[#7A5AA8]', head: 'text-[#7A5AA8]', chip: 'bg-[#7A5AA8]/10 text-[#5d4485]' },
+  Contacted: { dot: 'bg-[#C99A3E]', head: 'text-[#8a6a25]', chip: 'bg-[#C99A3E]/10 text-[#8a6a25]' },
+  Qualified: { dot: 'bg-[#C1652F]', head: 'text-[#a3531f]', chip: 'bg-[#C1652F]/10 text-[#a3531f]' },
+  Won:       { dot: 'bg-[#2F5D4F]', head: 'text-[#234638]', chip: 'bg-[#2F5D4F]/10 text-[#234638]' },
+  Lost:      { dot: 'bg-[#9B3B43]', head: 'text-[#7a2e34]', chip: 'bg-[#9B3B43]/10 text-[#7a2e34]' },
+};
 
 const Leads: React.FC = () => {
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Form State
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [requirement, setRequirement] = useState('');
+  const [value, setValue] = useState('');
+  const [source, setSource] = useState('WhatsApp'); // Updated default based on user request
+
+  const columns: Lead['status'][] = ['New', 'Contacted', 'Qualified', 'Won', 'Lost'];
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const fetchLeads = async () => {
+    setIsLoading(true);
+    try {
+      const data = await leadApi.getLeads();
+      setLeads(data);
+    } catch (error) {
+      console.error('Failed to load leads', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredLeads = leads.filter(lead =>
+    lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lead.requirement.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lead.source.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleAddLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone) return;
+
+    try {
+      const newLeadData = {
+        lead_id: `LEAD-10${leads.length + 1}`,
+        name,
+        phone,
+        source,
+        requirement,
+        status: 'New' as Lead['status'],
+        value: value ? `₹${Number(value).toLocaleString('en-IN')}` : '₹0'
+      };
+
+      const savedLead = await leadApi.addLead(newLeadData);
+      setLeads([savedLead, ...leads]); // Add to top of list
+      
+      // Reset form
+      setName('');
+      setPhone('');
+      setRequirement('');
+      setValue('');
+      setSource('WhatsApp');
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Failed to add lead', error);
+      alert('Error adding lead. Please try again.');
+    }
+  };
+
+  const moveStatus = async (id: string, currentStatus: Lead['status']) => {
+    const currentIndex = columns.indexOf(currentStatus);
+    if (currentIndex === -1 || currentIndex === columns.length - 1) return;
+    const nextStatus = columns[currentIndex + 1];
+
+    // Optimistic UI update
+    setLeads(leads.map(lead => lead.id === id ? { ...lead, status: nextStatus } : lead));
+
+    try {
+      await leadApi.updateLeadStatus(id, nextStatus);
+    } catch (error) {
+      console.error('Failed to update status', error);
+      // Revert if failed
+      setLeads(leads.map(lead => lead.id === id ? { ...lead, status: currentStatus } : lead));
+      alert('Failed to update lead status on the server.');
+    }
+  };
+
+  const handleMarkLost = async (id: string, currentStatus: Lead['status']) => {
+    // Optimistic UI update
+    setLeads(leads.map(lead => lead.id === id ? { ...lead, status: 'Lost' as Lead['status'] } : lead));
+
+    try {
+      await leadApi.updateLeadStatus(id, 'Lost');
+    } catch (error) {
+      console.error('Failed to mark lead as lost', error);
+      // Revert if failed
+      setLeads(leads.map(lead => lead.id === id ? { ...lead, status: currentStatus } : lead));
+      alert('Failed to update lead status on the server.');
+    }
+  };
+
+  const handleConvertLead = async (lead: Lead) => {
+    const confirmConvert = window.confirm(`Convert "${lead.name}" to an active customer?`);
+    if (!confirmConvert) return;
+
+    // Optimistic UI update to Won status
+    setLeads(leads.map(l => l.id === lead.id ? { ...l, status: 'Won' as Lead['status'] } : l));
+
+    try {
+      // 1. Update lead status to Won in database
+      await leadApi.updateLeadStatus(lead.id, 'Won');
+      
+      // 2. Add customer to database
+      await customerApi.addCustomer({
+        name: lead.name,
+        phone: lead.phone,
+        email: '',
+        address: ''
+      });
+      
+      alert(`Successfully converted "${lead.name}" to a customer!`);
+    } catch (error) {
+      console.error('Failed to convert lead', error);
+      // Revert status on failure
+      setLeads(leads.map(l => l.id === lead.id ? { ...l, status: lead.status } : l));
+      alert('Failed to convert lead to customer.');
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Leads</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span> <span className="mx-2">/</span> <span>Leads</span>
-          </nav>
-        </div>
-        
-        {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Export
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-            Create New
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
+      <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
 
-      {/* Filter Area & Search */}
-      <div className="flex justify-between items-center py-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex w-1/3">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <select className="px-4 py-2 border border-gray-300 rounded-md bg-white">
-            <option>All Filters</option>
-            <option>Active</option>
-            <option>Archived</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table/Card Area */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">
-        {/* Empty State */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">No data found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new entry.</p>
-          <div className="mt-6">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-              New Entry
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 sm:px-6 rounded-lg mt-4">
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#1C2430]/[0.08]">
           <div>
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of <span className="font-medium">97</span> results
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">
+              Pipeline
+            </p>
+            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#1C2430]">
+              Leads Board
+            </h1>
+            <p className="text-sm text-[#1C2430]/55 mt-1">
+              Track conversations and inquiries from WhatsApp, Instagram, Email, and Phone.
             </p>
           </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Next
-              </button>
-            </nav>
-          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#1C2430]/10 self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Add Lead
+          </button>
         </div>
+
+        {/* Search Filter */}
+        <div className="flex items-center bg-white border border-[#1C2430]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#C1652F]/25 focus-within:border-[#C1652F]/40 transition">
+          <Search className="w-4 h-4 text-[#1C2430]/35 mr-2 flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Search leads, requirements, or sources..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-transparent border-none outline-none text-sm text-[#1C2430] placeholder-[#1C2430]/35 w-full"
+          />
+        </div>
+
+        {/* Kanban Board */}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-[500px]">
+            <Loader2 className="w-8 h-8 text-[#1C2430]/40 animate-spin" />
+          </div>
+        ) : (
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 items-start h-full min-h-[550px] overflow-x-auto">
+            {columns.map(column => {
+              const style = columnStyles[column];
+              const columnLeads = filteredLeads.filter(l => l.status === column);
+              return (
+                <div key={column} className="bg-[#1C2430]/[0.035] p-3.5 rounded-2xl flex flex-col min-h-[500px] min-w-[230px]">
+                  <div className="flex justify-between items-center mb-3.5 px-1">
+                    <span className="flex items-center gap-2 text-sm font-bold text-[#1C2430]/80">
+                      <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                      {column}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${style.chip}`}>
+                      {columnLeads.length}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 flex-1 overflow-y-auto">
+                    {columnLeads.length === 0 && (
+                      <div className="text-xs text-[#1C2430]/30 text-center py-8 border border-dashed border-[#1C2430]/10 rounded-xl">
+                        No leads
+                      </div>
+                    )}
+                    {columnLeads.map(lead => (
+                      <div
+                        key={lead.id}
+                        className="bg-white p-4 rounded-xl border border-[#1C2430]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] space-y-2.5 hover:shadow-[0_8px_18px_rgba(28,36,48,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+                      >
+                        <div className="flex justify-between items-start">
+                          <span className="text-[10px] font-bold tracking-wide text-[#1C2430]/35">{lead.lead_id}</span>
+                          <span className={`text-[10px] bg-[#FAF7F1] px-2 py-0.5 rounded-full border font-semibold ${
+                            lead.source === 'WhatsApp' ? 'text-green-700 border-green-200 bg-green-50' :
+                            lead.source === 'Instagram Direct' ? 'text-pink-700 border-pink-200 bg-pink-50' :
+                            lead.source === 'Email' ? 'text-blue-700 border-blue-200 bg-blue-50' :
+                            lead.source === 'Phone Call' ? 'text-indigo-700 border-indigo-200 bg-indigo-50' :
+                            'text-[#1C2430]/55 border-[#1C2430]/[0.06]'
+                          }`}>
+                            {lead.source}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-serif font-semibold text-[#1C2430] text-sm">{lead.name}</h4>
+                          <p className="text-xs text-[#1C2430]/50 mt-1 flex items-center gap-1.5">
+                            <Phone className="w-3 h-3 text-[#1C2430]/35" /> {lead.phone}
+                          </p>
+                        </div>
+                        {lead.requirement && (
+                          <div className="bg-[#FAF7F1] px-2.5 py-2 rounded-lg text-xs text-[#1C2430]/65 border border-[#1C2430]/[0.05] leading-relaxed">
+                            <span className="font-semibold text-[#1C2430]/80">Requirement — </span>
+                            {lead.requirement}
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center pt-2 border-t border-[#1C2430]/[0.04]">
+                          <span className="text-sm font-serif font-bold text-[#1C2430]">{lead.value}</span>
+                          <div className="flex items-center gap-1.5">
+                            {column !== 'Lost' && column !== 'Won' && (
+                              <>
+                                <button
+                                  onClick={() => handleMarkLost(lead.id, lead.status)}
+                                  className="px-2 py-1 text-xs font-semibold text-[#9B3B43] hover:bg-[#9B3B43]/10 rounded-md transition cursor-pointer"
+                                  title="Mark as Lost"
+                                >
+                                  Lost
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleConvertLead(lead)}
+                                  className="px-2 py-1 text-xs font-semibold text-[#2F5D4F] hover:bg-[#2F5D4F]/10 rounded-md transition cursor-pointer"
+                                  title="Convert to Customer"
+                                >
+                                  Convert
+                                </button>
+                                
+                                {column !== 'Qualified' && (
+                                  <button
+                                    onClick={() => moveStatus(lead.id, lead.status)}
+                                    className="px-2 py-1 text-xs font-semibold text-[#C1652F] hover:bg-[#C1652F]/10 rounded-md transition cursor-pointer flex items-center gap-0.5"
+                                    title="Move to next stage"
+                                  >
+                                    Next <ChevronRight className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Add Lead Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-[#1C2430]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl border border-[#1C2430]/[0.06] shadow-2xl shadow-[#1C2430]/20 w-full max-w-md overflow-hidden">
+              <div className="px-6 py-5 border-b border-[#1C2430]/[0.08] flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1">New Entry</p>
+                  <h3 className="font-serif font-semibold text-[#1C2430] text-lg">Add New Lead</h3>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-[#1C2430]/35 hover:text-[#1C2430] hover:bg-[#1C2430]/[0.05] p-1.5 rounded-lg transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <form onSubmit={handleAddLead} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Lead Name *</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    placeholder="e.g. Shalini Roy"
+                    className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Phone / Email *</label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    placeholder="e.g. +91 98765 43210 or email"
+                    className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Requirement Details</label>
+                  <textarea
+                    value={requirement}
+                    onChange={(e) => setRequirement(e.target.value)}
+                    placeholder="e.g. Asking about Bridal Lehenga prices"
+                    rows={2}
+                    className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm resize-none transition"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Est. Value (INR)</label>
+                    <input
+                      type="number"
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)}
+                      placeholder="25000"
+                      className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Lead Source</label>
+                    <select
+                      value={source}
+                      onChange={(e) => setSource(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm bg-white transition"
+                    >
+                      <option>WhatsApp</option>
+                      <option>Instagram Direct</option>
+                      <option>Email</option>
+                      <option>Phone Call</option>
+                      <option>Walk-in</option>
+                      <option>Referral</option>
+                      <option>Google Search</option>
+                      <option>Facebook Ad</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-lg text-sm font-semibold transition mt-2 shadow-md shadow-[#1C2430]/10"
+                >
+                  Save Lead
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
-      
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 };

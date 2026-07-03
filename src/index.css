@@ -3,8 +3,71 @@
   Tailwind v4 base + custom design tokens
   Note: Inter font loaded via <link> in index.html
 */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Montserrat', sans-serif;
+  --font-serif: 'Montserrat', sans-serif;
+  
+  /* Boutique Light Theme (Parchment & Ink) */
+  --color-slate-50: #FAF7F1; /* Parchment Background */
+  --color-slate-100: rgba(28,36,48,0.05); /* Very faint ink */
+  --color-slate-200: rgba(28,36,48,0.1);  /* Faint ink border */
+  --color-slate-300: rgba(28,36,48,0.15);
+  --color-slate-400: rgba(28,36,48,0.4);  /* Muted text */
+  --color-slate-500: rgba(28,36,48,0.5);
+  --color-slate-600: rgba(28,36,48,0.65); /* Secondary text */
+  --color-slate-700: rgba(28,36,48,0.8);
+  --color-slate-800: #1C2430; /* Primary Ink */
+  --color-slate-900: #1C2430; /* Headings Ink */
+
+  --color-white: #FFFFFF;
+
+  /* Primary Yellow Gold (Replaces Blue) */
+  --color-blue-50: rgba(201,154,62,0.1);
+  --color-blue-100: rgba(201,154,62,0.2);
+  --color-blue-200: #EADCB8;
+  --color-blue-300: #DEC382;
+  --color-blue-400: #D3AD60;
+  --color-blue-500: #C99A3E; /* Main Gold */
+  --color-blue-600: #C99A3E; /* Main Gold */
+  --color-blue-700: #B08331; /* Hover Gold */
+  --color-blue-800: #936B25;
+  --color-blue-900: #78551A;
+
+  /* Status mapping (Pine for Success, Rosewood for Danger, Terracotta for Warning) */
+  --color-emerald-50: rgba(47,93,79,0.1);
+  --color-emerald-100: rgba(47,93,79,0.15);
+  --color-emerald-500: #2F5D4F;
+  --color-emerald-600: #2F5D4F;
+  --color-emerald-700: #234638;
+
+  --color-amber-50: rgba(193,101,47,0.1);
+  --color-amber-100: rgba(193,101,47,0.15);
+  --color-amber-500: #C1652F;
+  --color-amber-600: #C1652F;
+  --color-amber-700: #A25224;
+
+  --color-red-50: rgba(155,59,67,0.1);
+  --color-red-100: rgba(155,59,67,0.15);
+  --color-red-500: #9B3B43;
+  --color-red-600: #9B3B43;
+  --color-red-700: #7C2E35;
+
+  /* Premium Shadows for Light Theme */
+  --shadow-sm: 0 1px 3px rgba(28,36,48,0.04);
+  --shadow-md: 0 4px 12px rgba(28,36,48,0.06);
+  --shadow-lg: 0 8px 20px rgba(28,36,48,0.08);
+  --shadow-xl: 0 12px 30px rgba(28,36,48,0.1);
+  
+  /* Radii */
+  --radius-xl: 16px;
+  --radius-lg: 12px;
+  --radius-md: 10px;
+  --radius-2xl: 20px;
+}
 
 /* ─── Base styles ───────────────────────────────────────────────────────────── */
 *, *::before, *::after {
@@ -19,8 +82,8 @@ html {
 
 body {
   margin: 0;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-slate-50, #FAF7F1);
+  color: var(--color-slate-800, #1C2430);
 }
 
 /* ─── Scrollbar styling ──────────────────────────────────────────────────────── */
@@ -74,12 +137,15 @@ body {
 
 /* ─── Utility ────────────────────────────────────────────────────────────────── */
 .page-container {
-  padding: 1.5rem;
+  padding: 1rem;
   max-width: 1600px;
+}
+@media (min-width: 640px) {
+  .page-container { padding: 1.5rem; }
 }
 .card {
   background: white;
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
 }
@@ -98,4 +164,29 @@ body {
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 1.25rem;
+}
+
+/* ─── Responsive table wrapper ────────────────────────────────────────────── */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Mobile-safe bottom spacing ─────────────────────────────────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+/* ─── Line clamp utilities ───────────────────────────────────────────────── */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

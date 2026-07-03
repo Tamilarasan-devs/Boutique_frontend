@@ -1,95 +1,125 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Users, ShoppingBag, Star, Download } from 'lucide-react';
+import { reportApi, CustomersReport as CustomersReportType } from '../../../api/reportApi';
+
+const loyaltyColor: Record<string, string> = {
+  Gold: 'bg-amber-50 text-amber-700 border-amber-100',
+  Silver: 'bg-slate-100 text-slate-600 border-slate-200',
+  Regular: 'bg-blue-50 text-blue-700 border-blue-100',
+  New: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+};
 
 const CustomersReport: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<CustomersReportType | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const report = await reportApi.getCustomersReport();
+        setData(report);
+      } catch (error) {
+        console.error('Failed to load customers report:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const handleExport = async () => {
+    try {
+      await reportApi.exportReport('customers', 'excel');
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  if (loading || !data) {
+    return (
+      <div className="flex h-full items-center justify-center bg-slate-50/50 p-6 text-slate-500 font-semibold">
+        Loading customer data...
+      </div>
+    );
+  }
+
+  const { totalCustomers, totalRevenue, totalOrders, customers } = data;
+
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
+    <div className="flex flex-col h-full space-y-5 p-6 bg-slate-50/50">
+      <div className="flex justify-between items-center pb-4 border-b border-slate-100">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">CustomersReport</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span> <span className="mx-2">/</span> <span>CustomersReport</span>
-          </nav>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Customer Report</h1>
+          <p className="text-sm text-slate-500 mt-1">Lifetime value, loyalty tiers, and order frequency per customer.</p>
         </div>
-        
-        {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Export
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-            Create New
-          </button>
+        <button 
+          onClick={handleExport}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-1.5 transition shadow-sm"
+        >
+          <Download className="w-4 h-4" /> Export
+        </button>
+      </div>
+
+      {/* Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+          <div><span className="text-xs font-bold text-slate-400 uppercase">Total Customers</span><h3 className="text-2xl font-black text-slate-900 mt-1">{totalCustomers}</h3></div>
+          <div className="p-3 rounded-xl bg-blue-50 border border-blue-100"><Users className="w-6 h-6 text-blue-600" /></div>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+          <div><span className="text-xs font-bold text-slate-400 uppercase">Total Revenue</span><h3 className="text-2xl font-black text-slate-900 mt-1">₹{totalRevenue.toLocaleString('en-IN')}</h3></div>
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100"><ShoppingBag className="w-6 h-6 text-emerald-600" /></div>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+          <div><span className="text-xs font-bold text-slate-400 uppercase">Total Orders</span><h3 className="text-2xl font-black text-slate-900 mt-1">{totalOrders}</h3></div>
+          <div className="p-3 rounded-xl bg-amber-50 border border-amber-100"><Star className="w-6 h-6 text-amber-500" /></div>
         </div>
       </div>
 
-      {/* Filter Area & Search */}
-      <div className="flex justify-between items-center py-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex w-1/3">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <select className="px-4 py-2 border border-gray-300 rounded-md bg-white">
-            <option>All Filters</option>
-            <option>Active</option>
-            <option>Archived</option>
-          </select>
-        </div>
+      {/* Customer Table */}
+      <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <table className="w-full text-left text-sm text-slate-600">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
+              <th className="py-4 px-6">Customer</th>
+              <th className="py-4 px-6 text-center">Orders</th>
+              <th className="py-4 px-6 text-right">Total Spend</th>
+              <th className="py-4 px-6 text-right">Avg. Order</th>
+              <th className="py-4 px-6">Loyalty</th>
+              <th className="py-4 px-6">Last Order</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {customers.map((c, i) => (
+              <tr key={i} className="hover:bg-slate-50/40 transition">
+                <td className="py-4 px-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
+                      {c.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <span className="font-semibold text-slate-800">{c.name}</span>
+                  </div>
+                </td>
+                <td className="py-4 px-6 text-center font-bold text-slate-800">{c.orders}</td>
+                <td className="py-4 px-6 text-right font-bold text-slate-900">₹{c.totalSpend.toLocaleString('en-IN')}</td>
+                <td className="py-4 px-6 text-right text-slate-600 font-medium">₹{c.avgOrder.toLocaleString('en-IN')}</td>
+                <td className="py-4 px-6">
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${loyaltyColor[c.loyalty] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                    {c.loyalty}
+                  </span>
+                </td>
+                <td className="py-4 px-6 text-slate-500">{c.lastOrder}</td>
+              </tr>
+            ))}
+            {customers.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-slate-400 italic">No customers found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-
-      {/* Table/Card Area */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">
-        {/* Empty State */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">No data found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new entry.</p>
-          <div className="mt-6">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-              New Entry
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 sm:px-6 rounded-lg mt-4">
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of <span className="font-medium">97</span> results
-            </p>
-          </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Next
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
-      
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 };

@@ -1,95 +1,184 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Phone, Mail, MapPin, Trash2, X, Star } from 'lucide-react';
+import { inventoryApi } from '../../../api/inventoryApi';
+
+interface Supplier {
+  id: number;
+  name: string;
+  contact: string;
+  email: string;
+  phone: string;
+  location: string;
+  category: string;
+  rating: number;
+}
 
 const Suppliers: React.FC = () => {
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [name, setName] = useState('');
+  const [contact, setContact] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('');
+  const [rating, setRating] = useState(5);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const data = await inventoryApi.getSuppliers();
+      setSuppliers(data);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const filtered = suppliers.filter(s =>
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.category || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const resetForm = () => { setName(''); setContact(''); setPhone(''); setEmail(''); setLocation(''); setCategory(''); setRating(5); };
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone) return;
+    try {
+      await inventoryApi.addSupplier({ name, contact, phone, email, location, category, rating });
+      resetForm();
+      setIsModalOpen(false);
+      fetchData();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Delete this supplier?')) return;
+    try { await inventoryApi.deleteSupplier(id); fetchData(); } catch (err) { console.error(err); }
+  };
+
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Suppliers</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span> <span className="mx-2">/</span> <span>Suppliers</span>
-          </nav>
-        </div>
-        
-        {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Export
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-            Create New
+    <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
+      <div className="flex flex-col space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#1C2430]/[0.08]">
+          <div>
+            <p className="text-xs font-bold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">Inventory</p>
+            <h1 className="text-3xl font-bold tracking-tight text-[#1C2430]">Supplier Directory</h1>
+            <p className="text-sm font-medium text-[#1C2430]/55 mt-1">Manage fabric, accessory and raw material suppliers.</p>
+          </div>
+          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-bold flex items-center gap-1.5 transition shadow-md self-start sm:self-auto">
+            <Plus className="w-4 h-4" /> Add Supplier
           </button>
         </div>
-      </div>
 
-      {/* Filter Area & Search */}
-      <div className="flex justify-between items-center py-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex w-1/3">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        {/* Search */}
+        <div className="flex items-center bg-white border border-[#1C2430]/[0.1] rounded-xl px-4 py-3 w-full sm:w-96 shadow-sm focus-within:ring-2 focus-within:ring-[#C1652F]/25 transition">
+          <Search className="w-4 h-4 text-[#1C2430]/35 mr-2 flex-shrink-0" />
+          <input type="text" placeholder="Search by name or category..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[#1C2430] placeholder-[#1C2430]/35 w-full" />
         </div>
-        <div className="flex space-x-2">
-          <select className="px-4 py-2 border border-gray-300 rounded-md bg-white">
-            <option>All Filters</option>
-            <option>Active</option>
-            <option>Archived</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Table/Card Area */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">
-        {/* Empty State */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
+        {/* Grid */}
+        {loading ? (
+          <p className="text-center text-[#1C2430]/50 font-semibold py-12">Loading suppliers...</p>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-[#1C2430]/40 font-semibold">No suppliers found.</p>
+            <p className="text-[#1C2430]/30 text-sm mt-1">Add your first supplier to get started.</p>
           </div>
-          <h3 className="text-lg font-medium text-gray-900">No data found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new entry.</p>
-          <div className="mt-6">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-              New Entry
-            </button>
-          </div>
-        </div>
-      </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {filtered.map(s => (
+              <div key={s.id} className="bg-white p-6 rounded-2xl border border-[#1C2430]/[0.06] shadow-sm hover:shadow-md transition space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-[#1C2430] text-base">{s.name}</h3>
+                    {s.category && <span className="mt-1 inline-block text-[10px] bg-[#C99A3E]/10 text-[#8a6a25] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">{s.category}</span>}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className={`w-3.5 h-3.5 ${i < s.rating ? 'text-[#C99A3E] fill-[#C99A3E]' : 'text-[#1C2430]/15'}`} />
+                    ))}
+                  </div>
+                </div>
 
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 sm:px-6 rounded-lg mt-4">
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of <span className="font-medium">97</span> results
-            </p>
+                <div className="space-y-2 text-sm font-semibold text-[#1C2430]/60">
+                  {s.phone && <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-[#1C2430]/35 flex-shrink-0" />{s.phone} {s.contact && `· ${s.contact}`}</p>}
+                  {s.email && <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-[#1C2430]/35 flex-shrink-0" />{s.email}</p>}
+                  {s.location && <p className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[#1C2430]/35 flex-shrink-0" />{s.location}</p>}
+                </div>
+
+                <div className="pt-3 border-t border-[#1C2430]/[0.05] flex justify-end">
+                  <button onClick={() => handleDelete(s.id)} className="p-1.5 text-[#1C2430]/30 hover:text-[#9B3B43] hover:bg-[#9B3B43]/10 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+            ))}
           </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Next
-              </button>
-            </nav>
+        )}
+
+        {/* Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-[#1C2430]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl border border-[#1C2430]/[0.06] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+              <div className="px-6 py-5 border-b border-[#1C2430]/[0.08] flex justify-between items-center shrink-0">
+                <h2 className="text-xl font-bold text-[#1C2430]">Add New Supplier</h2>
+                <button onClick={() => { setIsModalOpen(false); resetForm(); }} className="p-2 bg-[#1C2430]/[0.04] hover:bg-[#1C2430]/[0.08] text-[#1C2430]/50 rounded-full transition"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="overflow-y-auto p-6">
+                <form id="supForm" onSubmit={handleAdd} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Supplier / Company Name *</label>
+                    <input value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Kashi Silk Mills" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Contact Person</label>
+                      <input value={contact} onChange={e => setContact(e.target.value)} placeholder="e.g. Rajesh Gupta" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Phone *</label>
+                      <input value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+91 94151 00001" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Email Address</label>
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="supplier@example.com" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Location / City</label>
+                      <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Varanasi, UP" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Category / Specialty</label>
+                      <input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Silk Fabrics" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Rating (1–5)</label>
+                    <div className="flex gap-2">
+                      {[1,2,3,4,5].map(r => (
+                        <button key={r} type="button" onClick={() => setRating(r)} className={`p-1.5 rounded-lg transition ${r <= rating ? 'text-[#C99A3E]' : 'text-[#1C2430]/20'}`}>
+                          <Star className={`w-5 h-5 ${r <= rating ? 'fill-[#C99A3E]' : ''}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div className="px-6 py-5 border-t border-[#1C2430]/[0.08] flex justify-end gap-3 bg-[#FAF7F1]/50 shrink-0">
+                <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[#1C2430]/60 hover:text-[#1C2430] transition">Cancel</button>
+                <button type="submit" form="supForm" className="px-6 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-bold shadow-md transition">Save Supplier</button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-      
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 };

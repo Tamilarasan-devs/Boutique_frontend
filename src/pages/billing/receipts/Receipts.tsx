@@ -1,95 +1,114 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Search, Printer, Download, CheckCircle } from 'lucide-react';
+
+interface Receipt {
+  id: string;
+  invoiceId: string;
+  customerName: string;
+  amount: number;
+  method: 'Cash' | 'UPI' | 'Card' | 'Bank Transfer';
+  date: string;
+  printed: boolean;
+}
+
+const mockReceipts: Receipt[] = [
+  { id: 'RCP-001', invoiceId: 'INV-2026-042', customerName: 'Priyanka Sen', amount: 20000, method: 'UPI', date: '2026-06-25', printed: true },
+  { id: 'RCP-002', invoiceId: 'INV-2026-038', customerName: 'Rohan Mehra', amount: 32000, method: 'Card', date: '2026-06-24', printed: true },
+  { id: 'RCP-003', invoiceId: 'INV-2026-041', customerName: 'Anjali Sharma', amount: 10000, method: 'Cash', date: '2026-06-26', printed: false },
+  { id: 'RCP-004', invoiceId: 'INV-2026-035', customerName: 'Meera Nair', amount: 6200, method: 'Bank Transfer', date: '2026-06-23', printed: false },
+];
+
+const methodColor: Record<Receipt['method'], string> = {
+  Cash: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+  UPI: 'bg-purple-50 text-purple-700 border-purple-100',
+  Card: 'bg-blue-50 text-blue-700 border-blue-100',
+  'Bank Transfer': 'bg-amber-50 text-amber-700 border-amber-100',
+};
 
 const Receipts: React.FC = () => {
+  const [receipts, setReceipts] = useState<Receipt[]>(mockReceipts);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filtered = receipts.filter(r =>
+    r.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const markPrinted = (id: string) => {
+    setReceipts(receipts.map(r => r.id === id ? { ...r, printed: true } : r));
+  };
+
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
+    <div className="flex flex-col h-full space-y-5 p-6 bg-slate-50/50">
+      <div className="flex justify-between items-center pb-4 border-b border-slate-100">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Receipts</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span> <span className="mx-2">/</span> <span>Receipts</span>
-          </nav>
-        </div>
-        
-        {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Export
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-            Create New
-          </button>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Receipts</h1>
+          <p className="text-sm text-slate-500 mt-1">Print and download payment receipts for customers.</p>
         </div>
       </div>
 
-      {/* Filter Area & Search */}
-      <div className="flex justify-between items-center py-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex w-1/3">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <select className="px-4 py-2 border border-gray-300 rounded-md bg-white">
-            <option>All Filters</option>
-            <option>Active</option>
-            <option>Archived</option>
-          </select>
-        </div>
+      <div className="flex items-center bg-white border border-slate-200 rounded-xl px-4 py-2.5 w-1/3 shadow-sm">
+        <Search className="w-4 h-4 text-slate-400 mr-2" />
+        <input
+          type="text"
+          placeholder="Search receipts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400 w-full"
+        />
       </div>
 
-      {/* Table/Card Area */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">
-        {/* Empty State */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">No data found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new entry.</p>
-          <div className="mt-6">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-              New Entry
-            </button>
-          </div>
-        </div>
+      <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <table className="w-full text-left text-sm text-slate-600">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
+              <th className="py-4 px-6">Receipt #</th>
+              <th className="py-4 px-6">Invoice</th>
+              <th className="py-4 px-6">Customer</th>
+              <th className="py-4 px-6 text-right">Amount</th>
+              <th className="py-4 px-6">Method</th>
+              <th className="py-4 px-6">Date</th>
+              <th className="py-4 px-6 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {filtered.map(r => (
+              <tr key={r.id} className="hover:bg-slate-50/40 transition">
+                <td className="py-4 px-6 font-bold text-slate-800">{r.id}</td>
+                <td className="py-4 px-6 text-slate-500">{r.invoiceId}</td>
+                <td className="py-4 px-6 font-medium text-slate-700">{r.customerName}</td>
+                <td className="py-4 px-6 text-right font-bold text-slate-900">₹{r.amount.toLocaleString('en-IN')}</td>
+                <td className="py-4 px-6">
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${methodColor[r.method]}`}>
+                    {r.method}
+                  </span>
+                </td>
+                <td className="py-4 px-6 text-slate-500">{r.date}</td>
+                <td className="py-4 px-6 text-right space-x-2">
+                  {r.printed ? (
+                    <span className="text-xs text-emerald-600 font-bold flex items-center gap-1 justify-end">
+                      <CheckCircle className="w-3.5 h-3.5" /> Printed
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => markPrinted(r.id)}
+                        className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition"
+                        title="Print"
+                      >
+                        <Printer className="w-4 h-4" />
+                      </button>
+                      <button className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-blue-600 transition" title="Download">
+                        <Download className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 sm:px-6 rounded-lg mt-4">
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of <span className="font-medium">97</span> results
-            </p>
-          </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Next
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
-      
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 };

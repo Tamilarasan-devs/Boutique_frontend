@@ -1,95 +1,140 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Upload as UploadIcon, X, CheckCircle, Image } from 'lucide-react';
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  size: string;
+  status: 'uploading' | 'done' | 'error';
+}
 
 const Upload: React.FC = () => {
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [designName, setDesignName] = useState('');
+  const [category, setCategory] = useState('Bridal');
+  const [style, setStyle] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    addFiles(droppedFiles);
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) addFiles(Array.from(e.target.files));
+  };
+
+  const addFiles = (newFiles: File[]) => {
+    const uploaded: UploadedFile[] = newFiles.map((f, i) => ({
+      id: `${Date.now()}-${i}`,
+      name: f.name,
+      size: `${(f.size / 1024).toFixed(1)} KB`,
+      status: 'done'
+    }));
+    setFiles(prev => [...prev, ...uploaded]);
+  };
+
+  const removeFile = (id: string) => {
+    setFiles(files.filter(f => f.id !== id));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!designName || files.length === 0) return;
+    alert(`Design "${designName}" uploaded with ${files.length} file(s)!`);
+    setDesignName('');
+    setStyle('');
+    setFiles([]);
+  };
+
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Upload</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span> <span className="mx-2">/</span> <span>Upload</span>
-          </nav>
-        </div>
-        
-        {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Export
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-            Create New
-          </button>
-        </div>
+    <div className="flex flex-col h-full space-y-5 p-6 bg-slate-50/50">
+      <div className="pb-4 border-b border-slate-100">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Upload Design</h1>
+        <p className="text-sm text-slate-500 mt-1">Add new garment designs, reference sketches, and embroidery patterns to your library.</p>
       </div>
 
-      {/* Filter Area & Search */}
-      <div className="flex justify-between items-center py-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex w-1/3">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <select className="px-4 py-2 border border-gray-300 rounded-md bg-white">
-            <option>All Filters</option>
-            <option>Active</option>
-            <option>Archived</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table/Card Area */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">
-        {/* Empty State */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+        {/* Upload Area */}
+        <div className="lg:col-span-3 space-y-5">
+          <div
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-2xl p-12 text-center transition cursor-pointer ${isDragging ? 'border-blue-400 bg-blue-50/50' : 'border-slate-200 bg-white hover:border-blue-300'}`}
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="p-4 bg-blue-50 rounded-2xl">
+                <UploadIcon className="w-8 h-8 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">Drag and drop files here</p>
+                <p className="text-xs text-slate-400 mt-1">or click to browse — PNG, JPG, PDF up to 10MB</p>
+              </div>
+              <label className="mt-3 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold cursor-pointer transition shadow-sm">
+                Choose Files
+                <input type="file" multiple accept="image/*,.pdf" onChange={handleFileInput} className="hidden" />
+              </label>
+            </div>
           </div>
-          <h3 className="text-lg font-medium text-gray-900">No data found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new entry.</p>
-          <div className="mt-6">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-              New Entry
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 sm:px-6 rounded-lg mt-4">
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          {/* Uploaded Files */}
+          {files.length > 0 && (
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+              <h3 className="text-sm font-bold text-slate-900">Uploaded Files ({files.length})</h3>
+              <div className="space-y-2">
+                {files.map(file => (
+                  <div key={file.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white rounded-lg border border-slate-100">
+                        <Image className="w-4 h-4 text-slate-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{file.name}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{file.size}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                      <button onClick={() => removeFile(file.id)} className="p-1 hover:bg-slate-200 rounded-lg transition">
+                        <X className="w-4 h-4 text-slate-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Details Form */}
+        <form onSubmit={handleSubmit} className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+          <h3 className="text-lg font-bold text-slate-900">Design Details</h3>
           <div>
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of <span className="font-medium">97</span> results
-            </p>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Design Name *</label>
+            <input type="text" value={designName} onChange={(e) => setDesignName(e.target.value)} required placeholder="e.g. Royal Zardosi Lehenga" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
           </div>
           <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Next
-              </button>
-            </nav>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Category</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Bridal</option>
+              <option>Ethnic</option>
+              <option>Menswear</option>
+              <option>Sarees</option>
+              <option>Fusion</option>
+            </select>
           </div>
-        </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Style / Technique</label>
+            <input type="text" value={style} onChange={(e) => setStyle(e.target.value)} placeholder="e.g. Zardosi, Thread Work" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+          </div>
+          <button type="submit" disabled={files.length === 0} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition mt-2 shadow-sm">
+            Upload to Library
+          </button>
+        </form>
       </div>
-      
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 };

@@ -1,95 +1,151 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Eye, EyeOff, Loader2, Scissors } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { authApi } from '../../api/authApi';
 
 const Login: React.FC = () => {
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [ownerExists, setOwnerExists] = useState<boolean | null>(null);
+
+  const from = (location.state as any)?.from?.pathname || '/';
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) navigate(from, { replace: true });
+  }, [isAuthenticated, navigate, from]);
+
+  // Check if owner exists (show Register link if not)
+  useEffect(() => {
+    authApi.checkOwnerExists().then(({ ownerExists }) => setOwnerExists(ownerExists)).catch(() => setOwnerExists(true));
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Login</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span> <span className="mx-2">/</span> <span>Login</span>
-          </nav>
-        </div>
-        
-        {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Export
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-            Create New
-          </button>
-        </div>
-      </div>
-
-      {/* Filter Area & Search */}
-      <div className="flex justify-between items-center py-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex w-1/3">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <select className="px-4 py-2 border border-gray-300 rounded-md bg-white">
-            <option>All Filters</option>
-            <option>Active</option>
-            <option>Archived</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table/Card Area */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">
-        {/* Empty State */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
+    <div className="min-h-screen bg-[#FAF7F1] flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Brand Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#1C2430] mb-4 shadow-lg shadow-[#1C2430]/20">
+            <Scissors className="w-7 h-7 text-[#C1652F]" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900">No data found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new entry.</p>
-          <div className="mt-6">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-              New Entry
+          <h1 className="text-3xl font-serif font-semibold text-[#1C2430] tracking-tight">Boutique CRM</h1>
+          <p className="text-sm text-[#1C2430]/50 mt-2 font-medium">Sign in to manage your atelier</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white rounded-3xl border border-[#1C2430]/[0.07] shadow-[0_8px_40px_rgba(28,36,48,0.08)] p-8">
+          <div className="mb-6">
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1">Welcome back</p>
+            <h2 className="text-xl font-serif font-semibold text-[#1C2430]">Sign in to your account</h2>
+          </div>
+
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-[#9B3B43]/[0.08] border border-[#9B3B43]/20 rounded-xl text-sm font-medium text-[#9B3B43]">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                placeholder="you@boutique.com"
+                className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition bg-[#FAF7F1]/50 text-[#1C2430]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 pr-11 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition bg-[#FAF7F1]/50 text-[#1C2430]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1C2430]/35 hover:text-[#1C2430]/70 transition"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 bg-[#1C2430] hover:bg-[#2a3545] disabled:opacity-60 text-[#FAF7F1] rounded-xl text-sm font-semibold transition shadow-md shadow-[#1C2430]/10 flex items-center justify-center gap-2 mt-2 cursor-pointer"
+            >
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isLoading ? 'Signing in…' : 'Sign In'}
             </button>
-          </div>
-        </div>
-      </div>
+          </form>
 
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 sm:px-6 rounded-lg mt-4">
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of <span className="font-medium">97</span> results
-            </p>
-          </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Next
-              </button>
-            </nav>
+          <div className="mt-6 pt-5 border-t border-[#1C2430]/[0.06] text-center">
+            {ownerExists === false ? (
+              <>
+                <p className="text-xs text-[#1C2430]/45 mb-3">No account set up yet?</p>
+                <Link
+                  to="/auth/register"
+                  className="text-sm font-semibold text-[#C1652F] hover:text-[#a3531f] transition"
+                >
+                  Set up your boutique →
+                </Link>
+              </>
+            ) : ownerExists === true ? (
+              <>
+                <p className="text-xs text-[#1C2430]/45 mb-3">Don't have an account?</p>
+                <Link
+                  to="/auth/register"
+                  className="text-sm font-semibold text-[#C1652F] hover:text-[#a3531f] transition"
+                >
+                  Sign up here
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
+
+        <p className="text-center text-xs text-[#1C2430]/35 mt-6 font-medium">
+          Boutique Atelier CRM · All rights reserved
+        </p>
       </div>
-      
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 };

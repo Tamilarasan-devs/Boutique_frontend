@@ -1,5 +1,6 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 // Layouts
 const AuthLayout = lazy(() => import('../layouts/AuthLayout'));
@@ -9,6 +10,7 @@ const ErrorLayout = lazy(() => import('../layouts/ErrorLayout'));
 
 // Auth Pages
 const Login = lazy(() => import('../pages/authentication/Login'));
+const Register = lazy(() => import('../pages/authentication/Register'));
 const ForgotPassword = lazy(() => import('../pages/authentication/ForgotPassword'));
 const ResetPassword = lazy(() => import('../pages/authentication/ResetPassword'));
 
@@ -29,8 +31,7 @@ const Trial = lazy(() => import('../pages/orders/trial/Trial'));
 const Delivery = lazy(() => import('../pages/orders/delivery/Delivery'));
 
 // Measurements
-const Templates = lazy(() => import('../pages/measurements/templates/Templates'));
-const History = lazy(() => import('../pages/measurements/history/History'));
+const Measurements = lazy(() => import('../pages/measurements/Measurements'));
 
 // Designs
 const Library = lazy(() => import('../pages/designs/library/Library'));
@@ -46,18 +47,12 @@ const Stock = lazy(() => import('../pages/inventory/stock/Stock'));
 // Billing
 const Invoice = lazy(() => import('../pages/billing/invoice/Invoice'));
 const Payments = lazy(() => import('../pages/billing/payments/Payments'));
-const Receipts = lazy(() => import('../pages/billing/receipts/Receipts'));
+const Pricing = lazy(() => import('../pages/billing/Pricing'));
 
 // Staff
 const Employees = lazy(() => import('../pages/staff/employees/Employees'));
 const Tailors = lazy(() => import('../pages/staff/tailors/Tailors'));
 const Attendance = lazy(() => import('../pages/staff/attendance/Attendance'));
-
-// Reports
-const SalesReport = lazy(() => import('../pages/reports/sales/SalesReport'));
-const InventoryReport = lazy(() => import('../pages/reports/inventory/InventoryReport'));
-const FinanceReport = lazy(() => import('../pages/reports/finance/FinanceReport'));
-const CustomersReport = lazy(() => import('../pages/reports/customers/CustomersReport'));
 
 // Marketing
 const Campaigns = lazy(() => import('../pages/marketing/campaigns/Campaigns'));
@@ -72,9 +67,13 @@ const UsersSettings = lazy(() => import('../pages/settings/users/UsersSettings')
 const RolesSettings = lazy(() => import('../pages/settings/roles/RolesSettings'));
 const PermissionsSettings = lazy(() => import('../pages/settings/permissions/PermissionsSettings'));
 const TaxesSettings = lazy(() => import('../pages/settings/taxes/TaxesSettings'));
-const GeneralSettings = lazy(() => import('../pages/settings/general/GeneralSettings'));
 
 const Profile = lazy(() => import('../pages/profile/Profile'));
+
+// Helper: wrap element in ProtectedRoute
+const P = (element: React.ReactElement) => (
+  <ProtectedRoute>{element}</ProtectedRoute>
+);
 
 export const router = createBrowserRouter([
   {
@@ -82,6 +81,7 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: 'login', element: <Login /> },
+      { path: 'register', element: <Register /> },
       { path: 'forgot-password', element: <ForgotPassword /> },
       { path: 'reset-password', element: <ResetPassword /> },
       { index: true, element: <Navigate to="login" replace /> }
@@ -89,16 +89,16 @@ export const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <DashboardLayout />,
+    element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
     children: [
       { index: true, element: <Dashboard /> },
-      
+
       // CRM
       { path: 'crm/leads', element: <Leads /> },
       { path: 'crm/customers', element: <Customers /> },
       { path: 'crm/appointments', element: <Appointments /> },
       { path: 'crm/followups', element: <Followups /> },
-      
+
       // Orders
       { path: 'orders/quotations', element: <Quotations /> },
       { path: 'orders/list', element: <Orders /> },
@@ -107,8 +107,7 @@ export const router = createBrowserRouter([
       { path: 'orders/delivery', element: <Delivery /> },
 
       // Measurements
-      { path: 'measurements/templates', element: <Templates /> },
-      { path: 'measurements/history', element: <History /> },
+      { path: 'measurements', element: <Measurements /> },
 
       // Designs
       { path: 'designs/library', element: <Library /> },
@@ -124,18 +123,12 @@ export const router = createBrowserRouter([
       // Billing
       { path: 'billing/invoice', element: <Invoice /> },
       { path: 'billing/payments', element: <Payments /> },
-      { path: 'billing/receipts', element: <Receipts /> },
+      { path: 'billing/pricing', element: P(<Pricing />) },
 
-      // Staff
-      { path: 'staff/employees', element: <Employees /> },
-      { path: 'staff/tailors', element: <Tailors /> },
-      { path: 'staff/attendance', element: <Attendance /> },
-
-      // Reports
-      { path: 'reports/sales', element: <SalesReport /> },
-      { path: 'reports/inventory', element: <InventoryReport /> },
-      { path: 'reports/finance', element: <FinanceReport /> },
-      { path: 'reports/customers', element: <CustomersReport /> },
+      // Staff (owner/manager only)
+      { path: 'staff/employees', element: P(<Employees />) },
+      { path: 'staff/tailors', element: P(<Tailors />) },
+      { path: 'staff/attendance', element: P(<Attendance />) },
 
       // Marketing
       { path: 'marketing/campaigns', element: <Campaigns /> },
@@ -150,15 +143,14 @@ export const router = createBrowserRouter([
   },
   {
     path: '/settings',
-    element: <SettingsLayout />,
+    element: <ProtectedRoute allowedRoles={['owner']}><SettingsLayout /></ProtectedRoute>,
     children: [
       { path: 'company', element: <CompanySettings /> },
       { path: 'users', element: <UsersSettings /> },
       { path: 'roles', element: <RolesSettings /> },
       { path: 'permissions', element: <PermissionsSettings /> },
       { path: 'taxes', element: <TaxesSettings /> },
-      { path: 'general', element: <GeneralSettings /> },
-      { index: true, element: <Navigate to="general" replace /> }
+      { index: true, element: <Navigate to="company" replace /> }
     ]
   },
   {

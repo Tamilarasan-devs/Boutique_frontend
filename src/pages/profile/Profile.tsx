@@ -1,95 +1,98 @@
 import React from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { Mail, Shield, Crown, User as UserIcon } from 'lucide-react';
+
+const ROLE_LABELS: Record<string, string> = {
+  owner: 'Owner',
+  manager: 'Manager',
+  sales_staff: 'Sales Staff',
+  tailor: 'Tailor',
+  receptionist: 'Receptionist',
+};
 
 const Profile: React.FC = () => {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
+  const initials = user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const isOwner = user.role === 'owner';
+
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Profile</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span> <span className="mx-2">/</span> <span>Profile</span>
-          </nav>
+    <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
+      <div className="max-w-3xl mx-auto px-6 md:px-8 py-8 space-y-6">
+        
+        {/* Header */}
+        <div className="pb-6 border-b border-[#1C2430]/[0.08]">
+          <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">My Account</p>
+          <h1 className="text-3xl font-serif font-semibold text-[#1C2430]">User Profile</h1>
+        </div>
+
+        {/* Profile Card */}
+        <div className="bg-white rounded-3xl border border-[#1C2430]/[0.06] shadow-[0_8px_40px_rgba(28,36,48,0.04)] overflow-hidden">
+          
+          {/* Banner */}
+          <div className="h-32 bg-gradient-to-r from-[#1C2430] to-[#2a3545] relative">
+            <div className="absolute -bottom-12 left-8">
+              <div className="w-24 h-24 rounded-2xl bg-white p-1.5 shadow-lg shadow-[#1C2430]/10">
+                <div className="w-full h-full rounded-xl bg-[#C1652F]/10 border border-[#C1652F]/20 text-[#C1652F] flex items-center justify-center font-black text-3xl">
+                  {initials}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-16 pb-8 px-8">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-serif font-bold text-[#1C2430] flex items-center gap-2">
+                  {user.name}
+                  {isOwner && (
+                    <span title="Owner" className="flex">
+                      <Crown className="w-5 h-5 text-[#C99A3E]" />
+                    </span>
+                  )}
+                </h2>
+                <div className="flex items-center gap-4 mt-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ring-1 bg-[#1C2430]/5 text-[#1C2430] ring-[#1C2430]/10">
+                    <Shield className="w-3.5 h-3.5 text-[#C1652F]" />
+                    {ROLE_LABELS[user.role] || user.role}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-[#1C2430]/[0.06] grid grid-cols-1 sm:grid-cols-2 gap-6">
+              
+              <div>
+                <p className="text-[10px] font-bold text-[#1C2430]/40 uppercase tracking-wider mb-2">Email Address</p>
+                <div className="flex items-center gap-3 text-sm font-medium text-[#1C2430]/80">
+                  <div className="p-2 rounded-lg bg-[#1C2430]/5">
+                    <Mail className="w-4 h-4 text-[#1C2430]/60" />
+                  </div>
+                  {user.email}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold text-[#1C2430]/40 uppercase tracking-wider mb-2">Account ID</p>
+                <div className="flex items-center gap-3 text-sm font-medium text-[#1C2430]/80">
+                  <div className="p-2 rounded-lg bg-[#1C2430]/5">
+                    <UserIcon className="w-4 h-4 text-[#1C2430]/60" />
+                  </div>
+                  <span className="font-mono text-xs">{user.id}</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
         
-        {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Export
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-            Create New
-          </button>
-        </div>
-      </div>
+        <p className="text-center text-xs text-[#1C2430]/40 font-medium">
+          If you need to change your password or account details, please contact your boutique administrator.
+        </p>
 
-      {/* Filter Area & Search */}
-      <div className="flex justify-between items-center py-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex w-1/3">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <select className="px-4 py-2 border border-gray-300 rounded-md bg-white">
-            <option>All Filters</option>
-            <option>Active</option>
-            <option>Archived</option>
-          </select>
-        </div>
       </div>
-
-      {/* Table/Card Area */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">
-        {/* Empty State */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">No data found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new entry.</p>
-          <div className="mt-6">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-              New Entry
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 sm:px-6 rounded-lg mt-4">
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of <span className="font-medium">97</span> results
-            </p>
-          </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Next
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
-      
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 };
