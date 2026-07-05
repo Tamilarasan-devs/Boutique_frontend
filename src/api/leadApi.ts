@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export interface Lead {
   id: string; // Database ID
@@ -14,7 +15,7 @@ export interface Lead {
 export const leadApi = {
   getLeads: async (): Promise<Lead[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/leads`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/leads`);
       if (!response.ok) throw new Error('Failed to fetch leads');
       return await response.json();
     } catch (error) {
@@ -25,7 +26,7 @@ export const leadApi = {
 
   addLead: async (leadData: Omit<Lead, 'id'>): Promise<Lead> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/leads`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +43,7 @@ export const leadApi = {
 
   updateLeadStatus: async (id: string, status: Lead['status']): Promise<Lead> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/leads/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/leads/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ export const leadApi = {
 
   deleteLead: async (id: string): Promise<void> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/leads/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/leads/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete lead');

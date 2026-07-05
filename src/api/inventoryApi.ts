@@ -1,7 +1,9 @@
-const API_BASE = 'http://localhost:8080/api/inventory';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL as BASE } from '@/constants';
+const API_BASE = `${BASE}/inventory`;
 
 const req = async (url: string, options: RequestInit = {}) => {
-  const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const res = await fetchWithAuth(url, { headers: { 'Content-Type': 'application/json' }, ...options });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 };

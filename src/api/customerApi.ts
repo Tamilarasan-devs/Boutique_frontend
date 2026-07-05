@@ -1,9 +1,10 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const customerApi = {
   getCustomers: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/customers`);
       if (!response.ok) {
         throw new Error('Failed to fetch customers');
       }
@@ -16,7 +17,7 @@ export const customerApi = {
 
   addCustomer: async (customerData: any) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/customers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +36,7 @@ export const customerApi = {
 
   updateCustomer: async (id: string, customerData: any) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/customers/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +55,7 @@ export const customerApi = {
 
   deleteCustomer: async (id: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/customers/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

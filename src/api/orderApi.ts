@@ -1,9 +1,10 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const orderApi = {
   getOrders: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/orders`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders`);
       if (!response.ok) {
         throw new Error('Failed to fetch orders');
       }
@@ -16,7 +17,7 @@ export const orderApi = {
 
   addOrder: async (orderData: any) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/orders`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +37,7 @@ export const orderApi = {
   updateOrderStatus: async (id: string, status: string) => {
     try {
       const numericId = id.replace('ORD-', '');
-      const response = await fetch(`${API_BASE_URL}/orders/${numericId}/status`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${numericId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +57,7 @@ export const orderApi = {
   deleteOrder: async (id: string) => {
     try {
       const numericId = id.replace('ORD-', '');
-      const response = await fetch(`${API_BASE_URL}/orders/${numericId}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${numericId}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -71,7 +72,7 @@ export const orderApi = {
 
   convertFromQuotation: async (quotationId: string) => {
     const numericId = quotationId.replace('QOT-', '');
-    const response = await fetch(`${API_BASE_URL}/orders/from-quotation/${numericId}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/orders/from-quotation/${numericId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });

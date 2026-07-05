@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:8080/api/billing';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL as BASE } from '@/constants';
+const API_BASE_URL = `${BASE}/billing`;
 
 export const BILLING_EVENTS_URL = `${API_BASE_URL}/events`;
 
@@ -13,6 +15,7 @@ export interface Invoice {
   id: number;
   invoice_number: string;
   order_id: number | null;
+  quotation_id?: number | null;
   customer_name: string;
   invoice_date: string;
   due_date: string;
@@ -37,7 +40,7 @@ export interface Payment {
 export const billingApi = {
   getInvoices: async (): Promise<Invoice[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/invoices`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/invoices`);
       if (!response.ok) {
         throw new Error('Failed to fetch invoices');
       }
@@ -50,7 +53,7 @@ export const billingApi = {
 
   getInvoiceById: async (id: number): Promise<Invoice> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/invoices/${id}`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/invoices/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch invoice details');
       }
@@ -63,7 +66,7 @@ export const billingApi = {
 
   createInvoice: async (invoiceData: Omit<Invoice, 'id' | 'invoice_number' | 'created_at'>): Promise<{ message: string; invoice: Invoice }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/invoices`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/invoices`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +85,7 @@ export const billingApi = {
 
   updateInvoiceStatus: async (id: number, status: Invoice['status']): Promise<{ message: string; invoice: Invoice }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/invoices/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/invoices/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +104,7 @@ export const billingApi = {
 
   deleteInvoice: async (id: number): Promise<{ message: string; invoice: Invoice }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/invoices/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/invoices/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -116,7 +119,7 @@ export const billingApi = {
 
   getPayments: async (): Promise<Payment[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/payments`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/payments`);
       if (!response.ok) {
         throw new Error('Failed to fetch payments');
       }
@@ -129,7 +132,7 @@ export const billingApi = {
 
   recordPayment: async (paymentData: Omit<Payment, 'id' | 'receipt_number' | 'created_at'>): Promise<{ message: string; payment: Payment; invoice: Invoice }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/payments`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/payments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

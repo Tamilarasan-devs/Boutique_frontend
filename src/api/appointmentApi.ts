@@ -1,9 +1,10 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const appointmentApi = {
   getAppointments: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/appointments`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/appointments`);
       if (!response.ok) {
         throw new Error('Failed to fetch appointments');
       }
@@ -16,7 +17,7 @@ export const appointmentApi = {
 
   addAppointment: async (appointmentData: any) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/appointments`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/appointments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,7 +38,7 @@ export const appointmentApi = {
     try {
       // Remove APT- prefix if present for backend compat
       const numericId = id.replace('APT-', '');
-      const response = await fetch(`${API_BASE_URL}/appointments/${numericId}/status`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${numericId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ export const appointmentApi = {
   deleteAppointment: async (id: string) => {
     try {
       const numericId = id.replace('APT-', '');
-      const response = await fetch(`${API_BASE_URL}/appointments/${numericId}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${numericId}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

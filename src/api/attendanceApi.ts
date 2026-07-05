@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export interface AttendanceRecord {
   id?: number;
@@ -43,14 +44,14 @@ export const attendanceApi = {
     if (filters.page) params.append('page', String(filters.page));
     if (filters.limit) params.append('limit', String(filters.limit));
 
-    const response = await fetch(`${API_BASE_URL}/attendance?${params.toString()}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/attendance?${params.toString()}`);
     if (!response.ok) throw new Error('Failed to fetch attendance');
     return await response.json();
   },
 
   // Get all employees + their attendance status for a specific date
   getAttendanceByDate: async (date: string): Promise<AttendanceRecord[]> => {
-    const response = await fetch(`${API_BASE_URL}/attendance/by-date?date=${date}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/attendance/by-date?date=${date}`);
     if (!response.ok) throw new Error('Failed to fetch attendance by date');
     return await response.json();
   },
@@ -64,7 +65,7 @@ export const attendanceApi = {
     status?: string;
     notes?: string;
   }): Promise<{ message: string; attendance: AttendanceRecord }> => {
-    const response = await fetch(`${API_BASE_URL}/attendance`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/attendance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -82,7 +83,7 @@ export const attendanceApi = {
     status?: string;
     records?: Array<{ employee_id: number; status?: string; check_in?: string; check_out?: string; notes?: string }>;
   }): Promise<{ message: string; count: number; attendance: AttendanceRecord[] }> => {
-    const response = await fetch(`${API_BASE_URL}/attendance/bulk`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/attendance/bulk`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -96,7 +97,7 @@ export const attendanceApi = {
     id: number,
     data: { check_in?: string; check_out?: string; status?: string; notes?: string }
   ): Promise<{ message: string; attendance: AttendanceRecord }> => {
-    const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/attendance/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -107,7 +108,7 @@ export const attendanceApi = {
 
   // Delete an attendance record
   deleteAttendance: async (id: number): Promise<{ message: string }> => {
-    const response = await fetch(`${API_BASE_URL}/attendance/${id}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/attendance/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete attendance');
     return await response.json();
   },
@@ -118,7 +119,7 @@ export const attendanceApi = {
     if (month) params.append('month', month);
     if (employee_id) params.append('employee_id', String(employee_id));
 
-    const response = await fetch(`${API_BASE_URL}/attendance/summary?${params.toString()}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/attendance/summary?${params.toString()}`);
     if (!response.ok) throw new Error('Failed to fetch attendance summary');
     return await response.json();
   },

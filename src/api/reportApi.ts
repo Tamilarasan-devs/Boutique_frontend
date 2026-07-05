@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:8080/api/reports';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL as BASE } from '@/constants';
+const API_BASE_URL = `${BASE}/reports`;
 
 export interface SalesReport {
   totalRevenue: number;
@@ -33,25 +35,25 @@ export interface CustomersReport {
 
 export const reportApi = {
   getSalesReport: async (): Promise<SalesReport> => {
-    const res = await fetch(`${API_BASE_URL}/sales`);
+    const res = await fetchWithAuth(`${API_BASE_URL}/sales`);
     if (!res.ok) throw new Error('Failed to fetch sales report');
     return res.json();
   },
 
   getInventoryReport: async (): Promise<InventoryReport> => {
-    const res = await fetch(`${API_BASE_URL}/inventory`);
+    const res = await fetchWithAuth(`${API_BASE_URL}/inventory`);
     if (!res.ok) throw new Error('Failed to fetch inventory report');
     return res.json();
   },
 
   getFinanceReport: async (): Promise<FinanceReport> => {
-    const res = await fetch(`${API_BASE_URL}/finance`);
+    const res = await fetchWithAuth(`${API_BASE_URL}/finance`);
     if (!res.ok) throw new Error('Failed to fetch finance report');
     return res.json();
   },
 
   getCustomersReport: async (): Promise<CustomersReport> => {
-    const res = await fetch(`${API_BASE_URL}/customers`);
+    const res = await fetchWithAuth(`${API_BASE_URL}/customers`);
     if (!res.ok) throw new Error('Failed to fetch customers report');
     return res.json();
   },

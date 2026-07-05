@@ -1,14 +1,15 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const measurementTemplateApi = {
   getTemplates: async () => {
-    const response = await fetch(`${API_BASE_URL}/measurement-templates`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/measurement-templates`);
     if (!response.ok) throw new Error('Failed to fetch templates');
     return await response.json();
   },
   
   createTemplate: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/measurement-templates`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/measurement-templates`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -18,7 +19,7 @@ export const measurementTemplateApi = {
   },
   
   updateTemplate: async (id: number | string, data: any) => {
-    const response = await fetch(`${API_BASE_URL}/measurement-templates/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/measurement-templates/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -28,7 +29,7 @@ export const measurementTemplateApi = {
   },
   
   deleteTemplate: async (id: number | string) => {
-    const response = await fetch(`${API_BASE_URL}/measurement-templates/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/measurement-templates/${id}`, {
       method: 'DELETE',
     });
     if (!response.ok) throw new Error('Failed to delete template');

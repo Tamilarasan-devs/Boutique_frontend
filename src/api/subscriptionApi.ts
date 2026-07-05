@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export interface SubscriptionStatus {
   id: number;
@@ -13,7 +14,7 @@ export interface SubscriptionStatus {
 export const subscriptionApi = {
   getSubscriptionStatus: async (): Promise<SubscriptionStatus> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/subscription/status`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/subscription/status`);
       if (!response.ok) throw new Error('Failed to fetch status');
       return await response.json();
     } catch (error) {
@@ -24,7 +25,7 @@ export const subscriptionApi = {
 
   createSubscription: async (plan_id: string): Promise<any> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/subscription/create`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/subscription/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +46,7 @@ export const subscriptionApi = {
     razorpay_signature: string;
   }): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/subscription/verify-signature`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/subscription/verify-signature`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

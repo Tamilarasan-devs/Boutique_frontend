@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export interface EmailLog {
   id: number;
@@ -30,7 +31,7 @@ export const emailLogApi = {
     status?: 'sent' | 'failed';
     error_message?: string;
   }): Promise<{ message: string; log: EmailLog }> => {
-    const response = await fetch(`${API_BASE_URL}/email/log`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/email/log`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -49,21 +50,21 @@ export const emailLogApi = {
     if (filters.status) params.append('status', filters.status);
     if (filters.page) params.append('page', String(filters.page));
     if (filters.limit) params.append('limit', String(filters.limit));
-    const response = await fetch(`${API_BASE_URL}/email/logs?${params.toString()}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/email/logs?${params.toString()}`);
     if (!response.ok) throw new Error('Failed to fetch email logs');
     return await response.json();
   },
 
   // Get stats
   getStats: async (): Promise<EmailStats> => {
-    const response = await fetch(`${API_BASE_URL}/email/stats`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/email/stats`);
     if (!response.ok) throw new Error('Failed to fetch email stats');
     return await response.json();
   },
 
   // Delete a log
   deleteLog: async (id: number): Promise<{ message: string }> => {
-    const response = await fetch(`${API_BASE_URL}/email/logs/${id}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/email/logs/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete email log');
     return await response.json();
   },

@@ -76,7 +76,7 @@ const menuItems: SidebarItem[] = [
       { title: 'Accessories', path: '/inventory/accessories', icon: <PackageSearch className="w-4 h-4" /> },
       { title: 'Suppliers', path: '/inventory/suppliers', icon: <Truck className="w-4 h-4" /> },
       { title: 'Purchases', path: '/inventory/purchases', icon: <PackageSearch className="w-4 h-4" /> },
-      { title: 'Stock', path: '/inventory/stock', icon: <PackageSearch className="w-4 h-4" /> },
+      // { title: 'Stock', path: '/inventory/stock', icon: <PackageSearch className="w-4 h-4" /> },
     ]
   },
   {

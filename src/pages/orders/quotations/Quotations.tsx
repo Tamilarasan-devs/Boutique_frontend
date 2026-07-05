@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, FileText, Trash2, X, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { quotationApi } from '../../../api/quotationApi';
 import { orderApi } from '../../../api/orderApi';
 
@@ -13,7 +13,7 @@ interface Quotation {
   date: string;
   validUntil: string;
   terms: string;
-  status: 'Draft' | 'Sent' | 'Accepted' | 'Rejected';
+  status: 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Invoiced';
 }
 
 const statusStyles: Record<string, string> = {
@@ -21,10 +21,12 @@ const statusStyles: Record<string, string> = {
   'Sent': 'bg-[#7A5AA8]/10 text-[#5d4485]',
   'Accepted': 'bg-[#2F5D4F]/10 text-[#234638]',
   'Rejected': 'bg-[#9B3B43]/10 text-[#7a2e34]',
+  'Invoiced': 'bg-purple-50 text-purple-700 border-purple-200/50',
 };
 
 const Quotations: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -37,6 +39,20 @@ const Quotations: React.FC = () => {
   const [discount, setDiscount] = useState<number | ''>('');
   const [validUntil, setValidUntil] = useState('');
   const [terms, setTerms] = useState('');
+
+  // If navigated from a converted lead, auto-open the modal with pre-filled data
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.fromLead) {
+      setCustomerName(state.customerName || '');
+      setItems(state.items || '');
+      const numericValue = parseFloat(String(state.totalAmount).replace(/[^0-9.]/g, ''));
+      setTotalAmount(isNaN(numericValue) ? '' : numericValue);
+      setIsModalOpen(true);
+      // Clear the state so refreshing the page doesn't re-open the modal
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

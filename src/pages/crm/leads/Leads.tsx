@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Phone, ChevronRight, X, Loader2 } from 'lucide-react';
+import { Plus, Search, Phone, ChevronRight, X, Loader2, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { leadApi, Lead } from '../../../api/leadApi';
 import { customerApi } from '../../../api/customerApi';
 
@@ -18,6 +19,7 @@ const columnStyles: Record<Lead['status'], { dot: string; head: string; chip: st
 };
 
 const Leads: React.FC = () => {
+  const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,7 +120,7 @@ const Leads: React.FC = () => {
   };
 
   const handleConvertLead = async (lead: Lead) => {
-    const confirmConvert = window.confirm(`Convert "${lead.name}" to an active customer?`);
+    const confirmConvert = window.confirm(`Convert "${lead.name}" to an active customer and create a quotation?`);
     if (!confirmConvert) return;
 
     // Optimistic UI update to Won status
@@ -127,7 +129,7 @@ const Leads: React.FC = () => {
     try {
       // 1. Update lead status to Won in database
       await leadApi.updateLeadStatus(lead.id, 'Won');
-      
+
       // 2. Add customer to database
       await customerApi.addCustomer({
         name: lead.name,
@@ -135,14 +137,33 @@ const Leads: React.FC = () => {
         email: '',
         address: ''
       });
-      
-      alert(`Successfully converted "${lead.name}" to a customer!`);
+
+      // 3. Navigate to Quotations page with lead data pre-filled
+      navigate('/orders/quotations', {
+        state: {
+          fromLead: true,
+          customerName: lead.name,
+          items: lead.requirement || '',
+          totalAmount: lead.value ? lead.value.replace(/[₹,]/g, '') : '',
+        }
+      });
     } catch (error) {
       console.error('Failed to convert lead', error);
       // Revert status on failure
       setLeads(leads.map(l => l.id === lead.id ? { ...l, status: lead.status } : l));
       alert('Failed to convert lead to customer.');
     }
+  };
+
+  const handleCreateQuotation = (lead: Lead) => {
+    navigate('/orders/quotations', {
+      state: {
+        fromLead: true,
+        customerName: lead.name,
+        items: lead.requirement || '',
+        totalAmount: lead.value ? lead.value.replace(/[₹,]/g, '') : '',
+      }
+    });
   };
 
   return (
@@ -242,6 +263,15 @@ const Leads: React.FC = () => {
                         <div className="flex justify-between items-center pt-2 border-t border-[#1C2430]/[0.04]">
                           <span className="text-sm font-serif font-bold text-[#1C2430]">{lead.value}</span>
                           <div className="flex items-center gap-1.5">
+                            {column === 'Won' && (
+                              <button
+                                onClick={() => handleCreateQuotation(lead)}
+                                className="px-2 py-1 text-xs font-semibold text-[#7A5AA8] hover:bg-[#7A5AA8]/10 rounded-md transition cursor-pointer flex items-center gap-0.5"
+                                title="Create Quotation"
+                              >
+                                <FileText className="w-3 h-3" /> Quotation
+                              </button>
+                            )}
                             {column !== 'Lost' && column !== 'Won' && (
                               <>
                                 <button
@@ -251,15 +281,15 @@ const Leads: React.FC = () => {
                                 >
                                   Lost
                                 </button>
-                                
+
                                 <button
                                   onClick={() => handleConvertLead(lead)}
                                   className="px-2 py-1 text-xs font-semibold text-[#2F5D4F] hover:bg-[#2F5D4F]/10 rounded-md transition cursor-pointer"
-                                  title="Convert to Customer"
+                                  title="Convert to Customer & Create Quotation"
                                 >
                                   Convert
                                 </button>
-                                
+
                                 {column !== 'Qualified' && (
                                   <button
                                     onClick={() => moveStatus(lead.id, lead.status)}

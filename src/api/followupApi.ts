@@ -1,9 +1,10 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const followupApi = {
   getFollowups: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/followups`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups`);
       if (!response.ok) {
         throw new Error('Failed to fetch followups');
       }
@@ -16,7 +17,7 @@ export const followupApi = {
 
   addFollowup: async (followupData: any) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/followups`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +37,7 @@ export const followupApi = {
   updateFollowupStatus: async (id: string, status: string) => {
     try {
       const numericId = id.replace('FOL-', '');
-      const response = await fetch(`${API_BASE_URL}/followups/${numericId}/status`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${numericId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

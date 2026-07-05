@@ -1,14 +1,15 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const deliveryApi = {
   getDeliveries: async () => {
-    const response = await fetch(`${API_BASE_URL}/deliveries`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/deliveries`);
     if (!response.ok) throw new Error('Failed to fetch deliveries');
     return await response.json();
   },
 
   addDelivery: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/deliveries`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/deliveries`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -18,7 +19,7 @@ export const deliveryApi = {
   },
 
   updateStatus: async (id: string | number, status: string) => {
-    const response = await fetch(`${API_BASE_URL}/deliveries/${id}/status`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/deliveries/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -28,7 +29,7 @@ export const deliveryApi = {
   },
 
   deleteDelivery: async (id: string | number) => {
-    const response = await fetch(`${API_BASE_URL}/deliveries/${id}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/deliveries/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete delivery');
     return await response.json();
   },

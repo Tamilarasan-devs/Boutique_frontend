@@ -1,14 +1,15 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const trialApi = {
   getTrials: async () => {
-    const response = await fetch(`${API_BASE_URL}/trials`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/trials`);
     if (!response.ok) throw new Error('Failed to fetch trials');
     return await response.json();
   },
 
   addTrial: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/trials`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/trials`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -21,7 +22,7 @@ export const trialApi = {
     const numericId = id.replace('TRL-', '');
     const body: any = { status };
     if (alteration_notes !== undefined) body.alteration_notes = alteration_notes;
-    const response = await fetch(`${API_BASE_URL}/trials/${numericId}/status`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/trials/${numericId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -32,7 +33,7 @@ export const trialApi = {
 
   deleteTrial: async (id: string) => {
     const numericId = id.replace('TRL-', '');
-    const response = await fetch(`${API_BASE_URL}/trials/${numericId}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/trials/${numericId}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete trial');
     return await response.json();
   },

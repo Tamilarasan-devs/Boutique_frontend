@@ -1,14 +1,15 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export const quotationApi = {
   getQuotations: async () => {
-    const response = await fetch(`${API_BASE_URL}/quotations`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/quotations`);
     if (!response.ok) throw new Error('Failed to fetch quotations');
     return await response.json();
   },
 
   addQuotation: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/quotations`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/quotations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -19,7 +20,7 @@ export const quotationApi = {
 
   updateStatus: async (id: string, status: string) => {
     const numericId = id.replace('QOT-', '');
-    const response = await fetch(`${API_BASE_URL}/quotations/${numericId}/status`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/quotations/${numericId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -30,7 +31,7 @@ export const quotationApi = {
 
   deleteQuotation: async (id: string) => {
     const numericId = id.replace('QOT-', '');
-    const response = await fetch(`${API_BASE_URL}/quotations/${numericId}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/quotations/${numericId}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete quotation');
     return await response.json();
   },

@@ -24,6 +24,10 @@ const Invoice: React.FC = () => {
 
   // New Invoice Form State
   const [customers, setCustomers] = useState<{ id: number; name: string }[]>([]);
+  const [quotations, setQuotations] = useState<any[]>([]);
+  const [creationMode, setCreationMode] = useState<'Manual' | 'FromQuotation'>('Manual');
+  const [selectedQuotationId, setSelectedQuotationId] = useState<string>('');
+
   const [customerName, setCustomerName] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('');
@@ -52,9 +56,22 @@ const Invoice: React.FC = () => {
     }
   };
 
+  const fetchQuotations = async () => {
+    try {
+      const { quotationApi } = await import('../../../api/quotationApi');
+      const data = await quotationApi.getQuotations();
+      // Only keep 'Accepted' quotations for generating invoices
+      const acceptedQuotations = data.filter((q: any) => q.status === 'Accepted');
+      setQuotations(acceptedQuotations);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchInvoices();
     fetchCustomers();
+    fetchQuotations();
   }, []);
 
   // SSE Subscription for real-time synchronization
@@ -140,6 +157,21 @@ const Invoice: React.FC = () => {
     return items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
   };
 
+  const handleQuotationSelect = (qId: string) => {
+    setSelectedQuotationId(qId);
+    const quotation = quotations.find(q => q.id.toString() === qId);
+    if (quotation) {
+      setCustomerName(quotation.customer_name);
+      const parsedItems = parseItems(quotation.items);
+      const newItems = parsedItems.map((i: any) => ({
+        description: i.description || i.item || '',
+        quantity: i.quantity || 1,
+        price: i.price || i.rate || 0
+      }));
+      setItems(newItems.length > 0 ? newItems : [{ description: '', quantity: 1, price: 0 }]);
+    }
+  };
+
   const handleCreateInvoiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName) {
@@ -161,6 +193,7 @@ const Invoice: React.FC = () => {
     try {
       await billingApi.createInvoice({
         order_id: null,
+        quotation_id: creationMode === 'FromQuotation' && selectedQuotationId ? parseInt(selectedQuotationId) : null,
         customer_name: customerName,
         invoice_date: invoiceDate,
         due_date: dueDate,
@@ -174,7 +207,10 @@ const Invoice: React.FC = () => {
       setInvoiceDate(new Date().toISOString().split('T')[0]);
       setDueDate('');
       setItems([{ description: '', quantity: 1, price: 0 }]);
+      setCreationMode('Manual');
+      setSelectedQuotationId('');
       setIsNewModalOpen(false);
+      fetchQuotations(); // Refresh quotations in case one was used
     } catch (err) {
       toast('Error creating invoice', 'error');
     }
@@ -316,6 +352,46 @@ const Invoice: React.FC = () => {
             </div>
 
             <form onSubmit={handleCreateInvoiceSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+              
+              <div className="flex gap-4 p-1 bg-slate-100 rounded-lg w-max mb-4">
+                <button
+                  type="button"
+                  onClick={() => setCreationMode('Manual')}
+                  className={`px-4 py-1.5 rounded-md text-sm font-semibold transition ${creationMode === 'Manual' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Manual Entry
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCreationMode('FromQuotation')}
+                  className={`px-4 py-1.5 rounded-md text-sm font-semibold transition ${creationMode === 'FromQuotation' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  From Quotation
+                </button>
+              </div>
+
+              {creationMode === 'FromQuotation' && (
+                <div className="mb-4">
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Select Converted Quotation</label>
+                  <select
+                    value={selectedQuotationId}
+                    onChange={(e) => handleQuotationSelect(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="" disabled>-- Select a Quotation --</option>
+                    {quotations.map(q => (
+                      <option key={q.id} value={q.id}>
+                        QOT-{q.id.toString().padStart(3, '0')} - {q.customer_name} - ₹{q.total_amount}
+                      </option>
+                    ))}
+                  </select>
+                  {quotations.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1">No accepted quotations found. Create or accept a quotation first.</p>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Customer Name</label>

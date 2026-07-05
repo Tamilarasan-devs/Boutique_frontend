@@ -1,13 +1,10 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
-const getAuthHeader = (): Record<string, string> => {
-  const token = localStorage.getItem('boutique_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
 
 export const settingsApi = {
   getCompanyProfile: async () => {
-    const response = await fetch(`${API_BASE_URL}/settings/company`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/settings/company`, {
       headers: { 'Content-Type': 'application/json' }
     });
     const json = await response.json();
@@ -16,9 +13,9 @@ export const settingsApi = {
   },
   
   updateCompanyProfile: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/settings/company`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/settings/company`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     const json = await response.json();

@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { fetchWithAuth } from './client';
+import { API_BASE_URL } from '@/constants';
 
 export interface Employee {
   id: number;
@@ -40,19 +41,19 @@ export const employeeApi = {
     if (filters.page) params.append('page', String(filters.page));
     if (filters.limit) params.append('limit', String(filters.limit));
 
-    const response = await fetch(`${API_BASE_URL}/employees?${params.toString()}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/employees?${params.toString()}`);
     if (!response.ok) throw new Error('Failed to fetch employees');
     return await response.json();
   },
 
   getEmployeeById: async (id: number): Promise<Employee> => {
-    const response = await fetch(`${API_BASE_URL}/employees/${id}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/employees/${id}`);
     if (!response.ok) throw new Error('Failed to fetch employee');
     return await response.json();
   },
 
   addEmployee: async (data: Partial<Employee>): Promise<{ message: string; employee: Employee }> => {
-    const response = await fetch(`${API_BASE_URL}/employees`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/employees`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -65,7 +66,7 @@ export const employeeApi = {
   },
 
   updateEmployee: async (id: number, data: Partial<Employee>): Promise<{ message: string; employee: Employee }> => {
-    const response = await fetch(`${API_BASE_URL}/employees/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/employees/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -78,7 +79,7 @@ export const employeeApi = {
   },
 
   deleteEmployee: async (id: number): Promise<{ message: string }> => {
-    const response = await fetch(`${API_BASE_URL}/employees/${id}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/employees/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete employee');
     return await response.json();
   },
