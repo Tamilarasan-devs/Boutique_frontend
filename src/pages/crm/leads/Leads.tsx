@@ -61,8 +61,9 @@ const Leads: React.FC = () => {
     if (!name || !phone) return;
 
     try {
+      const uniqueSuffix = Math.floor(1000 + Math.random() * 9000);
       const newLeadData = {
-        lead_id: `LEAD-10${leads.length + 1}`,
+        lead_id: `LEAD-${uniqueSuffix}`,
         name,
         phone,
         source,
