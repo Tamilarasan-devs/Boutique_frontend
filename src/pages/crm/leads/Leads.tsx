@@ -169,39 +169,42 @@ const Leads: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
-      <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+      <div className="flex flex-col h-full space-y-6 md:space-y-8 p-4 sm:p-6 md:p-8 max-w-[1600px] mx-auto">
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#1C2430]/[0.08]">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-6 pb-6 border-b border-[#1C2430]/[0.08]">
+          <div className="space-y-1.5">
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#C1652F]">
               Pipeline
             </p>
-            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#1C2430]">
+            <h1 className="text-3xl md:text-4xl font-serif font-semibold tracking-tight text-[#1C2430]">
               Leads Board
             </h1>
-            <p className="text-sm text-[#1C2430]/55 mt-1">
+            <p className="text-sm md:text-base text-[#1C2430]/60 max-w-xl">
               Track conversations and inquiries from WhatsApp, Instagram, Email, and Phone.
             </p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#1C2430]/10 self-start sm:self-auto"
-          >
-            <Plus className="w-4 h-4" /> Add Lead
-          </button>
-        </div>
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+            {/* Search Filter */}
+            <div className="flex items-center bg-white border border-[#1C2430]/[0.08] rounded-xl px-4 py-3 w-full sm:w-[320px] shadow-sm focus-within:ring-2 focus-within:ring-[#C1652F]/25 focus-within:border-[#C1652F]/40 transition-all duration-200 group">
+              <Search className="w-4 h-4 text-[#1C2430]/40 mr-2.5 flex-shrink-0 group-focus-within:text-[#C1652F]" />
+              <input
+                type="text"
+                placeholder="Search leads, requirements..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-transparent border-none outline-none text-sm text-[#1C2430] placeholder-[#1C2430]/40 w-full"
+              />
+            </div>
 
-        {/* Search Filter */}
-        <div className="flex items-center bg-white border border-[#1C2430]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#C1652F]/25 focus-within:border-[#C1652F]/40 transition">
-          <Search className="w-4 h-4 text-[#1C2430]/35 mr-2 flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="Search leads, requirements, or sources..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm text-[#1C2430] placeholder-[#1C2430]/35 w-full"
-          />
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-3 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-[#1C2430]/10 hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" /> Add Lead
+            </button>
+          </div>
         </div>
 
         {/* Kanban Board */}
@@ -210,74 +213,77 @@ const Leads: React.FC = () => {
             <Loader2 className="w-8 h-8 text-[#1C2430]/40 animate-spin" />
           </div>
         ) : (
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 items-start h-full min-h-[550px] overflow-x-auto">
+          <div className="flex-1 flex gap-5 overflow-x-auto pb-6 h-full min-h-[600px] snap-x snap-mandatory">
             {columns.map(column => {
               const style = columnStyles[column];
               const columnLeads = filteredLeads.filter(l => l.status === column);
               return (
-                <div key={column} className="bg-[#1C2430]/[0.035] p-3.5 rounded-2xl flex flex-col min-h-[500px] min-w-[230px]">
-                  <div className="flex justify-between items-center mb-3.5 px-1">
-                    <span className="flex items-center gap-2 text-sm font-bold text-[#1C2430]/80">
-                      <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                <div key={column} className="bg-[#1C2430]/[0.02] border border-[#1C2430]/[0.05] p-4 md:p-5 rounded-2xl flex flex-col min-w-[300px] sm:min-w-[340px] max-w-[360px] shrink-0 snap-start h-full">
+                  <div className="flex justify-between items-center mb-5 px-1">
+                    <span className="flex items-center gap-2.5 text-sm font-bold text-[#1C2430]/80">
+                      <span className={`w-2 h-2 rounded-full ${style.dot}`} />
                       {column}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${style.chip}`}>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-bold tracking-wide ${style.chip}`}>
                       {columnLeads.length}
                     </span>
                   </div>
 
-                  <div className="space-y-3 flex-1 overflow-y-auto">
+                  <div className="space-y-4 flex-1 overflow-y-auto pr-1">
                     {columnLeads.length === 0 && (
-                      <div className="text-xs text-[#1C2430]/30 text-center py-8 border border-dashed border-[#1C2430]/10 rounded-xl">
-                        No leads
+                      <div className="text-xs text-[#1C2430]/40 text-center py-10 border-2 border-dashed border-[#1C2430]/10 rounded-xl bg-white/50 font-medium">
+                        No leads here
                       </div>
                     )}
                     {columnLeads.map(lead => (
                       <div
                         key={lead.id}
-                        className="bg-white p-4 rounded-xl border border-[#1C2430]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] space-y-2.5 hover:shadow-[0_8px_18px_rgba(28,36,48,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+                        className="bg-white p-5 rounded-xl border border-[#1C2430]/[0.08] shadow-sm hover:shadow-md hover:border-[#1C2430]/[0.15] hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3.5 group"
                       >
                         <div className="flex justify-between items-start">
-                          <span className="text-[10px] font-bold tracking-wide text-[#1C2430]/35">{lead.lead_id}</span>
-                          <span className={`text-[10px] bg-[#FAF7F1] px-2 py-0.5 rounded-full border font-semibold ${
+                          <span className="text-[10px] font-bold tracking-wider text-[#1C2430]/40 uppercase">{lead.lead_id}</span>
+                          <span className={`text-[10px] px-2.5 py-1 rounded-full border font-bold tracking-wide ${
                             lead.source === 'WhatsApp' ? 'text-green-700 border-green-200 bg-green-50' :
                             lead.source === 'Instagram Direct' ? 'text-pink-700 border-pink-200 bg-pink-50' :
                             lead.source === 'Email' ? 'text-blue-700 border-blue-200 bg-blue-50' :
                             lead.source === 'Phone Call' ? 'text-indigo-700 border-indigo-200 bg-indigo-50' :
-                            'text-[#1C2430]/55 border-[#1C2430]/[0.06]'
+                            'text-[#1C2430]/60 border-[#1C2430]/[0.08] bg-white'
                           }`}>
                             {lead.source}
                           </span>
                         </div>
+                        
                         <div>
-                          <h4 className="font-serif font-semibold text-[#1C2430] text-sm">{lead.name}</h4>
-                          <p className="text-xs text-[#1C2430]/50 mt-1 flex items-center gap-1.5">
-                            <Phone className="w-3 h-3 text-[#1C2430]/35" /> {lead.phone}
+                          <h4 className="font-serif font-bold text-[#1C2430] text-base group-hover:text-[#C1652F] transition-colors">{lead.name}</h4>
+                          <p className="text-[13px] font-medium text-[#1C2430]/60 mt-1.5 flex items-center gap-2">
+                            <Phone className="w-3.5 h-3.5 text-[#1C2430]/40" /> {lead.phone}
                           </p>
                         </div>
+
                         {lead.requirement && (
-                          <div className="bg-[#FAF7F1] px-2.5 py-2 rounded-lg text-xs text-[#1C2430]/65 border border-[#1C2430]/[0.05] leading-relaxed">
-                            <span className="font-semibold text-[#1C2430]/80">Requirement — </span>
-                            {lead.requirement}
+                          <div className="bg-[#FAF7F1]/80 px-3.5 py-3 rounded-lg text-xs text-[#1C2430]/75 border border-[#1C2430]/[0.04] leading-relaxed">
+                            <span className="font-bold text-[#1C2430]/90 block mb-1 uppercase tracking-wider text-[10px]">Requirement</span>
+                            <span className="line-clamp-2" title={lead.requirement}>{lead.requirement}</span>
                           </div>
                         )}
-                        <div className="flex justify-between items-center pt-2 border-t border-[#1C2430]/[0.04]">
-                          <span className="text-sm font-serif font-bold text-[#1C2430]">{lead.value}</span>
-                          <div className="flex items-center gap-1.5">
+                        
+                        <div className="flex justify-between items-center pt-4 border-t border-[#1C2430]/[0.06] mt-auto">
+                          <span className="text-[15px] font-serif font-bold text-[#2F5D4F]">{lead.value}</span>
+                          <div className="flex items-center gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             {column === 'Won' && (
                               <button
                                 onClick={() => handleCreateQuotation(lead)}
-                                className="px-2 py-1 text-xs font-semibold text-[#7A5AA8] hover:bg-[#7A5AA8]/10 rounded-md transition cursor-pointer flex items-center gap-0.5"
+                                className="px-3 py-1.5 text-[11px] font-bold text-[#7A5AA8] bg-[#7A5AA8]/5 hover:bg-[#7A5AA8]/15 rounded-md transition cursor-pointer flex items-center gap-1.5"
                                 title="Create Quotation"
                               >
-                                <FileText className="w-3 h-3" /> Quotation
+                                <FileText className="w-3.5 h-3.5" /> Quotation
                               </button>
                             )}
                             {column !== 'Lost' && column !== 'Won' && (
                               <>
                                 <button
                                   onClick={() => handleMarkLost(lead.id, lead.status)}
-                                  className="px-2 py-1 text-xs font-semibold text-[#9B3B43] hover:bg-[#9B3B43]/10 rounded-md transition cursor-pointer"
+                                  className="px-2.5 py-1.5 text-[11px] font-bold text-[#9B3B43] bg-[#9B3B43]/5 hover:bg-[#9B3B43]/15 rounded-md transition cursor-pointer"
                                   title="Mark as Lost"
                                 >
                                   Lost
@@ -285,7 +291,7 @@ const Leads: React.FC = () => {
 
                                 <button
                                   onClick={() => handleConvertLead(lead)}
-                                  className="px-2 py-1 text-xs font-semibold text-[#2F5D4F] hover:bg-[#2F5D4F]/10 rounded-md transition cursor-pointer"
+                                  className="px-2.5 py-1.5 text-[11px] font-bold text-[#2F5D4F] bg-[#2F5D4F]/5 hover:bg-[#2F5D4F]/15 rounded-md transition cursor-pointer"
                                   title="Convert to Customer & Create Quotation"
                                 >
                                   Convert
@@ -294,7 +300,7 @@ const Leads: React.FC = () => {
                                 {column !== 'Qualified' && (
                                   <button
                                     onClick={() => moveStatus(lead.id, lead.status)}
-                                    className="px-2 py-1 text-xs font-semibold text-[#C1652F] hover:bg-[#C1652F]/10 rounded-md transition cursor-pointer flex items-center gap-0.5"
+                                    className="px-2.5 py-1.5 text-[11px] font-bold text-[#C1652F] bg-[#C1652F]/5 hover:bg-[#C1652F]/15 rounded-md transition cursor-pointer flex items-center gap-1"
                                     title="Move to next stage"
                                   >
                                     Next <ChevronRight className="w-3.5 h-3.5" />
