@@ -241,10 +241,10 @@ const Dashboard = () => {
 
   // ── Quick actions ────────────────────────────────────────────────────────
   const quickActions = [
-    { label: 'Add Lead',    icon: Users,    color: '#7A5AA8', path: '/crm/leads' },
-    { label: 'New Order',   icon: ShoppingBag, color: '#C1652F', path: '/orders' },
-    { label: 'Create Bill', icon: FileText, color: '#2F5D4F', path: '/billing' },
-    { label: 'View Stock',  icon: Package,  color: '#C99A3E', path: '/inventory' },
+    { label: 'Add Lead',    icon: Users,    color: '#7A5AA8', path: '/crm/leads', state: { openModal: true } },
+    { label: 'New Order',   icon: ShoppingBag, color: '#C1652F', path: '/orders/list', state: { openModal: true } },
+    { label: 'Create Bill', icon: FileText, color: '#2F5D4F', path: '/billing/invoice', state: { openModal: true } },
+    // { label: 'View Stock',  icon: Package,  color: '#C99A3E', path: '/inventory/stock' },
   ];
 
   // ─── Loading screen ───────────────────────────────────────────────────────
@@ -432,7 +432,7 @@ const Dashboard = () => {
                     return (
                       <button
                         key={i}
-                        onClick={() => navigate(action.path)}
+                        onClick={() => navigate(action.path, action.state ? { state: action.state } : undefined)}
                         className="flex flex-col items-center justify-center p-4 bg-[#FAF7F1]/70 border border-[#1C2430]/[0.06] rounded-xl transition text-center group cursor-pointer hover:border-[#1C2430]/20 hover:bg-white hover:shadow-sm"
                       >
                         <Icon className="w-5 h-5 mb-2 transition group-hover:scale-110" style={{ color: action.color }} />

@@ -3,6 +3,7 @@ import { Plus, Search, FileText, Trash2, X, ArrowRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { quotationApi } from '../../../api/quotationApi';
 import { orderApi } from '../../../api/orderApi';
+import { followupApi } from '../../../api/followupApi';
 
 interface Quotation {
   id: string;
@@ -39,6 +40,8 @@ const Quotations: React.FC = () => {
   const [discount, setDiscount] = useState<number | ''>('');
   const [validUntil, setValidUntil] = useState('');
   const [terms, setTerms] = useState('');
+  
+  const [followupId, setFollowupId] = useState<string | null>(null);
 
   // If navigated from a converted lead, auto-open the modal with pre-filled data
   useEffect(() => {
@@ -46,6 +49,7 @@ const Quotations: React.FC = () => {
     if (state?.fromLead) {
       setCustomerName(state.customerName || '');
       setItems(state.items || '');
+      setFollowupId(state.followupId || null);
       const numericValue = parseFloat(String(state.totalAmount).replace(/[^0-9.]/g, ''));
       setTotalAmount(isNaN(numericValue) ? '' : numericValue);
       setIsModalOpen(true);
@@ -102,6 +106,15 @@ const Quotations: React.FC = () => {
       }, ...quotations]);
       setCustomerName(''); setItems(''); setTotalAmount(''); setDiscount(''); setValidUntil(''); setTerms('');
       setIsModalOpen(false);
+
+      if (followupId) {
+        try {
+          await followupApi.updateFollowupStatus(followupId, 'Completed');
+        } catch (err) {
+          console.error('Failed to complete followup:', err);
+        }
+        setFollowupId(null);
+      }
     } catch (error) {
       console.error('Error creating quotation:', error);
     }

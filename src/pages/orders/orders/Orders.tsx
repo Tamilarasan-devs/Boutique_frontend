@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { orderApi } from '../../../api/orderApi';
 import { productionApi } from '../../../api/productionApi';
 
@@ -29,6 +29,7 @@ const statusStyles: Record<string, string> = {
 
 const Orders: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,6 +70,12 @@ const Orders: React.FC = () => {
       }
     };
     fetchOrders();
+
+    const state = location.state as any;
+    if (state?.openModal) {
+      setIsModalOpen(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
   }, []);
 
   const filteredOrders = orders.filter(ord => 

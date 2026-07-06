@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Phone, ChevronRight, X, Loader2, FileText } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Search, Filter, Phone, Calendar, MoreVertical, Trash2, ShieldCheck, HelpCircle, FileText, Upload, ChevronRight, X, Loader2 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { leadApi, Lead } from '../../../api/leadApi';
 import { customerApi } from '../../../api/customerApi';
 
@@ -20,6 +20,7 @@ const columnStyles: Record<Lead['status'], { dot: string; head: string; chip: st
 
 const Leads: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,6 +37,11 @@ const Leads: React.FC = () => {
 
   useEffect(() => {
     fetchLeads();
+    const state = location.state as any;
+    if (state?.openModal) {
+      setIsModalOpen(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
   }, []);
 
   const fetchLeads = async () => {

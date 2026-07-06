@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, FileText, Eye, X, Trash2, Printer } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { billingApi, BILLING_EVENTS_URL, Invoice as InvoiceType, InvoiceItemDetail } from '../../../api/billingApi';
 import { customerApi } from '../../../api/customerApi';
 import { useToast } from '../../../context/context';
@@ -12,6 +13,8 @@ const statusStyles: Record<InvoiceType['status'], string> = {
 };
 
 const Invoice: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [invoices, setInvoices] = useState<InvoiceType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,6 +75,12 @@ const Invoice: React.FC = () => {
     fetchInvoices();
     fetchCustomers();
     fetchQuotations();
+
+    const state = location.state as any;
+    if (state?.openModal) {
+      setIsNewModalOpen(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
   }, []);
 
   // SSE Subscription for real-time synchronization
@@ -191,7 +200,7 @@ const Invoice: React.FC = () => {
     const totalAmount = calculateFormTotal();
 
     try {
-      await billingApi.createInvoice({
+      const response = await billingApi.createInvoice({
         order_id: null,
         quotation_id: creationMode === 'FromQuotation' && selectedQuotationId ? parseInt(selectedQuotationId) : null,
         customer_name: customerName,
@@ -201,6 +210,15 @@ const Invoice: React.FC = () => {
         status: 'Pending',
         items: finalItems
       });
+
+      if (response && response.invoice) {
+        setInvoices(current => {
+          if (!current.find(i => i.id === response.invoice.id)) {
+            return [response.invoice, ...current];
+          }
+          return current;
+        });
+      }
 
       // Clear state and close
       setCustomerName('');

@@ -1,6 +1,8 @@
 import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
+export const FOLLOWUP_EVENTS_URL = `${API_BASE_URL}/followups/events`;
+
 export const followupApi = {
   getFollowups: async () => {
     try {
@@ -50,6 +52,26 @@ export const followupApi = {
       return await response.json();
     } catch (error) {
       console.error('Error updating followup status:', error);
+      throw error;
+    }
+  },
+
+  updateFollowup: async (id: string, data: { notes: string, due_date: string, status: string }) => {
+    try {
+      const numericId = id.replace('FOL-', '');
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${numericId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update followup');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating followup:', error);
       throw error;
     }
   },

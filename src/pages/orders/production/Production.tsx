@@ -104,6 +104,8 @@ const Production: React.FC = () => {
         delivery_method: 'Pickup',
         status: 'Ready for Pickup',
       });
+      // Remove from production queue once it's sent to delivery
+      await handleDelete(item.id);
       navigate('/orders/delivery');
     } catch (error) {
       console.error('Error sending to delivery:', error);
