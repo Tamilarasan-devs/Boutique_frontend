@@ -25,7 +25,8 @@ export const customerApi = {
         body: JSON.stringify(customerData),
       });
       if (!response.ok) {
-        throw new Error('Failed to add customer');
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to add customer');
       }
       return await response.json();
     } catch (error) {
@@ -44,7 +45,8 @@ export const customerApi = {
         body: JSON.stringify(customerData),
       });
       if (!response.ok) {
-        throw new Error('Failed to update customer');
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to update customer');
       }
       return await response.json();
     } catch (error) {

@@ -11,9 +11,9 @@ const App: React.FC = () => {
           <ToastProvider>
             <React.Suspense
               fallback={
-                <div className="flex h-screen w-screen items-center justify-center bg-[#FAF7F1]">
-                  <div className="flex flex-col items-center gap-3 text-[#1C2430]/40">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C1652F]" />
+                <div className="flex h-screen w-screen items-center justify-center bg-[#F4F3F8]">
+                  <div className="flex flex-col items-center gap-3 text-[#16132D]/40">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#7209B7]" />
                     <p className="text-sm font-medium font-serif">Loading Boutique CRM…</p>
                   </div>
                 </div>

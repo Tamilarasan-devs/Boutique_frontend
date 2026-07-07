@@ -14,9 +14,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#FAF7F1]">
-        <div className="flex flex-col items-center gap-3 text-[#1C2430]/50">
-          <Loader2 className="w-8 h-8 animate-spin text-[#C1652F]" />
+      <div className="flex h-screen items-center justify-center bg-[#F4F3F8]">
+        <div className="flex flex-col items-center gap-3 text-[#16132D]/50">
+          <Loader2 className="w-8 h-8 animate-spin text-[#7209B7]" />
           <p className="text-sm font-semibold font-serif">Loading…</p>
         </div>
       </div>
@@ -53,18 +53,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 };
 
 const AccessDenied: React.FC = () => (
-  <div className="flex h-full min-h-screen items-center justify-center bg-[#FAF7F1] p-8">
+  <div className="flex h-full min-h-screen items-center justify-center bg-[#F4F3F8] p-8">
     <div className="text-center max-w-sm">
-      <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-[#9B3B43]/10 border border-[#9B3B43]/15 flex items-center justify-center">
+      <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-[#F43F5E]/10 border border-[#F43F5E]/15 flex items-center justify-center">
         <span className="text-3xl">🔒</span>
       </div>
-      <h2 className="text-2xl font-serif font-semibold text-[#1C2430] mb-2">Access Restricted</h2>
-      <p className="text-sm text-[#1C2430]/55 mb-6">
+      <h2 className="text-2xl font-serif font-semibold text-[#16132D] mb-2">Access Restricted</h2>
+      <p className="text-sm text-[#16132D]/55 mb-6">
         You don't have permission to access this page. Please contact your boutique owner to request access.
       </p>
       <a
         href="/"
-        className="inline-block px-6 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold transition shadow-md shadow-[#1C2430]/10"
+        className="inline-block px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold transition shadow-md shadow-[#16132D]/10"
       >
         Back to Dashboard
       </a>

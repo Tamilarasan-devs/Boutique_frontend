@@ -148,8 +148,8 @@ const Measurements: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4 p-6 bg-slate-50">
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+    <div className="flex flex-col h-full space-y-4 p-4 sm:p-6 bg-slate-50 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <h1 className="text-3xl font-bold font-serif text-slate-900 flex items-center gap-2">
             <Scissors className="w-7 h-7 text-blue-600" />
@@ -161,7 +161,7 @@ const Measurements: React.FC = () => {
         </div>
         <button 
           onClick={openNewModal}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           New Measurement

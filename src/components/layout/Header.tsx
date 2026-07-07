@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ className, children, sidebarOpen, setSi
         {setSidebarOpen && (
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 mr-4 text-slate-500 hover:bg-slate-100 rounded-md md:hidden transition-colors"
+            className="p-2 mr-4 text-slate-500 hover:bg-slate-100 rounded-md lg:hidden transition-colors"
             aria-label="Toggle sidebar"
           >
             <Menu size={20} />

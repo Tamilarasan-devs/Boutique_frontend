@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Truck, Phone, CheckCircle, PackageCheck } from 'lucide-react';
+import { Search, Truck, Phone, CheckCircle, PackageCheck, Trash2 } from 'lucide-react';
 import { deliveryApi } from '../../../api/deliveryApi';
 import { useToast } from '../../../context';
 
@@ -43,6 +43,18 @@ const Delivery: React.FC = () => {
       fetchDeliveries(); // Refresh the list
     } catch (err) {
       toast('Failed to update status', 'error');
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    if (window.confirm('Are you sure you want to delete this delivery record?')) {
+      try {
+        await deliveryApi.deleteDelivery(id);
+        toast('Delivery record deleted', 'success');
+        fetchDeliveries();
+      } catch (err) {
+        toast('Failed to delete delivery', 'error');
+      }
     }
   };
 
@@ -99,16 +111,21 @@ const Delivery: React.FC = () => {
                       'bg-blue-50 text-blue-800 border-blue-200'
                     }`}>{d.status}</span>
                   </td>
-                  <td className="py-4 px-6 text-right space-x-2">
-                    {d.status === 'Ready for Pickup' && (
-                      <button onClick={() => updateStatus(d.id, 'Out for Delivery')} className="px-4 py-2 bg-amber-50 hover:bg-amber-100 hover:shadow-sm text-amber-800 text-sm font-bold rounded-xl transition flex items-center gap-1.5 inline-flex"><Truck className="w-4 h-4" /> Dispatch</button>
-                    )}
-                    {d.status === 'Out for Delivery' && (
-                      <button onClick={() => updateStatus(d.id, 'Delivered')} className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 hover:shadow-sm text-emerald-800 text-sm font-bold rounded-xl transition flex items-center gap-1.5 inline-flex"><PackageCheck className="w-4 h-4" /> Mark Delivered</button>
-                    )}
-                    {d.status === 'Delivered' && (
-                      <span className="text-sm text-slate-500 font-bold flex items-center gap-1.5 justify-end"><CheckCircle className="w-4 h-4 text-emerald-500" /> Done</span>
-                    )}
+                  <td className="py-4 px-6 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {d.status === 'Ready for Pickup' && (
+                        <button onClick={() => updateStatus(d.id, 'Out for Delivery')} className="px-4 py-2 bg-amber-50 hover:bg-amber-100 hover:shadow-sm text-amber-800 text-sm font-bold rounded-xl transition flex items-center gap-1.5"><Truck className="w-4 h-4" /> Dispatch</button>
+                      )}
+                      {d.status === 'Out for Delivery' && (
+                        <button onClick={() => updateStatus(d.id, 'Delivered')} className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 hover:shadow-sm text-emerald-800 text-sm font-bold rounded-xl transition flex items-center gap-1.5"><PackageCheck className="w-4 h-4" /> Mark Delivered</button>
+                      )}
+                      {d.status === 'Delivered' && (
+                        <span className="px-4 py-2 text-sm text-slate-500 font-bold flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-emerald-500" /> Done</span>
+                      )}
+                      <button onClick={() => handleDelete(d.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Delete Delivery">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

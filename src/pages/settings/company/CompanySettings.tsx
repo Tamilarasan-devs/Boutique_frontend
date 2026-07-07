@@ -17,27 +17,29 @@ const Field = ({
   label, value, onChange, placeholder = '', type = 'text', hint = ''
 }: { label: string; value: string; onChange: (val: string) => void; placeholder?: string; type?: string; hint?: string }) => (
   <div>
-    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">{label}</label>
-    <input
-      type={type}
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-xl text-sm font-medium text-[#1C2430] bg-white focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 transition placeholder-[#1C2430]/25"
-    />
-    {hint && <p className="text-[10px] text-[#1C2430]/35 mt-1 font-medium">{hint}</p>}
+    <label className="block text-[11px] font-bold text-[#16132D]/60 uppercase tracking-widest mb-2">{label}</label>
+    <div className="relative group">
+      <input
+        type={type}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full px-4 py-3 bg-white border border-[#16132D]/10 rounded-xl text-[13px] font-semibold text-[#16132D] placeholder-[#16132D]/30 focus:outline-none focus:ring-4 focus:ring-[#7209B7]/10 focus:border-[#7209B7] transition-all hover:border-[#16132D]/20 shadow-sm shadow-[#16132D]/[0.02]"
+      />
+    </div>
+    {hint && <p className="text-[10px] text-[#16132D]/40 mt-1.5 font-semibold flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[#16132D]/20"></span>{hint}</p>}
   </div>
 );
 
 const SectionCard = ({ icon: Icon, title, children }: { icon: any; title: string; children: React.ReactNode }) => (
-  <div className="bg-white rounded-2xl border border-[#1C2430]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-    <div className="px-6 py-4 border-b border-[#1C2430]/[0.07] flex items-center gap-2.5">
-      <div className="p-1.5 bg-[#C1652F]/10 rounded-lg">
-        <Icon className="w-4 h-4 text-[#C1652F]" />
+  <div className="bg-white rounded-2xl border border-[#16132D]/[0.05] shadow-[0_4px_24px_-12px_rgba(22,19,45,0.05)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_32px_-12px_rgba(22,19,45,0.08)]">
+    <div className="px-7 py-5 border-b border-[#16132D]/[0.05] flex items-center gap-3 bg-gradient-to-b from-white to-[#F8F8FB]/50">
+      <div className="p-2 bg-gradient-to-br from-[#7209B7]/10 to-[#7209B7]/5 rounded-xl border border-[#7209B7]/10 shadow-inner">
+        <Icon className="w-4 h-4 text-[#7209B7]" />
       </div>
-      <h2 className="text-sm font-bold text-[#1C2430]">{title}</h2>
+      <h2 className="text-[15px] font-bold text-[#16132D] tracking-tight">{title}</h2>
     </div>
-    <div className="p-6">{children}</div>
+    <div className="p-7">{children}</div>
   </div>
 );
 
@@ -104,57 +106,64 @@ const CompanySettings: React.FC = () => {
     : 'BC';
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
+    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
       <form onSubmit={handleSave}>
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-8 space-y-6">
 
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-6 border-b border-[#1C2430]/[0.08]">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-5 pb-8 border-b border-[#16132D]/[0.05]">
             <div>
-              <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">Settings</p>
-              <h1 className="text-3xl font-serif font-semibold text-[#1C2430]">Boutique Profile</h1>
-              <p className="text-sm text-[#1C2430]/55 mt-1">Your boutique's identity, business details, and contact information.</p>
+              <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#7209B7] mb-2">Company Settings</p>
+              <h1 className="text-3xl font-serif font-bold text-[#16132D] tracking-tight">Boutique Profile</h1>
+              <p className="text-[13px] font-medium text-[#16132D]/60 mt-1.5 max-w-xl leading-relaxed">Manage your boutique's identity, contact information, and billing details to customize how you appear to clients.</p>
             </div>
             <button
               type="submit"
               disabled={isSaving}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-md self-start sm:self-auto cursor-pointer disabled:opacity-70 ${
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[13px] font-bold transition-all duration-300 shadow-lg self-start sm:self-auto cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed group ${
                 saved
-                  ? 'bg-[#2F5D4F] text-white shadow-[#2F5D4F]/20'
-                  : 'bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] shadow-[#1C2430]/10'
+                  ? 'bg-[#10B981] text-white shadow-[#10B981]/25 hover:shadow-[#10B981]/40'
+                  : 'bg-[#16132D] hover:bg-[#2D2854] text-white shadow-[#16132D]/20 hover:shadow-[#16132D]/30 hover:-translate-y-0.5'
               }`}
             >
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-              {isSaving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />}
+              {isSaving ? 'Saving...' : saved ? 'Saved successfully!' : 'Save Changes'}
             </button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Live Preview Card */}
-            <div className="bg-white rounded-2xl border border-[#1C2430]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col">
-              <div className="bg-gradient-to-br from-[#1C2430] to-[#2a3545] p-6 flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-2xl bg-[#C1652F] flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#C1652F]/30 mb-3">
+            <div className="bg-white rounded-2xl border border-[#16132D]/[0.05] shadow-[0_8px_32px_-12px_rgba(22,19,45,0.06)] overflow-hidden flex flex-col relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent pointer-events-none z-10" />
+              <div className="bg-gradient-to-br from-[#16132D] to-[#252047] p-8 flex flex-col items-center text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay"></div>
+                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#7209B7] to-[#430570] flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-[#7209B7]/40 mb-5 relative z-10 border border-white/10 ring-4 ring-white/5">
                   {initials}
                 </div>
-                <h2 className="text-lg font-serif font-bold text-white">{form.name || 'Your Boutique'}</h2>
-                {form.tagline && <p className="text-xs text-white/55 mt-1 italic">{form.tagline}</p>}
+                <h2 className="text-xl font-serif font-bold text-white relative z-10 tracking-tight">{form.name || 'Your Boutique'}</h2>
+                {form.tagline && <p className="text-[13px] font-medium text-white/60 mt-1.5 italic relative z-10">"{form.tagline}"</p>}
               </div>
-              <div className="p-4 space-y-2 flex-1">
+              <div className="p-6 space-y-3.5 flex-1 relative z-10 bg-white">
                 {[
                   { icon: Phone, value: form.phone, placeholder: '+91 98765 43210' },
                   { icon: Mail, value: form.email, placeholder: 'hello@boutique.in' },
                   { icon: MapPin, value: form.city && form.state ? `${form.city}, ${form.state}` : '', placeholder: 'City, State' },
                   { icon: Globe, value: form.website, placeholder: 'www.boutique.in' },
                 ].map(({ icon: Icon, value, placeholder }, i) => (
-                  <div key={i} className="flex items-center gap-2.5 text-xs text-[#1C2430]/60 font-medium">
-                    <Icon className="w-3.5 h-3.5 text-[#1C2430]/30 flex-shrink-0" />
-                    <span className={value ? '' : 'text-[#1C2430]/25 italic'}>{value || placeholder}</span>
+                  <div key={i} className="flex items-center gap-3.5 text-[13px] font-semibold group/item">
+                    <div className="w-8 h-8 rounded-full bg-[#F8F8FB] border border-[#16132D]/[0.04] flex items-center justify-center text-[#16132D]/40 group-hover/item:text-[#7209B7] group-hover/item:bg-[#7209B7]/5 group-hover/item:border-[#7209B7]/20 transition-all">
+                      <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                    </div>
+                    <span className={`truncate transition-colors ${value ? 'text-[#16132D]/80' : 'text-[#16132D]/30 italic font-medium'}`}>
+                      {value || placeholder}
+                    </span>
                   </div>
                 ))}
               </div>
-              <div className="px-4 pb-4 pt-1">
-                <div className="text-[10px] font-bold text-[#1C2430]/30 uppercase tracking-wider flex items-center gap-1.5">
-                  <Scissors className="w-3 h-3" /> Live Preview
+              <div className="px-6 pb-5 pt-3 bg-white relative z-10 border-t border-[#16132D]/[0.03]">
+                <div className="text-[10px] font-bold text-[#16132D]/30 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+                  Live Preview
                 </div>
               </div>
             </div>
@@ -171,11 +180,11 @@ const CompanySettings: React.FC = () => {
                   <Field label="PAN Number" value={form.pan} onChange={(v) => handleChange('pan', v)} placeholder="AAAAA1111A" hint="10-character PAN" />
                   <Field label="Website" value={form.website} onChange={(v) => handleChange('website', v)} placeholder="www.boutique.in" />
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Currency</label>
+                    <label className="block text-[11px] font-bold text-[#16132D]/60 uppercase tracking-widest mb-2">Currency</label>
                     <select
                       value={form.currency}
                       onChange={e => handleChange('currency', e.target.value)}
-                      className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-xl text-sm font-medium text-[#1C2430] bg-white focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 cursor-pointer"
+                      className="w-full px-4 py-3 bg-white border border-[#16132D]/10 rounded-xl text-[13px] font-semibold text-[#16132D] focus:outline-none focus:ring-4 focus:ring-[#7209B7]/10 focus:border-[#7209B7] transition-all hover:border-[#16132D]/20 shadow-sm shadow-[#16132D]/[0.02] cursor-pointer"
                     >
                       <option value="INR">₹ INR — Indian Rupee</option>
                       <option value="USD">$ USD — US Dollar</option>
@@ -193,11 +202,11 @@ const CompanySettings: React.FC = () => {
                   </div>
                   <Field label="City" value={form.city} onChange={(v) => handleChange('city', v)} placeholder="Mumbai" />
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">State</label>
+                    <label className="block text-[11px] font-bold text-[#16132D]/60 uppercase tracking-widest mb-2">State</label>
                     <select
                       value={form.state}
                       onChange={e => handleChange('state', e.target.value)}
-                      className="w-full px-4 py-2.5 border border-[#1C2430]/[0.1] rounded-xl text-sm font-medium text-[#1C2430] bg-white focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 cursor-pointer"
+                      className="w-full px-4 py-3 bg-white border border-[#16132D]/10 rounded-xl text-[13px] font-semibold text-[#16132D] focus:outline-none focus:ring-4 focus:ring-[#7209B7]/10 focus:border-[#7209B7] transition-all hover:border-[#16132D]/20 shadow-sm shadow-[#16132D]/[0.02] cursor-pointer"
                     >
                       {INDIAN_STATES.map(s => <option key={s}>{s}</option>)}
                     </select>

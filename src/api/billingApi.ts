@@ -74,7 +74,8 @@ export const billingApi = {
         body: JSON.stringify(invoiceData),
       });
       if (!response.ok) {
-        throw new Error('Failed to create invoice');
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to create invoice');
       }
       return await response.json();
     } catch (error) {

@@ -278,9 +278,9 @@ const Templates: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6 p-6 animate-fade-in">
+    <div className="flex flex-col h-full space-y-6 p-4 sm:p-6 min-w-0 animate-fade-in">
       {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-850 flex items-center gap-2">
             <Layers className="w-6 h-6 text-blue-600" />
@@ -292,7 +292,7 @@ const Templates: React.FC = () => {
         </div>
 
         {/* Toolbar & Action Buttons */}
-        <div className="flex space-x-3">
+        <div className="flex space-x-3 self-start sm:self-auto">
           <button 
             onClick={() => toast('Profiles data exported successfully', 'info')}
             className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-sm font-semibold text-slate-700 rounded-lg shadow-sm transition-colors"

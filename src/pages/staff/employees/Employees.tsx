@@ -128,16 +128,16 @@ const Employees: React.FC = () => {
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
+    <div className="flex flex-col h-full space-y-4 p-4 sm:p-6 min-w-0">
       {/* Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Staff</h1>
           <nav className="text-sm text-gray-500 mt-1">
             <span>Home</span><span className="mx-2">/</span><span className="text-gray-900">Staff</span>
           </nav>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex space-x-3 self-start sm:self-auto">
           <button
             onClick={fetchEmployees}
             className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"

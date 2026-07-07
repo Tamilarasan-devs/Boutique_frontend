@@ -23,18 +23,18 @@ const mockAppointments: Appointment[] = [
 
 const getTypeStyle = (type: string) => {
   const styles: Record<string, string> = {
-    'Fitting': 'bg-[#C99A3E]/10 text-[#8a6a25] border-[#C99A3E]/20',
+    'Fitting': 'bg-[#8338EC]/10 text-[#6200EA] border-[#8338EC]/20',
     'Design Consultation': 'bg-[#7A5AA8]/10 text-[#5d4485] border-[#7A5AA8]/20',
-    'Fabric Selection': 'bg-[#2F5D4F]/10 text-[#234638] border-[#2F5D4F]/20',
-    'Measurement Collection': 'bg-[#C1652F]/10 text-[#a3531f] border-[#C1652F]/20',
+    'Fabric Selection': 'bg-[#10B981]/10 text-[#234638] border-[#10B981]/20',
+    'Measurement Collection': 'bg-[#7209B7]/10 text-[#a3531f] border-[#7209B7]/20',
   };
-  return styles[type] || 'bg-[#1C2430]/10 text-[#1C2430] border-[#1C2430]/20';
+  return styles[type] || 'bg-[#16132D]/10 text-[#16132D] border-[#16132D]/20';
 };
 
 const statusStyles: Record<Appointment['status'], string> = {
-  'Scheduled': 'bg-[#1C2430]/[0.05] text-[#1C2430]/70',
-  'Completed': 'bg-[#2F5D4F]/10 text-[#234638]',
-  'Cancelled': 'bg-[#9B3B43]/10 text-[#7a2e34]',
+  'Scheduled': 'bg-[#16132D]/[0.05] text-[#16132D]/70',
+  'Completed': 'bg-[#10B981]/10 text-[#234638]',
+  'Cancelled': 'bg-[#F43F5E]/10 text-[#7a2e34]',
 };
 
 const Appointments: React.FC = () => {
@@ -140,52 +140,52 @@ const Appointments: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
+    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
       <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#1C2430]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">
               Schedule
             </p>
-            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#1C2430]">
+            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#16132D]">
               Appointments
             </h1>
-            <p className="text-sm text-[#1C2430]/55 mt-1">
+            <p className="text-sm text-[#16132D]/55 mt-1">
               Schedule and manage customer fittings, consultation trials, and design reviews.
             </p>
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#1C2430]/10 self-start sm:self-auto"
+            className="px-4 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" /> Book Appointment
           </button>
         </div>
 
         {/* Filter Area & Search */}
-        <div className="flex items-center bg-white border border-[#1C2430]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#C1652F]/25 focus-within:border-[#C1652F]/40 transition">
-          <Search className="w-4 h-4 text-[#1C2430]/35 mr-2 flex-shrink-0" />
+        <div className="flex items-center bg-white border border-[#16132D]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 focus-within:border-[#7209B7]/40 transition">
+          <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
           <input 
             type="text" 
             placeholder="Search by customer or type..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm text-[#1C2430] placeholder-[#1C2430]/35 w-full"
+            className="bg-transparent border-none outline-none text-sm text-[#16132D] placeholder-[#16132D]/35 w-full"
           />
         </div>
 
         {/* Appointment Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredAppointments.map((apt) => (
-            <div key={apt.id} className="bg-white p-5 rounded-2xl border border-[#1C2430]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-[0_8px_18px_rgba(28,36,48,0.08)] hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-4">
+            <div key={apt.id} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-[0_8px_18px_rgba(28,36,48,0.08)] hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-4">
               <div className="flex justify-between items-start">
                 <div>
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border ${getTypeStyle(apt.type)}`}>
                     {apt.type}
                   </span>
-                  <h3 className="text-lg font-serif font-semibold text-[#1C2430] mt-3">{apt.customerName}</h3>
+                  <h3 className="text-lg font-serif font-semibold text-[#16132D] mt-3">{apt.customerName}</h3>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${statusStyles[apt.status]}`}>
@@ -193,7 +193,7 @@ const Appointments: React.FC = () => {
                   </span>
                   <button 
                     onClick={() => handleDeleteAppointment(apt.id)} 
-                    className="text-[#1C2430]/30 hover:text-[#9B3B43] transition p-1"
+                    className="text-[#16132D]/30 hover:text-[#F43F5E] transition p-1"
                     title="Delete Appointment"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -201,46 +201,46 @@ const Appointments: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-2.5 text-xs font-semibold text-[#1C2430]/55 pt-2">
+              <div className="space-y-2.5 text-xs font-semibold text-[#16132D]/55 pt-2">
                 <div className="flex items-center gap-2">
-                  <CalendarIcon className="w-4 h-4 text-[#1C2430]/35" />
+                  <CalendarIcon className="w-4 h-4 text-[#16132D]/35" />
                   <span>{apt.date}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#1C2430]/35" />
+                  <Clock className="w-4 h-4 text-[#16132D]/35" />
                   <span>{apt.time}</span>
                 </div>
                 {apt.phone && (
                   <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-[#1C2430]/35" />
+                    <Phone className="w-4 h-4 text-[#16132D]/35" />
                     <span>{apt.phone}</span>
                   </div>
                 )}
                 {apt.assignedTo && (
                   <div className="flex items-center gap-2">
-                    <UserCheck className="w-4 h-4 text-[#1C2430]/35" />
+                    <UserCheck className="w-4 h-4 text-[#16132D]/35" />
                     <span>{apt.assignedTo}</span>
                   </div>
                 )}
                 {apt.notes && (
-                  <div className="flex items-start gap-2 pt-3 mt-1 border-t border-[#1C2430]/[0.04] text-[#1C2430]/65">
-                    <MessageSquare className="w-4 h-4 text-[#1C2430]/35 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-2 pt-3 mt-1 border-t border-[#16132D]/[0.04] text-[#16132D]/65">
+                    <MessageSquare className="w-4 h-4 text-[#16132D]/35 mt-0.5 flex-shrink-0" />
                     <p className="font-normal leading-relaxed">"{apt.notes}"</p>
                   </div>
                 )}
               </div>
 
               {apt.status === 'Scheduled' && (
-                <div className="flex gap-2 pt-4 mt-2 border-t border-[#1C2430]/[0.06]">
+                <div className="flex gap-2 pt-4 mt-2 border-t border-[#16132D]/[0.06]">
                   <button 
                     onClick={() => handleUpdateStatus(apt.id, 'Completed')}
-                    className="flex-1 py-2 bg-[#2F5D4F]/10 hover:bg-[#2F5D4F]/20 text-[#234638] text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition"
+                    className="flex-1 py-2 bg-[#10B981]/10 hover:bg-[#10B981]/20 text-[#234638] text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition"
                   >
                     <Check className="w-3.5 h-3.5" /> Complete
                   </button>
                   <button 
                     onClick={() => handleUpdateStatus(apt.id, 'Cancelled')}
-                    className="flex-1 py-2 bg-[#9B3B43]/10 hover:bg-[#9B3B43]/20 text-[#7a2e34] text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition"
+                    className="flex-1 py-2 bg-[#F43F5E]/10 hover:bg-[#F43F5E]/20 text-[#7a2e34] text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition"
                   >
                     <X className="w-3.5 h-3.5" /> Cancel
                   </button>
@@ -249,7 +249,7 @@ const Appointments: React.FC = () => {
             </div>
           ))}
           {filteredAppointments.length === 0 && (
-             <div className="col-span-full py-12 text-center text-sm font-semibold text-[#1C2430]/35">
+             <div className="col-span-full py-12 text-center text-sm font-semibold text-[#16132D]/35">
                No appointments found.
              </div>
           )}
@@ -257,99 +257,99 @@ const Appointments: React.FC = () => {
 
         {/* Create Appointment Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-[#1C2430]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl border border-[#1C2430]/[0.06] shadow-2xl shadow-[#1C2430]/20 w-full max-w-md overflow-hidden">
-              <div className="px-6 py-5 border-b border-[#1C2430]/[0.08] flex justify-between items-center">
+          <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-md overflow-hidden">
+              <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center">
                 <div>
-                  <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1">New Entry</p>
-                  <h3 className="font-serif font-semibold text-[#1C2430] text-lg">Book Appointment</h3>
+                  <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1">New Entry</p>
+                  <h3 className="font-serif font-semibold text-[#16132D] text-lg">Book Appointment</h3>
                 </div>
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="text-[#1C2430]/35 hover:text-[#1C2430] hover:bg-[#1C2430]/[0.05] p-1.5 rounded-lg transition"
+                  className="text-[#16132D]/35 hover:text-[#16132D] hover:bg-[#16132D]/[0.05] p-1.5 rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <form onSubmit={handleCreateAppointment} className="p-6 space-y-5">
                 <div>
-                  <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
+                  <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
                   <input 
                     type="text" 
                     value={customerName} 
                     onChange={(e) => setCustomerName(e.target.value)} 
                     required
                     placeholder="e.g. Shalini Roy" 
-                    className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                    className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Date *</label>
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Date *</label>
                     <input 
                       type="date" 
                       value={date} 
                       onChange={(e) => setDate(e.target.value)} 
                       required
-                      className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition text-[#1C2430]"
+                      className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition text-[#16132D]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Time *</label>
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Time *</label>
                     <input 
                       type="time" 
                       value={time} 
                       onChange={(e) => setTime(e.target.value)} 
                       required
-                      className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                      className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Phone Number</label>
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Phone Number</label>
                     <input 
                       type="tel" 
                       value={phone} 
                       onChange={(e) => setPhone(e.target.value)} 
                       placeholder="+91 98765 43210"
-                      className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                      className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Assigned To</label>
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Assigned To</label>
                     <input 
                       type="text" 
                       value={assignedTo} 
                       onChange={(e) => setAssignedTo(e.target.value)} 
                       placeholder="e.g. Ritu (Lead Designer)"
-                      className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                      className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Consultation Type</label>
+                  <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Consultation Type</label>
                   <input 
                     type="text" 
                     value={type} 
                     onChange={(e) => setType(e.target.value)} 
                     placeholder="e.g. Fitting, Alteration..."
-                    className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition"
+                    className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Notes</label>
+                  <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Notes</label>
                   <textarea 
                     value={notes} 
                     onChange={(e) => setNotes(e.target.value)} 
                     placeholder="Additional customer requirements..." 
                     rows={3}
-                    className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm resize-none transition"
+                    className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm resize-none transition"
                   />
                 </div>
                 <button 
                   type="submit" 
-                  className="w-full py-3 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold transition mt-2 shadow-md shadow-[#1C2430]/10"
+                  className="w-full py-3 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold transition mt-2 shadow-md shadow-[#16132D]/10"
                 >
                   Schedule Appointment
                 </button>

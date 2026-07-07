@@ -85,7 +85,8 @@ const Invoice: React.FC = () => {
 
   // SSE Subscription for real-time synchronization
   useEffect(() => {
-    const eventSource = new EventSource(BILLING_EVENTS_URL);
+    const token = localStorage.getItem('boutique_token');
+    const eventSource = new EventSource(`${BILLING_EVENTS_URL}?token=${token}`);
 
     eventSource.addEventListener('invoice_created', (e) => {
       const newInv = JSON.parse(e.data) as InvoiceType;
@@ -172,12 +173,22 @@ const Invoice: React.FC = () => {
     if (quotation) {
       setCustomerName(quotation.customer_name);
       const parsedItems = parseItems(quotation.items);
-      const newItems = parsedItems.map((i: any) => ({
-        description: i.description || i.item || '',
-        quantity: i.quantity || 1,
-        price: i.price || i.rate || 0
-      }));
-      setItems(newItems.length > 0 ? newItems : [{ description: '', quantity: 1, price: 0 }]);
+      
+      if (parsedItems.length > 0) {
+        const newItems = parsedItems.map((i: any) => ({
+          description: i.description || i.item || '',
+          quantity: i.quantity || 1,
+          price: i.price || i.rate || 0
+        }));
+        setItems(newItems);
+      } else {
+        // Fallback for simple string item descriptions
+        setItems([{ 
+          description: typeof quotation.items === 'string' ? quotation.items : '', 
+          quantity: 1, 
+          price: parseFloat(quotation.total_amount) || 0 
+        }]);
+      }
     }
   };
 

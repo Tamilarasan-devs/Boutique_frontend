@@ -6,6 +6,7 @@ import { subscriptionApi, SubscriptionStatus } from '../api/subscriptionApi';
 
 const DashboardLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const location = useLocation();
@@ -27,13 +28,16 @@ const DashboardLayout: React.FC = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-[260px]' : 'w-0 lg:w-[80px]'} transition-all duration-300 ease-in-out border-r border-slate-200 bg-white flex-shrink-0 z-20 overflow-hidden hidden md:block h-full`}>
-        <Sidebar collapsed={!sidebarOpen} onCollapseToggle={(collapsed) => setSidebarOpen(!collapsed)} />
-      </div>
+      <Sidebar 
+        collapsed={!sidebarOpen} 
+        onCollapseToggle={(collapsed) => setSidebarOpen(!collapsed)}
+        mobileOpen={mobileSidebarOpen}
+        onMobileClose={() => setMobileSidebarOpen(false)}
+      />
 
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        
+        <Header sidebarOpen={mobileSidebarOpen} setSidebarOpen={setMobileSidebarOpen} />
+
         {/* Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           {checkingAuth ? (
@@ -49,8 +53,8 @@ const DashboardLayout: React.FC = () => {
           ) : (
             <>
               {subscription?.status === 'trialing' && (
-                <div className="bg-orange-100 border-b border-orange-200 px-4 py-2 text-center text-sm font-semibold text-orange-800">
-                  You are currently on a 15-Day Free Trial. <a href="/billing/pricing" className="underline hover:text-orange-900 ml-1">Upgrade to Pro</a> to ensure uninterrupted access.
+                <div className="bg-[#7209B7] px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm">
+                  You are currently on a 15-Day Free Trial. <a href="/billing/pricing" className="underline text-purple-200 hover:text-white ml-1 font-bold">Upgrade to Pro</a> to ensure uninterrupted access.
                 </div>
               )}
               <Suspense

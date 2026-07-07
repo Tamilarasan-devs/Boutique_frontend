@@ -58,6 +58,23 @@ export const leadApi = {
     }
   },
 
+  updateLead: async (id: string, leadData: Partial<Lead>): Promise<Lead> => {
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}/leads/${id}/full`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(leadData),
+      });
+      if (!response.ok) throw new Error('Failed to update lead');
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      throw error;
+    }
+  },
+
   deleteLead: async (id: string): Promise<void> => {
     try {
       const response = await fetchWithAuth(`${API_BASE_URL}/leads/${id}`, {

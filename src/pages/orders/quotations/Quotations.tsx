@@ -18,10 +18,10 @@ interface Quotation {
 }
 
 const statusStyles: Record<string, string> = {
-  'Draft': 'bg-[#1C2430]/[0.05] text-[#1C2430]/70',
+  'Draft': 'bg-[#16132D]/[0.05] text-[#16132D]/70',
   'Sent': 'bg-[#7A5AA8]/10 text-[#5d4485]',
-  'Accepted': 'bg-[#2F5D4F]/10 text-[#234638]',
-  'Rejected': 'bg-[#9B3B43]/10 text-[#7a2e34]',
+  'Accepted': 'bg-[#10B981]/10 text-[#234638]',
+  'Rejected': 'bg-[#F43F5E]/10 text-[#7a2e34]',
   'Invoiced': 'bg-purple-50 text-purple-700 border-purple-200/50',
 };
 
@@ -151,28 +151,28 @@ const Quotations: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
+    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
       <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#1C2430]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">Estimates</p>
-            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#1C2430]">Quotations</h1>
-            <p className="text-sm text-[#1C2430]/55 mt-1">Create and manage price estimates for bespoke garment orders.</p>
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Estimates</p>
+            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#16132D]">Quotations</h1>
+            <p className="text-sm text-[#16132D]/55 mt-1">Create and manage price estimates for bespoke garment orders.</p>
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#1C2430]/10 self-start sm:self-auto">
+          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto">
             <Plus className="w-4 h-4" /> New Quotation
           </button>
         </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex items-center bg-white border border-[#1C2430]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#C1652F]/25 transition">
-            <Search className="w-4 h-4 text-[#1C2430]/35 mr-2 flex-shrink-0" />
-            <input type="text" placeholder="Search quotations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm text-[#1C2430] placeholder-[#1C2430]/35 w-full" />
+          <div className="flex items-center bg-white border border-[#16132D]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition">
+            <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
+            <input type="text" placeholder="Search quotations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm text-[#16132D] placeholder-[#16132D]/35 w-full" />
           </div>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2.5 border border-[#1C2430]/[0.08] rounded-xl bg-white text-sm font-semibold text-[#1C2430]/70 focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 transition cursor-pointer">
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2.5 border border-[#16132D]/[0.08] rounded-xl bg-white text-sm font-semibold text-[#16132D]/70 focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 transition cursor-pointer">
             <option value="All">All Statuses</option>
             <option>Draft</option>
             <option>Sent</option>
@@ -182,11 +182,11 @@ const Quotations: React.FC = () => {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-[#1C2430]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-[#1C2430]/75">
+            <table className="w-full text-left text-sm text-[#16132D]/75">
               <thead>
-                <tr className="border-b border-[#1C2430]/[0.06] bg-[#1C2430]/[0.02] text-[#1C2430]/55 font-semibold text-xs tracking-wider uppercase">
+                <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-semibold text-xs tracking-wider uppercase">
                   <th className="py-4 px-6">Quotation</th>
                   <th className="py-4 px-6">Customer</th>
                   <th className="py-4 px-6">Items</th>
@@ -196,22 +196,22 @@ const Quotations: React.FC = () => {
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1C2430]/[0.04]">
+              <tbody className="divide-y divide-[#16132D]/[0.04]">
                 {filtered.map(q => (
-                  <tr key={q.id} className="hover:bg-[#1C2430]/[0.02] transition">
+                  <tr key={q.id} className="hover:bg-[#16132D]/[0.02] transition">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-[#1C2430]/35" />
-                        <span className="font-serif font-bold text-[#1C2430]">{q.id}</span>
+                        <FileText className="w-4 h-4 text-[#16132D]/35" />
+                        <span className="font-serif font-bold text-[#16132D]">{q.id}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-6 font-semibold text-[#1C2430]">{q.customerName}</td>
-                    <td className="py-4 px-6 text-[#1C2430]/65 max-w-[200px] truncate">{q.items}</td>
+                    <td className="py-4 px-6 font-semibold text-[#16132D]">{q.customerName}</td>
+                    <td className="py-4 px-6 text-[#16132D]/65 max-w-[200px] truncate">{q.items}</td>
                     <td className="py-4 px-6 text-right">
-                      <div className="font-bold text-[#1C2430]">₹{q.totalAmount.toLocaleString('en-IN')}</div>
-                      {q.discount > 0 && <div className="text-[10px] text-[#2F5D4F] font-semibold">{q.discount}% off</div>}
+                      <div className="font-bold text-[#16132D]">₹{q.totalAmount.toLocaleString('en-IN')}</div>
+                      {q.discount > 0 && <div className="text-[10px] text-[#10B981] font-semibold">{q.discount}% off</div>}
                     </td>
-                    <td className="py-4 px-6 text-[#1C2430]/55 font-medium">{q.validUntil}</td>
+                    <td className="py-4 px-6 text-[#16132D]/55 font-medium">{q.validUntil}</td>
                     <td className="py-4 px-6">
                       <select
                         value={q.status}
@@ -229,18 +229,18 @@ const Quotations: React.FC = () => {
                         {q.status !== 'Rejected' && q.status !== 'Accepted' && (
                           <button
                             onClick={() => handleConvertToOrder(q.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 bg-[#2F5D4F]/10 text-[#2F5D4F] hover:bg-[#2F5D4F]/20 transition"
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20 transition"
                             title="Convert to Order"
                           >
                             Convert to Order <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         )}
                         {q.status === 'Accepted' && (
-                          <span className="px-3 py-1.5 text-xs font-bold text-[#2F5D4F] flex items-center gap-1">
+                          <span className="px-3 py-1.5 text-xs font-bold text-[#10B981] flex items-center gap-1">
                             ✓ Converted
                           </span>
                         )}
-                        <button onClick={() => handleDelete(q.id)} className="p-1.5 rounded-lg text-[#1C2430]/35 hover:text-[#9B3B43] hover:bg-[#9B3B43]/10 transition" title="Delete">
+                        <button onClick={() => handleDelete(q.id)} className="p-1.5 rounded-lg text-[#16132D]/35 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -248,7 +248,7 @@ const Quotations: React.FC = () => {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={7} className="py-12 text-center text-sm font-semibold text-[#1C2430]/35">No quotations found.</td></tr>
+                  <tr><td colSpan={7} className="py-12 text-center text-sm font-semibold text-[#16132D]/35">No quotations found.</td></tr>
                 )}
               </tbody>
             </table>
@@ -257,45 +257,45 @@ const Quotations: React.FC = () => {
 
         {/* Create Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-[#1C2430]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl border border-[#1C2430]/[0.06] shadow-2xl shadow-[#1C2430]/20 w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
-              <div className="px-6 py-5 border-b border-[#1C2430]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-serif font-bold text-[#1C2430]">New Quotation</h2>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 bg-[#1C2430]/[0.03] hover:bg-[#1C2430]/[0.08] text-[#1C2430]/50 hover:text-[#1C2430] rounded-full transition"><X className="w-4 h-4" /></button>
+          <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+              <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
+                <h2 className="text-xl font-serif font-bold text-[#16132D]">New Quotation</h2>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 bg-[#16132D]/[0.03] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 hover:text-[#16132D] rounded-full transition"><X className="w-4 h-4" /></button>
               </div>
               <div className="overflow-y-auto p-6">
                 <form id="quotationForm" onSubmit={handleCreate} className="space-y-5">
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
-                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="e.g. Tanvi Jha" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
+                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="e.g. Tanvi Jha" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Items Description *</label>
-                    <textarea value={items} onChange={(e) => setItems(e.target.value)} required placeholder="e.g. Bridal Lehenga + Dupatta + Blouse" rows={2} className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition resize-none" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Items Description *</label>
+                    <textarea value={items} onChange={(e) => setItems(e.target.value)} required placeholder="e.g. Bridal Lehenga + Dupatta + Blouse" rows={2} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition resize-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Total Amount (₹) *</label>
-                      <input type="number" value={totalAmount} onChange={(e) => setTotalAmount(Number(e.target.value))} required placeholder="65000" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Total Amount (₹) *</label>
+                      <input type="number" value={totalAmount} onChange={(e) => setTotalAmount(Number(e.target.value))} required placeholder="65000" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Discount (%)</label>
-                      <input type="number" value={discount} onChange={(e) => setDiscount(Number(e.target.value))} placeholder="0" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Discount (%)</label>
+                      <input type="number" value={discount} onChange={(e) => setDiscount(Number(e.target.value))} placeholder="0" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Valid Until *</label>
-                    <input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} required className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Valid Until *</label>
+                    <input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} required className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Terms & Conditions</label>
-                    <textarea value={terms} onChange={(e) => setTerms(e.target.value)} placeholder="e.g. 50% advance required. Balance on delivery." rows={2} className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition resize-none" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Terms & Conditions</label>
+                    <textarea value={terms} onChange={(e) => setTerms(e.target.value)} placeholder="e.g. 50% advance required. Balance on delivery." rows={2} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition resize-none" />
                   </div>
                 </form>
               </div>
-              <div className="px-6 py-5 border-t border-[#1C2430]/[0.08] flex justify-end shrink-0 bg-[#FAF7F1]/50">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#1C2430]/60 hover:text-[#1C2430] transition mr-3">Cancel</button>
-                <button type="submit" form="quotationForm" className="px-6 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-bold shadow-md shadow-[#1C2430]/10 transition">Save Quotation</button>
+              <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3">Cancel</button>
+                <button type="submit" form="quotationForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition">Save Quotation</button>
               </div>
             </div>
           </div>

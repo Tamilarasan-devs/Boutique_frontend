@@ -18,16 +18,16 @@ interface ProductionItem {
 }
 
 const stageConfig: Record<string, { icon: any; color: string; bgColor: string }> = {
-  'Cutting': { icon: Scissors, color: 'text-[#C99A3E]', bgColor: 'bg-[#C99A3E]/10' },
+  'Cutting': { icon: Scissors, color: 'text-[#8338EC]', bgColor: 'bg-[#8338EC]/10' },
   'Stitching': { icon: Sparkles, color: 'text-[#7A5AA8]', bgColor: 'bg-[#7A5AA8]/10' },
-  'Trial': { icon: User, color: 'text-[#C1652F]', bgColor: 'bg-[#C1652F]/10' },
-  'Ready': { icon: CheckCircle2, color: 'text-[#2F5D4F]', bgColor: 'bg-[#2F5D4F]/10' },
+  'Trial': { icon: User, color: 'text-[#7209B7]', bgColor: 'bg-[#7209B7]/10' },
+  'Ready': { icon: CheckCircle2, color: 'text-[#10B981]', bgColor: 'bg-[#10B981]/10' },
 };
 
 const priorityStyles: Record<string, string> = {
-  'High': 'bg-[#9B3B43]/10 text-[#9B3B43] border-[#9B3B43]/20',
-  'Medium': 'bg-[#C99A3E]/10 text-[#8a6a25] border-[#C99A3E]/20',
-  'Low': 'bg-[#1C2430]/[0.05] text-[#1C2430]/60 border-[#1C2430]/10',
+  'High': 'bg-[#F43F5E]/10 text-[#F43F5E] border-[#F43F5E]/20',
+  'Medium': 'bg-[#8338EC]/10 text-[#6200EA] border-[#8338EC]/20',
+  'Low': 'bg-[#16132D]/[0.05] text-[#16132D]/60 border-[#16132D]/10',
 };
 
 const Production: React.FC = () => {
@@ -138,17 +138,17 @@ const Production: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] text-[#1C2430]">
+    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
       <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1600px] mx-auto">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#1C2430]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#C1652F] mb-1.5">Workshop</p>
-            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#1C2430]">Production Queue</h1>
-            <p className="text-sm text-[#1C2430]/55 mt-1">Track cutting, stitching, trial and ready states for master tailors.</p>
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Workshop</p>
+            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#16132D]">Production Queue</h1>
+            <p className="text-sm text-[#16132D]/55 mt-1">Track cutting, stitching, trial and ready states for master tailors.</p>
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#1C2430]/10 self-start sm:self-auto">
+          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto">
             <Plus className="w-4 h-4" /> Add to Queue
           </button>
         </div>
@@ -165,41 +165,41 @@ const Production: React.FC = () => {
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2">
                     <StageIcon className={`w-4 h-4 ${config.color}`} />
-                    <span className="text-sm font-bold text-[#1C2430]">{stage}</span>
+                    <span className="text-sm font-bold text-[#16132D]">{stage}</span>
                   </div>
-                  <span className="text-xs bg-white/70 text-[#1C2430]/60 px-2.5 py-0.5 rounded-full font-bold">
+                  <span className="text-xs bg-white/70 text-[#16132D]/60 px-2.5 py-0.5 rounded-full font-bold">
                     {stageItems.length}
                   </span>
                 </div>
 
                 <div className="space-y-3 flex-1 overflow-y-auto">
                   {stageItems.map((item) => (
-                    <div key={item.id} className="bg-white p-4 rounded-xl border border-[#1C2430]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-[0_4px_12px_rgba(28,36,48,0.08)] transition-all duration-200 space-y-3">
+                    <div key={item.id} className="bg-white p-4 rounded-xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-[0_4px_12px_rgba(28,36,48,0.08)] transition-all duration-200 space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-[#1C2430]/40 tracking-wider">{item.orderId || 'NO ORDER'}</span>
+                        <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider">{item.orderId || 'NO ORDER'}</span>
                         <div className="flex items-center gap-1.5">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${priorityStyles[item.priority] || priorityStyles['Medium']}`}>
                             {item.priority}
                           </span>
-                          <button onClick={() => handleDelete(item.id)} className="p-0.5 text-[#1C2430]/25 hover:text-[#9B3B43] transition">
+                          <button onClick={() => handleDelete(item.id)} className="p-0.5 text-[#16132D]/25 hover:text-[#F43F5E] transition">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="font-serif font-bold text-[#1C2430] text-sm">{item.garment}</h4>
-                        <p className="text-xs text-[#1C2430]/55 mt-0.5">For {item.customerName}</p>
+                        <h4 className="font-serif font-bold text-[#16132D] text-sm">{item.garment}</h4>
+                        <p className="text-xs text-[#16132D]/55 mt-0.5">For {item.customerName}</p>
                       </div>
 
                       {item.tailor && (
-                        <div className="bg-[#FAF7F1] p-2 rounded-lg text-xs text-[#1C2430]/65 border border-[#1C2430]/[0.04] flex justify-between items-center">
-                          <span>Tailor: <span className="font-bold text-[#1C2430]">{item.tailor}</span></span>
+                        <div className="bg-[#F4F3F8] p-2 rounded-lg text-xs text-[#16132D]/65 border border-[#16132D]/[0.04] flex justify-between items-center">
+                          <span>Tailor: <span className="font-bold text-[#16132D]">{item.tailor}</span></span>
                         </div>
                       )}
 
                       {item.expectedEndDate && (
-                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#1C2430]/45">
+                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#16132D]/45">
                           <CalendarIcon className="w-3 h-3" />
                           <span>Due: {item.expectedEndDate}</span>
                         </div>
@@ -208,7 +208,7 @@ const Production: React.FC = () => {
                       {stage !== 'Ready' && (
                         <button 
                           onClick={() => promoteStage(item.id, item.stage)}
-                          className="w-full py-2 bg-[#1C2430]/[0.04] hover:bg-[#C1652F]/10 text-[#C1652F] rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition"
+                          className="w-full py-2 bg-[#16132D]/[0.04] hover:bg-[#7209B7]/10 text-[#7209B7] rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition"
                         >
                           Promote <ChevronRight className="w-3.5 h-3.5" />
                         </button>
@@ -216,7 +216,7 @@ const Production: React.FC = () => {
                       {stage === 'Ready' && (
                         <button
                           onClick={() => handleSendToDelivery(item)}
-                          className="w-full py-2 bg-[#2F5D4F]/10 hover:bg-[#2F5D4F]/20 text-[#2F5D4F] rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                          className="w-full py-2 bg-[#10B981]/10 hover:bg-[#10B981]/20 text-[#10B981] rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition"
                         >
                           <Truck className="w-3.5 h-3.5" /> Send to Delivery
                         </button>
@@ -231,22 +231,22 @@ const Production: React.FC = () => {
 
         {/* Create Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-[#1C2430]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl border border-[#1C2430]/[0.06] shadow-2xl shadow-[#1C2430]/20 w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
-              <div className="px-6 py-5 border-b border-[#1C2430]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-serif font-bold text-[#1C2430]">Add to Production Queue</h2>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 bg-[#1C2430]/[0.03] hover:bg-[#1C2430]/[0.08] text-[#1C2430]/50 hover:text-[#1C2430] rounded-full transition"><X className="w-4 h-4" /></button>
+          <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+              <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
+                <h2 className="text-xl font-serif font-bold text-[#16132D]">Add to Production Queue</h2>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 bg-[#16132D]/[0.03] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 hover:text-[#16132D] rounded-full transition"><X className="w-4 h-4" /></button>
               </div>
               <div className="overflow-y-auto p-6">
                 <form id="productionForm" onSubmit={handleCreate} className="space-y-5">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Order Reference</label>
-                      <input type="text" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="e.g. ORD-2026-001" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Order Reference</label>
+                      <input type="text" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="e.g. ORD-2026-001" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Priority</label>
-                      <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm bg-white transition">
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Priority</label>
+                      <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm bg-white transition">
                         <option>High</option>
                         <option>Medium</option>
                         <option>Low</option>
@@ -254,36 +254,36 @@ const Production: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
-                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="e.g. Anjali Sharma" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
+                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="e.g. Anjali Sharma" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Garment *</label>
-                    <input type="text" value={garment} onChange={(e) => setGarment(e.target.value)} required placeholder="e.g. Silk Anarkali Suit" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Garment *</label>
+                    <input type="text" value={garment} onChange={(e) => setGarment(e.target.value)} required placeholder="e.g. Silk Anarkali Suit" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Assigned Tailor</label>
-                    <input type="text" value={tailor} onChange={(e) => setTailor(e.target.value)} placeholder="e.g. Ramesh Singh" className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 focus:border-[#C1652F]/40 text-sm transition" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Assigned Tailor</label>
+                    <input type="text" value={tailor} onChange={(e) => setTailor(e.target.value)} placeholder="e.g. Ramesh Singh" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Start Date</label>
-                      <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm transition" />
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Start Date</label>
+                      <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm transition" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Expected End</label>
-                      <input type="date" value={expectedEndDate} onChange={(e) => setExpectedEndDate(e.target.value)} className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm transition" />
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Expected End</label>
+                      <input type="date" value={expectedEndDate} onChange={(e) => setExpectedEndDate(e.target.value)} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm transition" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1C2430]/45 uppercase tracking-wider mb-1.5">Notes</label>
-                    <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Special instructions for the tailor..." rows={2} className="w-full px-4 py-3 border border-[#1C2430]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C1652F]/25 text-sm resize-none transition" />
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Notes</label>
+                    <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Special instructions for the tailor..." rows={2} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm resize-none transition" />
                   </div>
                 </form>
               </div>
-              <div className="px-6 py-5 border-t border-[#1C2430]/[0.08] flex justify-end shrink-0 bg-[#FAF7F1]/50">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#1C2430]/60 hover:text-[#1C2430] transition mr-3">Cancel</button>
-                <button type="submit" form="productionForm" className="px-6 py-2.5 bg-[#1C2430] hover:bg-[#2a3545] text-[#FAF7F1] rounded-xl text-sm font-bold shadow-md shadow-[#1C2430]/10 transition">Add to Queue</button>
+              <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3">Cancel</button>
+                <button type="submit" form="productionForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition">Add to Queue</button>
               </div>
             </div>
           </div>

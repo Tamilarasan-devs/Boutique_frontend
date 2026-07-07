@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { attendanceApi, AttendanceRecord, AttendanceSummary } from '../../../api/attendanceApi';
+import { 
+  CalendarDays, Search, CheckCircle2, XCircle, Clock, 
+  FileEdit, RefreshCw, BarChart3, Users, Calendar
+} from 'lucide-react';
 
 type AttendanceStatus = 'Present' | 'Absent' | 'Half-Day' | 'Late';
 
 const STATUS_OPTIONS: AttendanceStatus[] = ['Present', 'Absent', 'Half-Day', 'Late'];
 
-const statusConfig: Record<AttendanceStatus, { color: string; bg: string; dot: string; emoji: string }> = {
-  Present:  { color: 'text-emerald-800', bg: 'bg-emerald-100', dot: 'bg-emerald-500', emoji: '🟢' },
-  Absent:   { color: 'text-red-800',     bg: 'bg-red-100',     dot: 'bg-red-500',     emoji: '🔴' },
-  'Half-Day': { color: 'text-amber-800', bg: 'bg-amber-100',   dot: 'bg-amber-500',   emoji: '🟡' },
-  Late:     { color: 'text-orange-800',  bg: 'bg-orange-100',  dot: 'bg-orange-500',  emoji: '🟠' },
+const statusConfig: Record<AttendanceStatus, { color: string; bg: string; dot: string; icon: React.ReactNode }> = {
+  Present:  { color: 'text-[#10B981]', bg: 'bg-[#10B981]/10', dot: 'bg-[#10B981]', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+  Absent:   { color: 'text-[#F43F5E]', bg: 'bg-[#F43F5E]/10', dot: 'bg-[#F43F5E]', icon: <XCircle className="w-3.5 h-3.5" /> },
+  'Half-Day': { color: 'text-[#7209B7]', bg: 'bg-[#7209B7]/10', dot: 'bg-[#7209B7]', icon: <Clock className="w-3.5 h-3.5" /> },
+  Late:     { color: 'text-[#8338EC]', bg: 'bg-[#8338EC]/10', dot: 'bg-[#8338EC]', icon: <Clock className="w-3.5 h-3.5" /> },
 };
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -70,7 +74,6 @@ const Attendance: React.FC = () => {
         check_in: record.check_in || undefined,
         check_out: record.check_out || undefined,
       });
-      // Update locally
       setRecords(prev => prev.map(r =>
         r.employee_id === empId
           ? { ...r, status, attendance_id: r.attendance_id || undefined }
@@ -96,7 +99,6 @@ const Attendance: React.FC = () => {
     }
   };
 
-  // Save check-in or check-out time for a specific employee
   const handleTimeChange = async (record: AttendanceRecord, field: 'check_in' | 'check_out', value: string) => {
     const empId = record.employee_id;
     try {
@@ -117,7 +119,6 @@ const Attendance: React.FC = () => {
     }
   };
 
-  // One-click "Now" button — sets check-in or check-out to current time
   const handleQuickTime = async (record: AttendanceRecord, field: 'check_in' | 'check_out') => {
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -157,137 +158,151 @@ const Attendance: React.FC = () => {
   const presentCount = records.filter(r => r.status === 'Present').length;
   const absentCount = records.filter(r => r.status === 'Absent').length;
   const halfDayCount = records.filter(r => r.status === 'Half-Day').length;
-  const lateCount = records.filter(r => r.status === 'Late').length;
   const unmarkedCount = records.filter(r => !r.status).length;
 
   const isToday = selectedDate === todayStr();
 
   return (
-    <div className="flex flex-col h-full space-y-4 p-6">
+    <div className="flex flex-col h-full space-y-6 p-6 bg-[#F4F3F8]">
+      
       {/* Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#16132D]/[0.08]">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
-          <nav className="text-sm text-gray-500 mt-1">
-            <span>Home</span><span className="mx-2">/</span><span className="text-gray-900">Attendance</span>
-          </nav>
+          <h1 className="text-3xl font-serif font-bold text-[#16132D] flex items-center gap-3">
+            <CalendarDays className="w-8 h-8 text-[#7209B7]" />
+            Staff Attendance
+          </h1>
+          <p className="text-sm text-[#16132D]/60 mt-1 font-medium">Manage daily attendance, timesheets, and monthly summaries</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={fetchAttendance}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+        <div className="flex flex-wrap items-center gap-3">
+          <button 
+            onClick={fetchAttendance}
+            className="px-4 py-2 bg-white border border-[#16132D]/[0.1] rounded-xl text-sm font-semibold text-[#16132D] hover:bg-[#F4F3F8] transition-all flex items-center gap-2 shadow-sm"
+          >
+            <RefreshCw className="w-4 h-4" />
             Refresh
           </button>
           <button
             onClick={handleBulkMarkPresent}
             disabled={bulkMarking}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 disabled:opacity-60 flex items-center gap-2 shadow-sm"
+            className="px-5 py-2 bg-[#16132D] text-[#F4F3F8] rounded-xl text-sm font-bold hover:bg-[#2a3545] disabled:opacity-60 transition-all flex items-center gap-2 shadow-md shadow-[#16132D]/10"
           >
-            {bulkMarking
-              ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : <span>✅</span>}
+            {bulkMarking ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-[#10B981]" />}
             {bulkMarking ? 'Marking...' : 'Mark All Present'}
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-        {(['daily', 'summary'] as const).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${activeTab === tab ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-            {tab === 'daily' ? '📅 Daily View' : '📊 Monthly Summary'}
-          </button>
-        ))}
+      <div className="flex gap-2 bg-[#16132D]/[0.04] p-1.5 rounded-xl w-fit border border-[#16132D]/[0.08]">
+        <button 
+          onClick={() => setActiveTab('daily')}
+          className={`px-5 py-2 rounded-lg text-sm font-bold capitalize transition-all flex items-center gap-2 ${activeTab === 'daily' ? 'bg-white shadow-sm text-[#16132D]' : 'text-[#16132D]/60 hover:text-[#16132D]'}`}
+        >
+          <Calendar className="w-4 h-4" /> Daily View
+        </button>
+        <button 
+          onClick={() => setActiveTab('summary')}
+          className={`px-5 py-2 rounded-lg text-sm font-bold capitalize transition-all flex items-center gap-2 ${activeTab === 'summary' ? 'bg-white shadow-sm text-[#16132D]' : 'text-[#16132D]/60 hover:text-[#16132D]'}`}
+        >
+          <BarChart3 className="w-4 h-4" /> Monthly Summary
+        </button>
       </div>
 
       {activeTab === 'daily' ? (
-        <>
+        <div className="flex flex-col gap-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {[
-              { label: 'Total Staff', value: records.length, color: 'from-slate-500 to-slate-600' },
-              { label: 'Present', value: presentCount, color: 'from-emerald-500 to-emerald-600' },
-              { label: 'Absent', value: absentCount, color: 'from-red-500 to-red-600' },
-              { label: 'Half-Day', value: halfDayCount, color: 'from-amber-500 to-amber-600' },
-              { label: 'Unmarked', value: unmarkedCount, color: 'from-gray-400 to-gray-500' },
-            ].map(stat => (
-              <div key={stat.label} className={`bg-gradient-to-r ${stat.color} rounded-xl p-4 text-white shadow-sm`}>
-                <p className="text-xs font-medium opacity-90">{stat.label}</p>
-                <p className="text-2xl font-bold mt-1">{loading ? '—' : stat.value}</p>
-              </div>
-            ))}
+              { label: 'Total Staff', value: records.length, icon: Users, color: 'text-[#8338EC]', bg: 'bg-[#8338EC]/10' },
+              { label: 'Present', value: presentCount, icon: CheckCircle2, color: 'text-[#10B981]', bg: 'bg-[#10B981]/10' },
+              { label: 'Absent', value: absentCount, icon: XCircle, color: 'text-[#F43F5E]', bg: 'bg-[#F43F5E]/10' },
+              { label: 'Half-Day', value: halfDayCount, icon: Clock, color: 'text-[#7209B7]', bg: 'bg-[#7209B7]/10' },
+              { label: 'Unmarked', value: unmarkedCount, icon: CalendarDays, color: 'text-[#7A5AA8]', bg: 'bg-[#7A5AA8]/10' },
+            ].map(stat => {
+              const Icon = stat.icon;
+              return (
+                <div key={stat.label} className="bg-white rounded-2xl p-5 border border-[#16132D]/[0.08] shadow-sm flex flex-col transition-all hover:shadow-md">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs font-bold text-[#16132D]/50 uppercase tracking-wider">{stat.label}</p>
+                    <div className={`p-1.5 rounded-lg ${stat.bg}`}>
+                      <Icon className={`w-4 h-4 ${stat.color}`} />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-black text-[#16132D]">{loading ? '-' : stat.value}</p>
+                </div>
+              );
+            })}
           </div>
 
           {/* Filters row */}
-          <div className="flex flex-wrap gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            {/* Date picker */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">Date:</label>
-              <input type="date" value={selectedDate}
+          <div className="flex flex-wrap md:flex-nowrap gap-4 bg-white p-4 rounded-2xl shadow-sm border border-[#16132D]/[0.08]">
+            <div className="flex items-center gap-3 bg-[#F4F3F8] px-4 py-2 rounded-xl border border-[#16132D]/[0.06]">
+              <label className="text-xs font-bold text-[#16132D]/60 uppercase tracking-wider">Date:</label>
+              <input 
+                type="date" 
+                value={selectedDate}
                 onChange={e => setSelectedDate(e.target.value)}
                 max={todayStr()}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="bg-transparent border-none outline-none text-sm font-semibold text-[#16132D] focus:ring-0 cursor-pointer" 
+              />
               {!isToday && (
                 <button onClick={() => setSelectedDate(todayStr())}
-                  className="px-3 py-2 text-xs text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50">Today</button>
+                  className="px-3 py-1 text-xs font-bold text-[#7209B7] bg-[#7209B7]/10 rounded-lg hover:bg-[#7209B7]/20 transition">Today</button>
               )}
             </div>
+            
             <div className="flex-1 min-w-[200px] relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input type="text" placeholder="Search employee..."
-                value={search} onChange={e => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#16132D]/40" />
+              <input 
+                type="text" 
+                placeholder="Search employee by name..."
+                value={search} 
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 bg-[#F4F3F8] border border-[#16132D]/[0.06] rounded-xl text-sm font-medium text-[#16132D] placeholder-[#16132D]/40 focus:outline-none focus:ring-2 focus:ring-[#7209B7]/20 focus:border-[#7209B7]/30 transition-all" 
+              />
             </div>
           </div>
 
           {/* Attendance Table */}
-          <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-[#16132D]/[0.08] overflow-hidden">
             {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm text-gray-500">Loading attendance...</p>
-                </div>
+              <div className="flex flex-col items-center justify-center h-64 gap-4">
+                <RefreshCw className="w-8 h-8 text-[#7209B7] animate-spin" />
+                <p className="text-sm font-semibold text-[#16132D]/60">Loading attendance data...</p>
               </div>
             ) : error ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                  <p className="text-red-600 font-medium">{error}</p>
-                  <button onClick={fetchAttendance} className="mt-3 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm">Retry</button>
+              <div className="flex flex-col items-center justify-center h-64 gap-3 text-center px-4">
+                <div className="w-12 h-12 rounded-full bg-[#F43F5E]/10 flex items-center justify-center mb-2">
+                  <XCircle className="w-6 h-6 text-[#F43F5E]" />
                 </div>
+                <p className="text-[#F43F5E] font-bold">{error}</p>
+                <button onClick={fetchAttendance} className="mt-2 px-5 py-2.5 bg-[#16132D] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#2a3545]">Retry Now</button>
               </div>
             ) : filteredRecords.length === 0 ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                  <div className="text-5xl mb-4">📋</div>
-                  <h3 className="text-lg font-semibold text-gray-900">No employees found</h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {records.length === 0
-                      ? 'Add employees first from the Staff page.'
-                      : 'No employees match your search.'}
-                  </p>
+              <div className="flex flex-col items-center justify-center h-64 gap-3 text-center px-4">
+                <div className="w-16 h-16 rounded-full bg-[#F4F3F8] flex items-center justify-center mb-2">
+                  <Users className="w-8 h-8 text-[#16132D]/30" />
                 </div>
+                <h3 className="text-lg font-bold text-[#16132D]">No employees found</h3>
+                <p className="text-sm text-[#16132D]/60">
+                  {records.length === 0 ? 'Add employees from the Staff page to manage their attendance.' : 'No employees match your search criteria.'}
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Employee</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Quick Mark</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Check In</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Check Out</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Notes</th>
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="bg-[#F4F3F8]/50 border-b border-[#16132D]/[0.08]">
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Employee</th>
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Status</th>
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Quick Mark</th>
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Check In</th>
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Check Out</th>
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Notes</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-[#16132D]/[0.04]">
                     {filteredRecords.map(record => {
                       const isMarking = markingId === record.employee_id;
                       const cfg = record.status ? statusConfig[record.status as AttendanceStatus] : null;
@@ -295,39 +310,37 @@ const Attendance: React.FC = () => {
                       const checkOutVal = record.check_out ? record.check_out.substring(0, 5) : '';
 
                       return (
-                        <tr key={record.employee_id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-4 py-3">
+                        <tr key={record.employee_id} className="hover:bg-[#F4F3F8]/30 transition-colors group">
+                          <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7209B7] to-[#8338EC] flex items-center justify-center text-white font-bold text-sm shadow-sm shadow-[#7209B7]/20 flex-shrink-0">
                                 {record.employee_name?.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="font-medium text-gray-900 text-sm">{record.employee_name}</p>
-                                <p className="text-xs text-gray-500">{record.employee_phone || '—'}</p>
+                                <p className="font-bold text-[#16132D]">{record.employee_name}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-[11px] font-semibold text-[#7A5AA8] bg-[#7A5AA8]/10 px-2 py-0.5 rounded-md">{record.employee_role}</span>
+                                  <span className="text-xs text-[#16132D]/50 font-medium">{record.employee_phone || 'No phone'}</span>
+                                </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                              {record.employee_role}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
+                          <td className="px-6 py-4">
                             {isMarking ? (
-                              <div className="w-5 h-5 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
+                              <RefreshCw className="w-5 h-5 text-[#7209B7] animate-spin" />
                             ) : cfg ? (
-                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.color}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-current ${cfg.bg} ${cfg.color}`}>
+                                {cfg.icon}
                                 {record.status}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 italic">
+                              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F4F3F8] text-[#16132D]/50 border border-[#16132D]/10 border-dashed">
                                 Unmarked
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1">
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1.5 p-1 bg-[#F4F3F8] rounded-xl border border-[#16132D]/[0.04] w-fit">
                               {STATUS_OPTIONS.map(s => {
                                 const sCfg = statusConfig[s];
                                 const isActive = record.status === s;
@@ -335,69 +348,68 @@ const Attendance: React.FC = () => {
                                   <button key={s}
                                     onClick={() => handleMarkStatus(record, s)}
                                     disabled={isMarking}
-                                    className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                                       isActive
-                                        ? `${sCfg.bg} ${sCfg.color} ring-1 ring-offset-0`
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        ? `${sCfg.bg} ${sCfg.color} shadow-sm`
+                                        : 'text-[#16132D]/50 hover:bg-white hover:text-[#16132D] hover:shadow-sm'
                                     }`}>
-                                    {sCfg.emoji} {s}
+                                    {isActive && <span className={`w-1.5 h-1.5 rounded-full ${sCfg.dot}`} />}
+                                    {s}
                                   </button>
                                 );
                               })}
                             </div>
                           </td>
-                          {/* Check In column */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
                               <input
                                 type="time"
                                 value={checkInVal}
                                 onChange={e => handleTimeChange(record, 'check_in', e.target.value)}
-                                className="px-2 py-1.5 border border-gray-300 rounded-lg text-xs w-[100px] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                                className="px-3 py-2 bg-[#F4F3F8] border border-[#16132D]/[0.08] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7209B7]/30 transition-all w-[110px]"
                               />
                               {!checkInVal && isToday && (
                                 <button
                                   onClick={() => handleQuickTime(record, 'check_in')}
-                                  className="px-2 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-medium hover:bg-emerald-100 transition-colors whitespace-nowrap"
-                                  title="Set current time as check-in"
+                                  className="px-3 py-2 bg-[#10B981]/10 text-[#10B981] rounded-xl text-xs font-bold hover:bg-[#10B981]/20 transition-all whitespace-nowrap"
+                                  title="Check In Now"
                                 >
                                   Now
                                 </button>
                               )}
                             </div>
                           </td>
-                          {/* Check Out column */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
                               <input
                                 type="time"
                                 value={checkOutVal}
                                 onChange={e => handleTimeChange(record, 'check_out', e.target.value)}
-                                className="px-2 py-1.5 border border-gray-300 rounded-lg text-xs w-[100px] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                                className="px-3 py-2 bg-[#F4F3F8] border border-[#16132D]/[0.08] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7209B7]/30 transition-all w-[110px]"
                               />
                               {checkInVal && !checkOutVal && isToday && (
                                 <button
                                   onClick={() => handleQuickTime(record, 'check_out')}
-                                  className="px-2 py-1.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-lg text-xs font-medium hover:bg-orange-100 transition-colors whitespace-nowrap"
-                                  title="Set current time as check-out"
+                                  className="px-3 py-2 bg-[#F43F5E]/10 text-[#F43F5E] rounded-xl text-xs font-bold hover:bg-[#F43F5E]/20 transition-all whitespace-nowrap"
+                                  title="Check Out Now"
                                 >
                                   Now
                                 </button>
                               )}
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-6 py-4">
                             <button
                               onClick={() => setNotesModal({ record, notes: record.notes || '' })}
-                              className="flex items-center gap-1 text-xs text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded"
+                              className="flex items-center justify-center w-8 h-8 bg-[#F4F3F8] text-[#16132D]/60 hover:bg-[#7209B7]/10 hover:text-[#7209B7] rounded-xl transition-all"
+                              title={record.notes ? 'Edit Note' : 'Add Note'}
                             >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                              {record.notes ? 'Edit' : 'Add'} Note
+                              <FileEdit className="w-4 h-4" />
                             </button>
                             {record.notes && (
-                              <p className="text-xs text-gray-500 mt-1 max-w-[150px] truncate">{record.notes}</p>
+                              <p className="text-[11px] font-medium text-[#16132D]/50 mt-1.5 max-w-[120px] truncate" title={record.notes}>
+                                {record.notes}
+                              </p>
                             )}
                           </td>
                         </tr>
@@ -408,109 +420,131 @@ const Attendance: React.FC = () => {
               </div>
             )}
           </div>
-        </>
+        </div>
       ) : (
         /* Monthly Summary Tab */
-        <>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900">Monthly Attendance Summary — {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
-              <p className="text-sm text-gray-500 mt-0.5">Overview of attendance for all staff this month</p>
-            </div>
-            {summaryLoading ? (
-              <div className="flex items-center justify-center h-48">
-                <div className="w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : summary.length === 0 ? (
-              <div className="flex items-center justify-center h-48">
-                <div className="text-center">
-                  <div className="text-4xl mb-3">📊</div>
-                  <p className="text-gray-500 text-sm">No attendance data for this month yet.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      {['Employee', 'Role', 'Present', 'Absent', 'Half-Day', 'Late', 'Total Marked', 'Attendance %'].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {summary.map(s => {
-                      const pct = s.total_marked > 0 ? Math.round((Number(s.present_days) / Number(s.total_marked)) * 100) : 0;
-                      return (
-                        <tr key={s.employee_id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-semibold text-sm">
-                                {s.employee_name.charAt(0).toUpperCase()}
-                              </div>
-                              <span className="font-medium text-gray-900 text-sm">{s.employee_name}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">{s.employee_role}</span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">{s.present_days}</span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800">{s.absent_days}</span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800">{s.half_days}</span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-orange-100 text-orange-800">{s.late_days}</span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-600 font-medium">{s.total_marked}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-gray-200 rounded-full h-1.5 min-w-[60px]">
-                                <div
-                                  className={`h-1.5 rounded-full ${pct >= 80 ? 'bg-emerald-500' : pct >= 60 ? 'bg-amber-500' : 'bg-red-500'}`}
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
-                              <span className="text-xs font-semibold text-gray-700">{pct}%</span>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#16132D]/[0.08] overflow-hidden">
+          <div className="px-6 py-5 border-b border-[#16132D]/[0.06] bg-[#F4F3F8]/30">
+            <h3 className="text-lg font-bold text-[#16132D]">Monthly Summary — {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+            <p className="text-sm font-medium text-[#16132D]/60 mt-0.5">Performance and attendance overview for all active staff</p>
           </div>
-        </>
+          
+          {summaryLoading ? (
+            <div className="flex flex-col items-center justify-center h-64 gap-4">
+              <RefreshCw className="w-8 h-8 text-[#7209B7] animate-spin" />
+              <p className="text-sm font-semibold text-[#16132D]/60">Analyzing monthly data...</p>
+            </div>
+          ) : summary.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 gap-3 text-center px-4">
+              <div className="w-16 h-16 rounded-full bg-[#F4F3F8] flex items-center justify-center mb-2">
+                <BarChart3 className="w-8 h-8 text-[#16132D]/30" />
+              </div>
+              <h3 className="text-lg font-bold text-[#16132D]">No attendance data yet</h3>
+              <p className="text-sm text-[#16132D]/60">Data will appear here once attendance is marked for this month.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto p-4">
+              <table className="w-full text-left text-sm border-separate border-spacing-0">
+                <thead>
+                  <tr>
+                    {['Employee', 'Role', 'Present', 'Absent', 'Half-Day', 'Late', 'Total Marked', 'Attendance %'].map((h, i) => (
+                      <th key={h} className={`px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 ${i === 0 ? 'rounded-tl-xl' : ''} ${i === 7 ? 'rounded-tr-xl' : ''}`}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.map((s, i) => {
+                    const pct = s.total_marked > 0 ? Math.round((Number(s.present_days) / Number(s.total_marked)) * 100) : 0;
+                    const isLast = i === summary.length - 1;
+                    
+                    return (
+                      <tr key={s.employee_id} className="hover:bg-[#F4F3F8]/40 transition-colors">
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#16132D] to-[#2a3545] flex items-center justify-center text-[#F4F3F8] font-bold text-xs shadow-sm shadow-[#16132D]/10 flex-shrink-0">
+                              {s.employee_name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="font-bold text-[#16132D]">{s.employee_name}</span>
+                          </div>
+                        </td>
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <span className="text-[11px] font-bold text-[#7209B7] bg-[#7209B7]/10 px-2.5 py-1 rounded-md">{s.employee_role}</span>
+                        </td>
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#10B981]/10 text-[#10B981]">{s.present_days}</span>
+                        </td>
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F43F5E]/10 text-[#F43F5E]">{s.absent_days}</span>
+                        </td>
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#7209B7]/10 text-[#7209B7]">{s.half_days}</span>
+                        </td>
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#8338EC]/10 text-[#8338EC]">{s.late_days}</span>
+                        </td>
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <span className="font-bold text-[#16132D]/80">{s.total_marked}</span>
+                        </td>
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-[#16132D]/[0.06] rounded-full h-2 min-w-[70px] overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-500 ${pct >= 80 ? 'bg-[#10B981]' : pct >= 60 ? 'bg-[#8338EC]' : 'bg-[#F43F5E]'}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className="text-xs font-black text-[#16132D] w-8">{pct}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Notes Modal */}
       {notesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-            <h3 className="text-base font-bold text-gray-900 mb-1">
-              Add Note — {notesModal.record.employee_name}
-            </h3>
-            <p className="text-sm text-gray-500 mb-4">
-              {selectedDate} · {notesModal.record.status || 'Unmarked'}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16132D]/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl shadow-[#16132D]/20 w-full max-w-sm p-6 transform transition-all">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-serif font-bold text-[#16132D]">
+                Add Note
+              </h3>
+              <div className="px-2.5 py-1 bg-[#F4F3F8] rounded-lg text-xs font-bold text-[#16132D]/60">
+                {notesModal.record.employee_name}
+              </div>
+            </div>
+            
+            <p className="text-xs font-bold text-[#16132D]/50 mb-4 uppercase tracking-wider">
+              {selectedDate} • <span className="text-[#7209B7]">{notesModal.record.status || 'Unmarked'}</span>
             </p>
+            
             <textarea
               value={notesModal.notes}
               onChange={e => setNotesModal(n => n ? { ...n, notes: e.target.value } : null)}
-              rows={3}
+              rows={4}
               placeholder="e.g. Left early due to medical appointment..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none mb-4"
+              className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/[0.08] rounded-xl text-sm font-medium text-[#16132D] focus:outline-none focus:ring-2 focus:ring-[#7209B7]/20 focus:border-[#7209B7]/30 resize-none mb-6 transition-all"
             />
+            
             <div className="flex gap-3">
-              <button onClick={() => setNotesModal(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
-              <button onClick={handleSaveNotes} disabled={savingNotes}
-                className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 disabled:opacity-60">
+              <button 
+                onClick={() => setNotesModal(null)}
+                className="flex-1 px-4 py-3 bg-white border border-[#16132D]/[0.1] text-[#16132D] rounded-xl text-sm font-bold hover:bg-[#F4F3F8] transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveNotes} 
+                disabled={savingNotes}
+                className="flex-1 px-4 py-3 bg-[#16132D] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 hover:bg-[#2a3545] disabled:opacity-60 transition-all"
+              >
                 {savingNotes ? 'Saving...' : 'Save Note'}
               </button>
             </div>

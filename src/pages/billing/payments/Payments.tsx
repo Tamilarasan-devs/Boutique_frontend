@@ -47,7 +47,8 @@ const Payments: React.FC = () => {
 
   // SSE Subscription for real-time synchronization
   useEffect(() => {
-    const eventSource = new EventSource(BILLING_EVENTS_URL);
+    const token = localStorage.getItem('boutique_token');
+    const eventSource = new EventSource(`${BILLING_EVENTS_URL}?token=${token}`);
 
     eventSource.addEventListener('payment_recorded', (e) => {
       const newPay = JSON.parse(e.data) as Payment;
