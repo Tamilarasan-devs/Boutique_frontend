@@ -70,11 +70,12 @@ export const orderApi = {
     }
   },
 
-  convertFromQuotation: async (quotationId: string) => {
+  convertFromQuotation: async (quotationId: string, advanceAmount?: number) => {
     const numericId = quotationId.replace('QOT-', '');
     const response = await fetchWithAuth(`${API_BASE_URL}/orders/from-quotation/${numericId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ advance_amount: advanceAmount || 0 })
     });
     if (!response.ok) throw new Error('Failed to convert quotation to order');
     return await response.json();

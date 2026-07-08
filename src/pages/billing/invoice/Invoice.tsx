@@ -19,6 +19,7 @@ const Invoice: React.FC = () => {
   const { confirm } = useConfirm();
   const [invoices, setInvoices] = useState<InvoiceType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [customerFilter, setCustomerFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal States
@@ -136,10 +137,12 @@ const Invoice: React.FC = () => {
     .filter(i => i.status === 'Pending' || i.status === 'Overdue')
     .reduce((s, i) => s + parseFloat(i.total_amount as any), 0);
 
-  const filteredInvoices = invoices.filter(inv =>
-    inv.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    inv.invoice_number.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredInvoices = invoices.filter(inv => {
+    const matchSearch = inv.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        inv.invoice_number.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchCustomer = customerFilter === 'All' || inv.customer_name === customerFilter;
+    return matchSearch && matchCustomer;
+  });
 
   // Form handlers
   const handleAddItemRow = () => {
@@ -298,15 +301,27 @@ const Invoice: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center bg-white border border-slate-200 rounded-xl px-4 py-2.5 w-full md:w-1/3 shadow-sm print:hidden">
-        <Search className="w-4 h-4 text-slate-400 mr-2" />
-        <input
-          type="text"
-          placeholder="Search invoices..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400 w-full"
-        />
+      <div className="flex flex-col md:flex-row gap-3 print:hidden">
+        <div className="flex items-center bg-white border border-slate-200 rounded-xl px-4 py-2.5 w-full md:w-96 shadow-sm">
+          <Search className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Search invoices..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400 w-full"
+          />
+        </div>
+        <select
+          value={customerFilter}
+          onChange={(e) => setCustomerFilter(e.target.value)}
+          className="px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer"
+        >
+          <option value="All">All Customers</option>
+          {customers.map(c => (
+            <option key={c.id} value={c.name}>{c.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Main Invoices Table */}

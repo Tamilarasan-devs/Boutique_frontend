@@ -6,12 +6,12 @@ import {
   FileEdit, RefreshCw, BarChart3, Users, Calendar
 } from 'lucide-react';
 
-type AttendanceStatus = 'Present' | 'Absent' | 'Half-Day' | 'Late';
+type AttendanceStatus = 'Login' | 'Absent' | 'Half-Day' | 'Late';
 
-const STATUS_OPTIONS: AttendanceStatus[] = ['Present', 'Absent', 'Half-Day', 'Late'];
+const STATUS_OPTIONS: AttendanceStatus[] = ['Login', 'Absent', 'Half-Day', 'Late'];
 
 const statusConfig: Record<AttendanceStatus, { color: string; bg: string; dot: string; icon: React.ReactNode }> = {
-  Present:  { color: 'text-[#10B981]', bg: 'bg-[#10B981]/10', dot: 'bg-[#10B981]', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+  Login:  { color: 'text-[#10B981]', bg: 'bg-[#10B981]/10', dot: 'bg-[#10B981]', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
   Absent:   { color: 'text-[#F43F5E]', bg: 'bg-[#F43F5E]/10', dot: 'bg-[#F43F5E]', icon: <XCircle className="w-3.5 h-3.5" /> },
   'Half-Day': { color: 'text-[#7209B7]', bg: 'bg-[#7209B7]/10', dot: 'bg-[#7209B7]', icon: <Clock className="w-3.5 h-3.5" /> },
   Late:     { color: 'text-[#8338EC]', bg: 'bg-[#8338EC]/10', dot: 'bg-[#8338EC]', icon: <Clock className="w-3.5 h-3.5" /> },
@@ -68,16 +68,22 @@ const Attendance: React.FC = () => {
     const empId = record.employee_id;
     setMarkingId(empId);
     try {
+      let checkIn = record.check_in || undefined;
+      if (status === 'Login' && !record.check_in && selectedDate === todayStr()) {
+        const now = new Date();
+        checkIn = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      }
+
       await attendanceApi.markAttendance({
         employee_id: empId,
         date: selectedDate,
         status,
-        check_in: record.check_in || undefined,
+        check_in: checkIn,
         check_out: record.check_out || undefined,
       });
       setRecords(prev => prev.map(r =>
         r.employee_id === empId
-          ? { ...r, status, attendance_id: r.attendance_id || undefined }
+          ? { ...r, status, check_in: checkIn, attendance_id: r.attendance_id || undefined }
           : r
       ));
     } catch (e) {
@@ -90,7 +96,7 @@ const Attendance: React.FC = () => {
   const handleBulkMarkPresent = async () => {
     setBulkMarking(true);
     try {
-      await attendanceApi.bulkMarkAttendance({ date: selectedDate, status: 'Present' });
+      await attendanceApi.bulkMarkAttendance({ date: selectedDate, status: 'Login' });
       fetchAttendance();
       fetchSummary();
     } catch {
@@ -106,13 +112,13 @@ const Attendance: React.FC = () => {
       await attendanceApi.markAttendance({
         employee_id: empId,
         date: selectedDate,
-        status: record.status || 'Present',
+        status: record.status || 'Login',
         check_in: field === 'check_in' ? value : (record.check_in || undefined),
         check_out: field === 'check_out' ? value : (record.check_out || undefined),
       });
       setRecords(prev => prev.map(r =>
         r.employee_id === empId
-          ? { ...r, [field]: value, status: r.status || 'Present' }
+          ? { ...r, [field]: value, status: r.status || 'Login' }
           : r
       ));
     } catch {
@@ -139,7 +145,7 @@ const Attendance: React.FC = () => {
         await attendanceApi.markAttendance({
           employee_id: notesModal.record.employee_id,
           date: selectedDate,
-          status: notesModal.record.status || 'Present',
+          status: notesModal.record.status || 'Login',
           notes: notesModal.notes,
         });
       }
@@ -156,7 +162,7 @@ const Attendance: React.FC = () => {
     !search || r.employee_name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const presentCount = records.filter(r => r.status === 'Present').length;
+  const presentCount = records.filter(r => r.status === 'Login').length;
   const absentCount = records.filter(r => r.status === 'Absent').length;
   const halfDayCount = records.filter(r => r.status === 'Half-Day').length;
   const unmarkedCount = records.filter(r => !r.status).length;
@@ -189,7 +195,7 @@ const Attendance: React.FC = () => {
             className="px-5 py-2 bg-[#16132D] text-[#F4F3F8] rounded-xl text-sm font-bold hover:bg-[#2a3545] disabled:opacity-60 transition-all flex items-center gap-2 shadow-md shadow-[#16132D]/10"
           >
             {bulkMarking ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-[#10B981]" />}
-            {bulkMarking ? 'Marking...' : 'Mark All Present'}
+            {bulkMarking ? 'Marking...' : 'Mark All Login'}
           </button>
         </div>
       </div>
@@ -216,7 +222,7 @@ const Attendance: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {[
               { label: 'Total Staff', value: records.length, icon: Users, color: 'text-[#8338EC]', bg: 'bg-[#8338EC]/10' },
-              { label: 'Present', value: presentCount, icon: CheckCircle2, color: 'text-[#10B981]', bg: 'bg-[#10B981]/10' },
+              { label: 'Login', value: presentCount, icon: CheckCircle2, color: 'text-[#10B981]', bg: 'bg-[#10B981]/10' },
               { label: 'Absent', value: absentCount, icon: XCircle, color: 'text-[#F43F5E]', bg: 'bg-[#F43F5E]/10' },
               { label: 'Half-Day', value: halfDayCount, icon: Clock, color: 'text-[#7209B7]', bg: 'bg-[#7209B7]/10' },
               { label: 'Unmarked', value: unmarkedCount, icon: CalendarDays, color: 'text-[#7A5AA8]', bg: 'bg-[#7A5AA8]/10' },
@@ -298,8 +304,8 @@ const Attendance: React.FC = () => {
                       <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Employee</th>
                       <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Status</th>
                       <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Quick Mark</th>
-                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Check In</th>
-                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Check Out</th>
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Login Time</th>
+                      <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Logout Time</th>
                       <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Notes</th>
                     </tr>
                   </thead>
@@ -341,25 +347,21 @@ const Attendance: React.FC = () => {
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex flex-wrap gap-1.5 p-1 bg-[#F4F3F8] rounded-xl border border-[#16132D]/[0.04] w-fit">
-                              {STATUS_OPTIONS.map(s => {
-                                const sCfg = statusConfig[s];
-                                const isActive = record.status === s;
-                                return (
-                                  <button key={s}
-                                    onClick={() => handleMarkStatus(record, s)}
-                                    disabled={isMarking}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                                      isActive
-                                        ? `${sCfg.bg} ${sCfg.color} shadow-sm`
-                                        : 'text-[#16132D]/50 hover:bg-white hover:text-[#16132D] hover:shadow-sm'
-                                    }`}>
-                                    {isActive && <span className={`w-1.5 h-1.5 rounded-full ${sCfg.dot}`} />}
-                                    {s}
-                                  </button>
-                                );
-                              })}
-                            </div>
+                            <select
+                              value={record.status || ''}
+                              onChange={(e) => handleMarkStatus(record, e.target.value as AttendanceStatus)}
+                              disabled={isMarking}
+                              className={`px-3 py-2 border rounded-xl text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#7209B7]/30 cursor-pointer min-w-[120px] ${
+                                record.status 
+                                  ? `${statusConfig[record.status as AttendanceStatus].bg} ${statusConfig[record.status as AttendanceStatus].color} border-current` 
+                                  : 'bg-[#F4F3F8] border-[#16132D]/[0.08] text-[#16132D]/60'
+                              }`}
+                            >
+                              <option value="" disabled>Select Status</option>
+                              {STATUS_OPTIONS.map(s => (
+                                <option key={s} value={s}>{s}</option>
+                              ))}
+                            </select>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
@@ -373,9 +375,9 @@ const Attendance: React.FC = () => {
                                 <button
                                   onClick={() => handleQuickTime(record, 'check_in')}
                                   className="px-3 py-2 bg-[#10B981]/10 text-[#10B981] rounded-xl text-xs font-bold hover:bg-[#10B981]/20 transition-all whitespace-nowrap"
-                                  title="Check In Now"
+                                  title="Login Now"
                                 >
-                                  Now
+                                  Login Now
                                 </button>
                               )}
                             </div>
@@ -392,9 +394,9 @@ const Attendance: React.FC = () => {
                                 <button
                                   onClick={() => handleQuickTime(record, 'check_out')}
                                   className="px-3 py-2 bg-[#F43F5E]/10 text-[#F43F5E] rounded-xl text-xs font-bold hover:bg-[#F43F5E]/20 transition-all whitespace-nowrap"
-                                  title="Check Out Now"
+                                  title="Logout Now"
                                 >
-                                  Now
+                                  Logout Now
                                 </button>
                               )}
                             </div>
@@ -448,7 +450,7 @@ const Attendance: React.FC = () => {
               <table className="w-full text-left text-sm border-separate border-spacing-0">
                 <thead>
                   <tr>
-                    {['Employee', 'Role', 'Present', 'Absent', 'Half-Day', 'Late', 'Total Marked', 'Attendance %'].map((h, i) => (
+                    {['Employee', 'Role', 'Login', 'Absent', 'Half-Day', 'Late', 'Total Marked', 'Attendance %'].map((h, i) => (
                       <th key={h} className={`px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 ${i === 0 ? 'rounded-tl-xl' : ''} ${i === 7 ? 'rounded-tr-xl' : ''}`}>
                         {h}
                       </th>

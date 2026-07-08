@@ -66,6 +66,7 @@ const UsersSettings = lazy(() => import('../pages/settings/users/UsersSettings')
 const RolesSettings = lazy(() => import('../pages/settings/roles/RolesSettings'));
 const PermissionsSettings = lazy(() => import('../pages/settings/permissions/PermissionsSettings'));
 const TaxesSettings = lazy(() => import('../pages/settings/taxes/TaxesSettings'));
+const LoyaltySettings = lazy(() => import('../pages/settings/loyalty/LoyaltySettings'));
 
 const Profile = lazy(() => import('../pages/profile/Profile'));
 
@@ -148,6 +149,7 @@ export const router = createBrowserRouter([
       { path: 'roles', element: <RolesSettings /> },
       { path: 'permissions', element: <PermissionsSettings /> },
       { path: 'taxes', element: <TaxesSettings /> },
+      { path: 'loyalty', element: <LoyaltySettings /> },
       { index: true, element: <Navigate to="company" replace /> }
     ]
   },

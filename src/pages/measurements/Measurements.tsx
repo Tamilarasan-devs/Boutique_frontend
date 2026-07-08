@@ -216,7 +216,7 @@ const Measurements: React.FC = () => {
       // Execute pending workflow action
       if (actionOnSuccess) {
         if (actionOnSuccess.type === 'convertQuotation') {
-          await orderApi.convertFromQuotation(actionOnSuccess.quotationId);
+          await orderApi.convertFromQuotation(actionOnSuccess.quotationId, actionOnSuccess.advanceAmount || 0);
         } else if (actionOnSuccess.type === 'sendToProduction') {
           await productionApi.addProduction(actionOnSuccess.payload);
           await orderApi.updateOrderStatus(actionOnSuccess.payload.order_id, 'Cutting');

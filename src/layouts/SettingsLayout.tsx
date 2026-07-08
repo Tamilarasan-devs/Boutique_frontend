@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Building2, Settings, Users, Shield, Receipt, Globe,
-  ChevronLeft, Scissors, Crown, LogOut
+  ChevronLeft, Scissors, Crown, LogOut, Heart
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/settings/roles', icon: Shield, label: 'Roles & Access', desc: 'Define custom roles & limits' },
   { to: '/settings/taxes', icon: Receipt, label: 'Taxes & GST', desc: 'Configure tax rates & billing' },
   { to: '/settings/permissions', icon: Globe, label: 'Permissions', desc: 'Global app security controls' },
+  { to: '/settings/loyalty', icon: Heart, label: 'Loyalty Program', desc: 'Rewards & point settings' },
 ];
 
 const ROLE_LABELS: Record<string, string> = {

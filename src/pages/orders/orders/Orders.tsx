@@ -20,6 +20,8 @@ interface Order {
   fabricDetails: string;
   priority: 'Normal' | 'Rush';
   status: 'Received' | 'Cutting' | 'Stitching' | 'Trial Scheduled' | 'Completed';
+  pointsEarned?: number;
+  loyaltyDiscount?: number;
 }
 
 const statusStyles: Record<string, string> = {
@@ -50,8 +52,11 @@ const Orders: React.FC = () => {
   const [tailor, setTailor] = useState('');
   const [fabricDetails, setFabricDetails] = useState('');
   const [priority, setPriority] = useState<Order['priority']>('Normal');
+  const [pointsRedeemed, setPointsRedeemed] = useState<number | ''>('');
   const [tailors, setTailors] = useState<Employee[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+
+  const matchedCustomer = customers.find(c => c.name === customerName);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -69,7 +74,9 @@ const Orders: React.FC = () => {
           tailor: item.tailor || '',
           fabricDetails: item.fabric_details || '',
           priority: item.priority,
-          status: item.status
+          status: item.status,
+          pointsEarned: item.points_earned || 0,
+          loyaltyDiscount: parseFloat(item.loyalty_discount) || 0
         }));
         setOrders(formatted);
       } catch (error) {
@@ -141,7 +148,8 @@ const Orders: React.FC = () => {
         delivery_date: deliveryDate,
         tailor,
         fabric_details: fabricDetails,
-        priority
+        priority,
+        points_redeemed: pointsRedeemed || 0
       });
       
       const newOrder: Order = {
@@ -156,13 +164,15 @@ const Orders: React.FC = () => {
         tailor: response.order.tailor || '',
         fabricDetails: response.order.fabric_details || '',
         priority: response.order.priority,
-        status: response.order.status
+        status: response.order.status,
+        pointsEarned: response.order.points_earned || 0,
+        loyaltyDiscount: parseFloat(response.order.loyalty_discount) || 0
       };
 
       setOrders([newOrder, ...orders]);
       // Reset
       setCustomerName(''); setCustomerPhone(''); setCategory(''); setStitchingCost(''); setTotalAmount('');
-      setAdvancePaid(''); setDeliveryDate(''); setTailor(''); setFabricDetails('');
+      setAdvancePaid(''); setDeliveryDate(''); setTailor(''); setFabricDetails(''); setPointsRedeemed('');
       setPriority('Normal');
       setIsModalOpen(false);
     } catch (error) {
@@ -387,11 +397,22 @@ const Orders: React.FC = () => {
                     <span className="text-[#16132D]/50">Advance Paid</span>
                     <span className="text-[#234638]">₹{selectedOrder.advancePaid.toLocaleString('en-IN')}</span>
                   </div>
+                  {(selectedOrder.loyaltyDiscount || 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-[#16132D]/50">Loyalty Discount</span>
+                      <span className="text-[#F43F5E]">- ₹{selectedOrder.loyaltyDiscount?.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between pt-2 border-t border-[#16132D]/[0.06]">
                     <span className="text-[#16132D]/80">Balance Due</span>
-                    <span className="text-[#F43F5E]">₹{(selectedOrder.totalAmount - selectedOrder.advancePaid).toLocaleString('en-IN')}</span>
+                    <span className="text-[#F43F5E]">₹{Math.max(0, selectedOrder.totalAmount - selectedOrder.advancePaid).toLocaleString('en-IN')}</span>
                   </div>
                 </div>
+                {(selectedOrder.pointsEarned || 0) > 0 && (
+                  <div className="bg-gradient-to-r from-[#7209B7]/10 to-[#7209B7]/5 p-3 rounded-xl border border-[#7209B7]/20 flex items-center gap-2 text-[#7209B7]">
+                    <span className="text-[11px] font-bold">💎 Earned {selectedOrder.pointsEarned} Loyalty Points!</span>
+                  </div>
+                )}
                 <div>
                   <span className="text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1.5">UPDATE STATUS</span>
                   <select 
@@ -526,6 +547,26 @@ const Orders: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-[#F4F3F8] rounded-xl border border-[#16132D]/[0.04]">
+                    <div className="md:col-span-3">
+                      {matchedCustomer && matchedCustomer.loyalty_points > 0 && (
+                        <div className="mb-3 p-3 bg-[#7209B7]/5 rounded-lg border border-[#7209B7]/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                          <div>
+                            <span className="text-xs font-bold text-[#7209B7] flex items-center gap-1"><span className="text-[14px]">💎</span> Available Loyalty Points: {matchedCustomer.loyalty_points}</span>
+                            <span className="text-[10px] text-[#16132D]/50 block mt-0.5">Use points to give an instant discount on this order.</span>
+                          </div>
+                          <div className="shrink-0 w-full md:w-32">
+                            <input 
+                              type="number" 
+                              value={pointsRedeemed} 
+                              onChange={(e) => setPointsRedeemed(Number(e.target.value))}
+                              max={matchedCustomer.loyalty_points}
+                              placeholder="Redeem pts" 
+                              className="w-full px-3 py-2 border border-[#7209B7]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/50 text-xs bg-white text-[#7209B7] font-bold"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <label className="block text-[10px] font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Stitching Cost (₹)</label>
                       <input 

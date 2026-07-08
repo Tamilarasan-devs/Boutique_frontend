@@ -15,7 +15,10 @@ interface CompanySettings {
   pincode: string;
   website: string;
   currency: string;
-  invoice_prefix: string;
+  invoice_prefix?: string;
+  loyalty_enabled?: boolean;
+  points_per_unit?: number;
+  redemption_value?: number;
 }
 
 interface SettingsContextType {

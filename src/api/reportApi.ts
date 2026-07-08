@@ -30,7 +30,7 @@ export interface CustomersReport {
   totalCustomers: number;
   totalRevenue: number;
   totalOrders: number;
-  customers: Array<{ name: string; orders: number; totalSpend: number; avgOrder: number; loyalty: string; lastOrder: string }>;
+  customers: Array<{ name: string; orders: number; totalSpend: number; avgOrder: number; loyalty: string; loyaltyPoints: number; lastOrder: string }>;
 }
 
 export const reportApi = {

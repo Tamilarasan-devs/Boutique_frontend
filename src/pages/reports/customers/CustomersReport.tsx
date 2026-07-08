@@ -87,6 +87,7 @@ const CustomersReport: React.FC = () => {
               <th className="py-4 px-6 text-right">Total Spend</th>
               <th className="py-4 px-6 text-right">Avg. Order</th>
               <th className="py-4 px-6">Loyalty</th>
+              <th className="py-4 px-6 text-center">Points</th>
               <th className="py-4 px-6">Last Order</th>
             </tr>
           </thead>
@@ -109,12 +110,15 @@ const CustomersReport: React.FC = () => {
                     {c.loyalty}
                   </span>
                 </td>
+                <td className="py-4 px-6 text-center font-bold text-[#7209B7]">
+                  {c.loyaltyPoints}
+                </td>
                 <td className="py-4 px-6 text-slate-500">{c.lastOrder}</td>
               </tr>
             ))}
             {customers.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-slate-400 italic">No customers found.</td>
+                <td colSpan={7} className="py-8 text-center text-slate-400 italic">No customers found.</td>
               </tr>
             )}
           </tbody>

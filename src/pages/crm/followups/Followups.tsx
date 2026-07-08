@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, Search, Phone, MessageSquare, Mail, Calendar, Check, AlertCircle, X, Edit3, Clock, ChevronRight, FileText, ArrowRight, Trash2, List } from 'lucide-react';
 import { followupApi, FOLLOWUP_EVENTS_URL } from '../../../api/followupApi';
 import { useConfirm } from '../../../context/ConfirmContext';
@@ -23,6 +23,7 @@ const localizer = dateFnsLocalizer({
 interface FollowUp {
   id: string;
   customerName: string;
+  customerEmail?: string;
   channel: 'Call' | 'WhatsApp' | 'Email'|"Instagram"|"Facebook";
   reason: string;
   notes?: string;
@@ -32,6 +33,7 @@ interface FollowUp {
 
 const Followups: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { confirm } = useConfirm();
   const [followups, setFollowups] = useState<FollowUp[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +47,7 @@ const Followups: React.FC = () => {
 
   // Create Form states
   const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
   const [channel, setChannel] = useState<FollowUp['channel']>('WhatsApp');
   const [reason, setReason] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -99,6 +102,7 @@ const Followups: React.FC = () => {
         const formatted = data.map((item: any) => ({
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
+          customerEmail: item.customer_email || '',
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
@@ -125,6 +129,7 @@ const Followups: React.FC = () => {
       const newFol: FollowUp = {
         id: `FOL-${item.id}`,
         customerName: item.customer_name,
+        customerEmail: item.customer_email || '',
         channel: item.channel,
         reason: item.reason,
         notes: item.notes || '',
@@ -139,6 +144,7 @@ const Followups: React.FC = () => {
       const updatedFol: FollowUp = {
         id: `FOL-${item.id}`,
         customerName: item.customer_name,
+        customerEmail: item.customer_email || '',
         channel: item.channel,
         reason: item.reason,
         notes: item.notes || '',
@@ -167,6 +173,24 @@ const Followups: React.FC = () => {
     };
   }, []);
 
+  // Handle incoming lead data
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.fromLead && state.customerName) {
+      setCustomerName(state.customerName || '');
+      setReason(state.requirement || '');
+      if (state.source) {
+        if (state.source.includes('WhatsApp')) setChannel('WhatsApp');
+        else if (state.source.includes('Insta')) setChannel('Instagram');
+        else if (state.source.includes('Email')) setChannel('Email');
+        else if (state.source.includes('Phone') || state.source.includes('Call')) setChannel('Call');
+      }
+      setIsModalOpen(true);
+      // Clean up state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
   const filteredFollowUps = followups.filter(fol => {
     const matchesSearch = fol.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           fol.reason.toLowerCase().includes(searchTerm.toLowerCase());
@@ -181,6 +205,7 @@ const Followups: React.FC = () => {
     try {
       const response = await followupApi.addFollowup({
         customer_name: customerName,
+        customer_email: customerEmail,
         channel,
         reason,
         due_date: dueDate,
@@ -194,6 +219,7 @@ const Followups: React.FC = () => {
         const newFol: FollowUp = {
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
+          customerEmail: item.customer_email || '',
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
@@ -204,6 +230,7 @@ const Followups: React.FC = () => {
       }
 
       setCustomerName('');
+      setCustomerEmail('');
       setReason('');
       setDueDate('');
       setIsModalOpen(false);
@@ -291,6 +318,7 @@ const Followups: React.FC = () => {
         const updatedFol: FollowUp = {
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
+          customerEmail: item.customer_email || '',
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
@@ -561,6 +589,9 @@ const Followups: React.FC = () => {
                     <div>
                       <p className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Customer</p>
                       <p className="text-lg font-bold text-[#16132D]">{selectedFollowup.customerName}</p>
+                      {selectedFollowup.customerEmail && (
+                        <p className="text-sm font-medium text-[#16132D]/60 mt-1">{selectedFollowup.customerEmail}</p>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
@@ -664,6 +695,10 @@ const Followups: React.FC = () => {
               <div>
                 <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Customer Name</label>
                 <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="E.g. Shalini Roy" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Customer Email (Optional, for Calendar Invite)</label>
+                <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="E.g. shalini@example.com" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

@@ -36,8 +36,13 @@ const Quotations: React.FC = () => {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Advance Payment Modal
+  const [advanceModalOpen, setAdvanceModalOpen] = useState(false);
+  const [selectedForConversion, setSelectedForConversion] = useState<string | null>(null);
+  const [advanceAmount, setAdvanceAmount] = useState<number | ''>('');
 
   // Form states
   const [customerName, setCustomerName] = useState('');
@@ -178,15 +183,18 @@ const Quotations: React.FC = () => {
     }
   };
 
-  const handleConvertToOrder = async (id: string) => {
-    const q = quotations.find(q => q.id === id);
+  const handleConvertToOrder = (id: string) => {
+    setSelectedForConversion(id);
+    setAdvanceAmount('');
+    setAdvanceModalOpen(true);
+  };
+
+  const proceedWithConversion = () => {
+    if (!selectedForConversion) return;
+    const q = quotations.find(q => q.id === selectedForConversion);
     if (!q) return;
     
-    const isConfirmed = await confirm('Convert this quotation to an Order? You will be asked to add measurements first.', {
-      title: 'Convert Quotation',
-      confirmText: 'Convert to Order'
-    });
-    if (!isConfirmed) return;
+    setAdvanceModalOpen(false);
     
     navigate('/measurements', { 
       state: { 
@@ -197,7 +205,8 @@ const Quotations: React.FC = () => {
         cancelReturnTo: '/orders/quotations',
         actionOnSuccess: {
           type: 'convertQuotation',
-          quotationId: id
+          quotationId: selectedForConversion,
+          advanceAmount: advanceAmount || 0
         }
       } 
     });
@@ -380,6 +389,29 @@ const Quotations: React.FC = () => {
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3">Cancel</button>
                 <button type="submit" form="quotationForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition">Save Quotation</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Advance Payment Modal */}
+        {advanceModalOpen && (
+          <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-sm overflow-hidden flex flex-col">
+              <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center">
+                <h2 className="text-xl font-serif font-bold text-[#16132D]">Convert to Order</h2>
+                <button onClick={() => setAdvanceModalOpen(false)} className="p-2 bg-[#16132D]/[0.03] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 hover:text-[#16132D] rounded-full transition"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="p-6">
+                <p className="text-sm text-[#16132D]/60 mb-4">You are about to convert this quotation to an Order. Enter the advance amount collected (if any), then add customer measurements to proceed.</p>
+                <div>
+                  <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Advance Amount (₹)</label>
+                  <input type="number" value={advanceAmount} onChange={(e) => setAdvanceAmount(Number(e.target.value))} placeholder="0" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
+                </div>
+              </div>
+              <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end bg-[#F4F3F8]/50">
+                <button onClick={() => setAdvanceModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3">Cancel</button>
+                <button onClick={proceedWithConversion} className="px-6 py-2.5 bg-[#10B981] hover:bg-[#0da070] text-white rounded-xl text-sm font-bold shadow-md shadow-[#10B981]/20 transition flex items-center gap-1.5">Proceed <ArrowRight className="w-4 h-4" /></button>
               </div>
             </div>
           </div>

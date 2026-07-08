@@ -12,7 +12,7 @@ export interface AttendanceRecord {
   date: string;
   check_in?: string;
   check_out?: string;
-  status?: 'Present' | 'Absent' | 'Half-Day' | 'Late';
+  status?: 'Login' | 'Absent' | 'Half-Day' | 'Late';
   notes?: string;
   created_at?: string;
 }

@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Filter, Phone, Calendar, MoreVertical, Trash2, ShieldCheck, HelpCircle, FileText, Upload, ChevronRight, X, Loader2, Edit } from 'lucide-react';
+import { Plus, Search, Filter, Phone, Calendar, MoreVertical, Trash2, ShieldCheck, HelpCircle, FileText, Upload, ChevronRight, X, Loader2, Edit, MessageSquare } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { leadApi, Lead } from '../../../api/leadApi';
 import { customerApi } from '../../../api/customerApi';
@@ -217,6 +217,17 @@ const Leads: React.FC = () => {
     });
   };
 
+  const handleAddFollowup = (lead: Lead) => {
+    navigate('/crm/followups', {
+      state: {
+        fromLead: true,
+        customerName: lead.name,
+        requirement: lead.requirement,
+        source: lead.source
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
       <div className="flex flex-col h-full space-y-6 md:space-y-8 p-4 sm:p-6 md:p-8 max-w-[1600px] mx-auto">
@@ -304,7 +315,16 @@ const Leads: React.FC = () => {
                             }`}>
                               {lead.source}
                             </span>
-                            <button onClick={() => openEditModal(lead)} className="text-[#16132D]/30 hover:text-[#7209B7] transition p-1 hover:bg-[#7209B7]/10 rounded-lg" title="Edit Lead">
+                            {column !== 'Lost' && column !== 'Won' && (
+                              <button
+                                onClick={() => handleAddFollowup(lead)}
+                                className="text-[#3B82F6] hover:text-white transition p-1.5 hover:bg-[#3B82F6] bg-[#3B82F6]/10 rounded-lg flex items-center gap-1"
+                                title="Add Follow up"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <button onClick={() => openEditModal(lead)} className="text-[#16132D]/30 hover:text-[#7209B7] transition p-1.5 hover:bg-[#7209B7]/10 rounded-lg" title="Edit Lead">
                               <Edit className="w-3.5 h-3.5" />
                             </button>
                           </div>
