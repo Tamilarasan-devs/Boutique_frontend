@@ -19,7 +19,6 @@ const Dashboard = lazy(() => import('../pages/dashboard/Dashboard'));
 
 // CRM Pages
 const Leads = lazy(() => import('../pages/crm/leads/Leads'));
-const Customers = lazy(() => import('../pages/crm/customers/Customers'));
 const Appointments = lazy(() => import('../pages/crm/appointments/Appointments'));
 const Followups = lazy(() => import('../pages/crm/followups/Followups'));
 
@@ -95,7 +94,6 @@ export const router = createBrowserRouter([
 
       // CRM
       { path: 'crm/leads', element: <Leads /> },
-      { path: 'crm/customers', element: <Customers /> },
       { path: 'crm/appointments', element: <Appointments /> },
       { path: 'crm/followups', element: <Followups /> },
 

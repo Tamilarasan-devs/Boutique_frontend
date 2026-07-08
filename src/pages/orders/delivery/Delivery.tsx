@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Truck, Phone, CheckCircle, PackageCheck, Trash2 } from 'lucide-react';
 import { deliveryApi } from '../../../api/deliveryApi';
-import { useToast } from '../../../context';
+import { useToast, useConfirm } from '../../../context';
 
 interface DeliveryItem {
   id: string | number;
@@ -15,6 +15,7 @@ interface DeliveryItem {
 
 const Delivery: React.FC = () => {
   const { toast } = useToast();
+  const { confirm } = useConfirm();
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -47,7 +48,13 @@ const Delivery: React.FC = () => {
   };
 
   const handleDelete = async (id: string | number) => {
-    if (window.confirm('Are you sure you want to delete this delivery record?')) {
+    const isConfirmed = await confirm('Are you sure you want to delete this delivery record?', {
+      title: 'Delete Delivery',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    
+    if (isConfirmed) {
       try {
         await deliveryApi.deleteDelivery(id);
         toast('Delivery record deleted', 'success');

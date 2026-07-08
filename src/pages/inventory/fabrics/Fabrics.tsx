@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, AlertCircle, Trash2, X } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
+import { useConfirm } from '../../../context';
 
 interface FabricItem {
   id: number;
@@ -14,6 +15,7 @@ interface FabricItem {
 }
 
 const Fabrics: React.FC = () => {
+  const { confirm } = useConfirm();
   const [fabrics, setFabrics] = useState<FabricItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,7 +61,12 @@ const Fabrics: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this fabric?')) return;
+    const isConfirmed = await confirm('Delete this fabric?', {
+      title: 'Delete Fabric',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    if (!isConfirmed) return;
     try { await inventoryApi.deleteItem(id); fetch(); } catch (err) { console.error(err); }
   };
 

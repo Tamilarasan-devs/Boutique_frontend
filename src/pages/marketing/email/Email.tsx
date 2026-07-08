@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { emailLogApi, EmailLog, EmailStats } from '../../../api/emailApi';
@@ -237,7 +238,7 @@ const Email: React.FC = () => {
       setDeleteConfirm(null);
       fetchHistory();
     } catch {
-      alert('Failed to delete log');
+      toast.error('Failed to delete log');
     }
   };
 

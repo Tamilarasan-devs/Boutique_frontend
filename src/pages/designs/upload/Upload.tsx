@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { Upload as UploadIcon, X, CheckCircle, Image } from 'lucide-react';
 
@@ -43,7 +44,7 @@ const Upload: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!designName || files.length === 0) return;
-    alert(`Design "${designName}" uploaded with ${files.length} file(s)!`);
+    toast.success(`Design "${designName}" uploaded with ${files.length} file(s)!`);
     setDesignName('');
     setStyle('');
     setFiles([]);

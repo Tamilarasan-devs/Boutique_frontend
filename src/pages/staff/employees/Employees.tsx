@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState, useEffect, useCallback } from 'react';
 import { employeeApi, Employee } from '../../../api/employeeApi';
 
@@ -119,7 +120,7 @@ const Employees: React.FC = () => {
       setDeleteTarget(null);
       fetchEmployees();
     } catch {
-      alert('Failed to delete employee');
+      toast.error('Failed to delete employee');
     } finally {
       setDeleting(false);
     }

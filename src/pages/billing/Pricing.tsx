@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState, useEffect } from 'react';
 import { Check, Shield, Zap, Sparkles, Loader2 } from 'lucide-react';
 import { subscriptionApi, SubscriptionStatus } from '../../api/subscriptionApi';
@@ -51,11 +52,11 @@ const Pricing: React.FC = () => {
               razorpay_subscription_id: response.razorpay_subscription_id,
               razorpay_signature: response.razorpay_signature,
             });
-            alert('Subscription successful! Welcome to Pro.');
+            toast.success('Subscription successful! Welcome to Pro.');
             fetchStatus(); // Refresh status to unlock CRM
             window.location.href = '/'; // Redirect to dashboard
           } catch (err) {
-            alert('Payment verification failed.');
+            toast.error('Payment verification failed.');
           }
         },
         prefill: {
@@ -71,7 +72,7 @@ const Pricing: React.FC = () => {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
-      alert('Error initiating checkout. Please try again later.');
+      toast.error('Error initiating checkout. Please try again later.');
       console.error(error);
     } finally {
       setLoading(false);

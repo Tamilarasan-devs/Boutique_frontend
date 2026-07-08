@@ -3,6 +3,7 @@ import { Scissors, Sparkles, CheckCircle2, ChevronRight, User, Plus, X, Trash2, 
 import { useNavigate } from 'react-router-dom';
 import { productionApi } from '../../../api/productionApi';
 import { deliveryApi } from '../../../api/deliveryApi';
+import { useConfirm } from '../../../context';
 
 interface ProductionItem {
   id: string;
@@ -32,6 +33,7 @@ const priorityStyles: Record<string, string> = {
 
 const Production: React.FC = () => {
   const navigate = useNavigate();
+  const { confirm } = useConfirm();
   const [items, setItems] = useState<ProductionItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -93,7 +95,11 @@ const Production: React.FC = () => {
   };
 
   const handleSendToDelivery = async (item: ProductionItem) => {
-    if (!window.confirm(`Send "${item.garment}" for ${item.customerName} to Delivery queue?`)) return;
+    const isConfirmed = await confirm(`Send "${item.garment}" for ${item.customerName} to Delivery queue?`, {
+      title: 'Send to Delivery',
+      confirmText: 'Send to Delivery'
+    });
+    if (!isConfirmed) return;
     try {
       await deliveryApi.addDelivery({
         order_id: item.orderId || '',

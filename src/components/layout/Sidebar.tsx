@@ -44,7 +44,6 @@ const menuItems: SidebarItem[] = [
     title: 'CRM', icon: <Users className="w-5 h-5" />,
     children: [
       { title: 'Leads', path: '/crm/leads', icon: <Users className="w-4 h-4" /> },
-      { title: 'Customers', path: '/crm/customers', icon: <UserSquare2 className="w-4 h-4" /> },
       // { title: 'Appointments', path: '/crm/appointments', icon: <CalendarDays className="w-4 h-4" /> },
       { title: 'Followups', path: '/crm/followups', icon: <CalendarDays className="w-4 h-4" /> },
     ]

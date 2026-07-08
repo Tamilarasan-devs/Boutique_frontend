@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Phone, MessageSquare, Mail, Calendar, Check, AlertCircle, X, Edit3, Clock, ChevronRight, FileText, ArrowRight } from 'lucide-react';
+import { Plus, Search, Phone, MessageSquare, Mail, Calendar, Check, AlertCircle, X, Edit3, Clock, ChevronRight, FileText, ArrowRight, Trash2, List } from 'lucide-react';
 import { followupApi, FOLLOWUP_EVENTS_URL } from '../../../api/followupApi';
+import { useConfirm } from '../../../context/ConfirmContext';
+import { toast } from 'sonner';
+import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const locales = {
+  'en-US': enUS,
+}
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+})
 
 interface FollowUp {
   id: string;
@@ -15,12 +32,16 @@ interface FollowUp {
 
 const Followups: React.FC = () => {
   const navigate = useNavigate();
+  const { confirm } = useConfirm();
   const [followups, setFollowups] = useState<FollowUp[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Completed' | 'Overdue' | 'Rejected'>('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [calendarView, setCalendarView] = useState<any>('month');
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   // Create Form states
   const [customerName, setCustomerName] = useState('');
@@ -66,6 +87,12 @@ const Followups: React.FC = () => {
   };
 
   useEffect(() => {
+    const formatDate = (dateString: string) => {
+      if (!dateString) return '';
+      const d = new Date(dateString);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
     const fetchFollowups = async () => {
       try {
         const data = await followupApi.getFollowups();
@@ -75,7 +102,7 @@ const Followups: React.FC = () => {
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
-          dueDate: new Date(item.due_date).toISOString().split('T')[0],
+          dueDate: formatDate(item.due_date),
           status: item.status
         }));
         setFollowups(formatted);
@@ -88,7 +115,7 @@ const Followups: React.FC = () => {
     fetchFollowups();
 
     // Setup Server-Sent Events for real-time updates
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('boutique_token');
     if (!token) return;
 
     const eventSource = new EventSource(`${FOLLOWUP_EVENTS_URL}?token=${token}`);
@@ -101,7 +128,7 @@ const Followups: React.FC = () => {
         channel: item.channel,
         reason: item.reason,
         notes: item.notes || '',
-        dueDate: new Date(item.due_date).toISOString().split('T')[0],
+        dueDate: formatDate(item.due_date),
         status: item.status
       };
       setFollowups(prev => [newFol, ...prev.filter(f => f.id !== newFol.id)]);
@@ -115,13 +142,24 @@ const Followups: React.FC = () => {
         channel: item.channel,
         reason: item.reason,
         notes: item.notes || '',
-        dueDate: new Date(item.due_date).toISOString().split('T')[0],
+        dueDate: formatDate(item.due_date),
         status: item.status
       };
       setFollowups(prev => prev.map(fol => fol.id === updatedFol.id ? updatedFol : fol));
       
       // Update selected followup in drawer if it's the one being modified
+      // Update selected followup in drawer if it's the one being modified
       setSelectedFollowup(prev => (prev?.id === updatedFol.id ? updatedFol : prev));
+    });
+
+    eventSource.addEventListener('followup_deleted', (e) => {
+      const { id } = JSON.parse(e.data);
+      const folId = `FOL-${id}`;
+      setFollowups(prev => prev.filter(f => f.id !== folId));
+      setSelectedFollowup(prev => prev?.id === folId ? null : prev);
+      if (selectedFollowup?.id === folId) {
+        setIsDrawerOpen(false);
+      }
     });
 
     return () => {
@@ -151,13 +189,15 @@ const Followups: React.FC = () => {
       
       if (response && response.followup) {
         const item = response.followup;
+        const d = new Date(item.due_date);
+        const formattedDate = item.due_date ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
         const newFol: FollowUp = {
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
-          dueDate: new Date(item.due_date).toISOString().split('T')[0],
+          dueDate: formattedDate,
           status: item.status
         };
         setFollowups(prev => [newFol, ...prev.filter(f => f.id !== newFol.id)]);
@@ -197,6 +237,28 @@ const Followups: React.FC = () => {
     }
   };
 
+  const handleDelete = async (fol: FollowUp, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const isConfirmed = await confirm(
+      "Are you sure you want to delete this follow-up? This action cannot be undone.", 
+      { title: "Delete Follow-up", destructive: true }
+    );
+    if (isConfirmed) {
+      try {
+        await followupApi.deleteFollowup(fol.id);
+        toast.success("Follow-up deleted successfully");
+        setFollowups(prev => prev.filter(f => f.id !== fol.id));
+        if (selectedFollowup?.id === fol.id) {
+          setIsDrawerOpen(false);
+          setSelectedFollowup(null);
+        }
+      } catch (error) {
+        console.error("Error deleting followup:", error);
+        toast.error("Failed to delete follow-up");
+      }
+    }
+  };
+
   const handleOpenDrawer = (fol: FollowUp) => {
     setSelectedFollowup(fol);
     setUpdateNotes('');
@@ -224,13 +286,15 @@ const Followups: React.FC = () => {
       
       if (response && response.followup) {
         const item = response.followup;
+        const d = new Date(item.due_date);
+        const formattedDate = item.due_date ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
         const updatedFol: FollowUp = {
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
-          dueDate: new Date(item.due_date).toISOString().split('T')[0],
+          dueDate: formattedDate,
           status: item.status
         };
         setFollowups(prev => prev.map(fol => fol.id === updatedFol.id ? updatedFol : fol));
@@ -245,6 +309,38 @@ const Followups: React.FC = () => {
     }
   };
 
+  const calendarEvents = filteredFollowUps.map(fol => {
+    // Parse the date and set a default time (10:00 AM - 11:00 AM) so it shows up nicely in Week/Day views
+    const startDate = new Date(fol.dueDate);
+    startDate.setHours(10, 0, 0, 0);
+    
+    const endDate = new Date(fol.dueDate);
+    endDate.setHours(11, 0, 0, 0);
+
+    return {
+      id: fol.id,
+      title: `${fol.customerName} - ${fol.reason}`,
+      start: startDate,
+      end: endDate,
+      allDay: false,
+      resource: fol,
+    };
+  });
+
+  const EventComponent = ({ event }: any) => {
+    const fol = event.resource as FollowUp;
+    let statusClass = "bg-[#4285F4]/10 text-[#4285F4] border-[#4285F4]/20"; // Pending
+    if (fol.status === 'Completed') statusClass = "bg-emerald-100 text-emerald-700 border-emerald-200";
+    else if (fol.status === 'Overdue') statusClass = "bg-rose-100 text-rose-700 border-rose-200";
+    else if (fol.status === 'Rejected') statusClass = "bg-gray-100 text-gray-600 border-gray-200";
+
+    return (
+      <div className={`px-2 py-1 h-full w-full rounded text-xs font-semibold border ${statusClass} overflow-hidden whitespace-nowrap text-ellipsis flex items-center`}>
+        {event.title}
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-full bg-[#F4F3F8] relative overflow-hidden">
       <div className={`flex flex-col flex-1 p-8 transition-all duration-300 ease-in-out ${isDrawerOpen ? 'mr-[420px]' : ''}`}>
@@ -255,12 +351,30 @@ const Followups: React.FC = () => {
             <h1 className="text-3xl font-extrabold text-[#16132D] tracking-tight">Follow-ups</h1>
             <p className="text-[#16132D]/60 mt-2 font-medium">Keep your customer communications organized and close more deals.</p>
           </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 bg-[#16132D] hover:bg-[#2A3441] text-white rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-          >
-            <Plus className="w-4 h-4" /> New Follow-up
-          </button>
+          <div className="flex gap-3">
+            <div className="flex bg-white rounded-xl shadow-sm border border-[#16132D]/10 p-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#16132D] text-white shadow-sm' : 'text-[#16132D]/60 hover:bg-[#16132D]/5 hover:text-[#16132D]'}`}
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-[#16132D] text-white shadow-sm' : 'text-[#16132D]/60 hover:bg-[#16132D]/5 hover:text-[#16132D]'}`}
+                title="Calendar View"
+              >
+                <Calendar className="w-4 h-4" />
+              </button>
+            </div>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-2.5 bg-[#16132D] hover:bg-[#2A3441] text-white rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <Plus className="w-4 h-4" /> New Follow-up
+            </button>
+          </div>
         </div>
 
         {/* Controls */}
@@ -293,9 +407,39 @@ const Followups: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table / Calendar */}
         <div className="flex-1 bg-white rounded-3xl border border-[#16132D]/5 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
-          <div className="overflow-x-auto flex-1">
+          {viewMode === 'calendar' ? (
+            <div className="flex-1 p-6 h-[700px]">
+              <style dangerouslySetInnerHTML={{__html: `
+                .rbc-calendar { font-family: inherit; }
+                .rbc-toolbar button { font-weight: 600; border-radius: 8px; border: 1px solid #e2e8f0; color: #475569; }
+                .rbc-toolbar button.rbc-active { background-color: #16132D; color: white; border-color: #16132D; }
+                .rbc-toolbar button:hover:not(.rbc-active) { background-color: #f1f5f9; }
+                .rbc-event { background: transparent; padding: 0; border: none; }
+                .rbc-today { background-color: #F4F3F8; }
+                .rbc-header { padding: 12px 0; font-weight: 700; color: #16132D; border-bottom: 2px solid #f1f5f9; }
+              `}} />
+              <BigCalendar
+                localizer={localizer}
+                events={calendarEvents}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: '100%' }}
+                components={{
+                  event: EventComponent
+                }}
+                onSelectEvent={(event: any) => handleOpenDrawer(event.resource)}
+                views={['month', 'week', 'day']}
+                view={calendarView}
+                onView={(view) => setCalendarView(view)}
+                date={calendarDate}
+                onNavigate={(date) => setCalendarDate(date)}
+                popup
+              />
+            </div>
+          ) : (
+            <div className="overflow-x-auto flex-1">
             {isLoading ? (
               <div className="flex h-full items-center justify-center text-[#16132D]/40 font-medium">Loading...</div>
             ) : filteredFollowUps.length === 0 ? (
@@ -369,14 +513,23 @@ const Followups: React.FC = () => {
                               </button>
                               <button 
                                 onClick={(e) => handleMarkRejected(fol.id, e)}
-                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-lg transition-colors flex items-center gap-1"
-                                title="Reject"
+                                className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-lg transition-colors flex items-center gap-1"
+                                title="Reject Follow-up"
                               >
                                 <X className="w-3.5 h-3.5" /> Reject
                               </button>
                             </>
                           )}
+                         
+                          <button 
+                            onClick={(e) => handleDelete(fol, e)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Follow-up"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                           <ChevronRight className="w-5 h-5 text-[#16132D]/20 group-hover:text-[#16132D]/60 transition-colors ml-2" />
+
                         </div>
                       </td>
                     </tr>
@@ -385,6 +538,7 @@ const Followups: React.FC = () => {
               </table>
             )}
           </div>
+          )}
         </div>
       </div>
 
@@ -408,14 +562,16 @@ const Followups: React.FC = () => {
                       <p className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Customer</p>
                       <p className="text-lg font-bold text-[#16132D]">{selectedFollowup.customerName}</p>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                        selectedFollowup.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' 
-                        : selectedFollowup.status === 'Overdue' ? 'bg-rose-100 text-rose-800'
-                        : selectedFollowup.status === 'Rejected' ? 'bg-slate-200 text-slate-700'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {selectedFollowup.status}
-                    </span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                          selectedFollowup.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' 
+                          : selectedFollowup.status === 'Overdue' ? 'bg-rose-100 text-rose-800'
+                          : selectedFollowup.status === 'Rejected' ? 'bg-slate-200 text-slate-700'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {selectedFollowup.status}
+                      </span>
+                    </div>
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Original Reason</p>
@@ -511,7 +667,7 @@ const Followups: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Entery Date</label>
+                  <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Due Date</label>
                   <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
                 </div>
                 <div>

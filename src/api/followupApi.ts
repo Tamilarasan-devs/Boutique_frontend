@@ -67,11 +67,29 @@ export const followupApi = {
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        throw new Error('Failed to update followup');
+        const errorData = await response.json();
+        console.error('Backend error:', errorData);
+        throw new Error(`Failed to update followup: ${errorData.details || errorData.error}`);
       }
       return await response.json();
     } catch (error) {
       console.error('Error updating followup:', error);
+      throw error;
+    }
+  },
+
+  deleteFollowup: async (id: string) => {
+    try {
+      const numericId = id.replace('FOL-', '');
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${numericId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete followup');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting followup:', error);
       throw error;
     }
   },

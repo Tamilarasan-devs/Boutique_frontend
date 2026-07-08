@@ -1,14 +1,10 @@
 import React, { createContext, useContext, useCallback, useState } from 'react';
 import { cn } from '../utils';
 
+import { toast as sonnerToast } from 'sonner';
+
 // ─── Toast Types ─────────────────────────────────────────────────────────────
 export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
-
-interface Toast {
-  id: string;
-  message: string;
-  variant: ToastVariant;
-}
 
 interface ToastContextValue {
   toast: (message: string, variant?: ToastVariant) => void;
@@ -16,60 +12,28 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-const ICONS: Record<ToastVariant, string> = {
-  success: '✓',
-  error: '✕',
-  warning: '⚠',
-  info: 'ℹ',
-};
-
-const COLORS: Record<ToastVariant, string> = {
-  success: 'bg-green-600',
-  error: 'bg-red-600',
-  warning: 'bg-amber-500',
-  info: 'bg-blue-600',
-};
-
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
   const toast = useCallback((message: string, variant: ToastVariant = 'info') => {
-    const id = crypto.randomUUID();
-    setToasts(prev => [...prev, { id, message, variant }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4000);
+    switch (variant) {
+      case 'success':
+        sonnerToast.success(message);
+        break;
+      case 'error':
+        sonnerToast.error(message);
+        break;
+      case 'warning':
+        sonnerToast.warning(message);
+        break;
+      case 'info':
+      default:
+        sonnerToast.info(message);
+        break;
+    }
   }, []);
-
-  const dismiss = (id: string) =>
-    setToasts(prev => prev.filter(t => t.id !== id));
 
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      {/* Toast Container */}
-      <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none">
-        {toasts.map(t => (
-          <div
-            key={t.id}
-            className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium pointer-events-auto animate-in slide-in-from-right-5 max-w-sm',
-              COLORS[t.variant]
-            )}
-          >
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
-              {ICONS[t.variant]}
-            </span>
-            <span className="flex-1">{t.message}</span>
-            <button
-              onClick={() => dismiss(t.id)}
-              className="flex-shrink-0 text-white/70 hover:text-white"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
     </ToastContext.Provider>
   );
 };

@@ -1,8 +1,10 @@
+import { toast } from 'sonner';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Search, Filter, Phone, Calendar, MoreVertical, Trash2, ShieldCheck, HelpCircle, FileText, Upload, ChevronRight, X, Loader2, Edit } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { leadApi, Lead } from '../../../api/leadApi';
 import { customerApi } from '../../../api/customerApi';
+import { useConfirm } from '../../../context';
 
 // ────────────────────────────────────────────────────────────
 // Palette (matches Boutique Overview):
@@ -21,6 +23,7 @@ const columnStyles: Record<Lead['status'], { dot: string; head: string; chip: st
 const Leads: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm } = useConfirm();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -143,6 +146,14 @@ const Leads: React.FC = () => {
   };
 
   const handleMarkLost = async (id: string, currentStatus: Lead['status']) => {
+    const isConfirmed = await confirm('Are you sure you want to mark this lead as lost? This cannot be undone easily.', {
+      title: 'Mark as Lost',
+      confirmText: 'Mark Lost',
+      destructive: true
+    });
+    
+    if (!isConfirmed) return;
+
     // Optimistic UI update
     setLeads(leads.map(lead => lead.id === id ? { ...lead, status: 'Lost' as Lead['status'] } : lead));
 
@@ -157,7 +168,10 @@ const Leads: React.FC = () => {
   };
 
   const handleConvertLead = async (lead: Lead) => {
-    const confirmConvert = window.confirm(`Convert "${lead.name}" to an active customer and create a quotation?`);
+    const confirmConvert = await confirm(`Convert "${lead.name}" to an active customer and create a quotation?`, {
+      title: 'Convert Lead',
+      confirmText: 'Convert & Create Quotation'
+    });
     if (!confirmConvert) return;
 
     // Optimistic UI update to Won status

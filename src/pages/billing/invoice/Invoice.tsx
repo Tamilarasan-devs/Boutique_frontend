@@ -3,7 +3,7 @@ import { Search, Plus, FileText, Eye, X, Trash2, Printer } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { billingApi, BILLING_EVENTS_URL, Invoice as InvoiceType, InvoiceItemDetail } from '../../../api/billingApi';
 import { customerApi } from '../../../api/customerApi';
-import { useToast } from '../../../context/context';
+import { useToast, useConfirm } from '../../../context';
 
 const statusStyles: Record<InvoiceType['status'], string> = {
   'Paid': 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -16,6 +16,7 @@ const Invoice: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { confirm } = useConfirm();
   const [invoices, setInvoices] = useState<InvoiceType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -246,7 +247,13 @@ const Invoice: React.FC = () => {
   };
 
   const handleDeleteInvoice = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this invoice?')) {
+    const isConfirmed = await confirm('Are you sure you want to delete this invoice?', {
+      title: 'Delete Invoice',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    
+    if (isConfirmed) {
       try {
         await billingApi.deleteInvoice(id);
         setIsDetailModalOpen(false);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Phone, Mail, MapPin, Trash2, X, Star } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
+import { useConfirm } from '../../../context';
 
 interface Supplier {
   id: number;
@@ -14,6 +15,7 @@ interface Supplier {
 }
 
 const Suppliers: React.FC = () => {
+  const { confirm } = useConfirm();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,7 +59,12 @@ const Suppliers: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this supplier?')) return;
+    const isConfirmed = await confirm('Delete this supplier?', {
+      title: 'Delete Supplier',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    if (!isConfirmed) return;
     try { await inventoryApi.deleteSupplier(id); fetchData(); } catch (err) { console.error(err); }
   };
 

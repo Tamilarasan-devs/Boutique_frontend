@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState, useEffect, useCallback } from 'react';
 import { attendanceApi, AttendanceRecord, AttendanceSummary } from '../../../api/attendanceApi';
 import { 
@@ -80,7 +81,7 @@ const Attendance: React.FC = () => {
           : r
       ));
     } catch (e) {
-      alert('Failed to mark attendance');
+      toast.error('Failed to mark attendance');
     } finally {
       setMarkingId(null);
     }
@@ -93,7 +94,7 @@ const Attendance: React.FC = () => {
       fetchAttendance();
       fetchSummary();
     } catch {
-      alert('Failed to bulk mark attendance');
+      toast.error('Failed to bulk mark attendance');
     } finally {
       setBulkMarking(false);
     }
@@ -115,7 +116,7 @@ const Attendance: React.FC = () => {
           : r
       ));
     } catch {
-      alert('Failed to update time');
+      toast.error('Failed to update time');
     }
   };
 
@@ -145,7 +146,7 @@ const Attendance: React.FC = () => {
       setNotesModal(null);
       fetchAttendance();
     } catch {
-      alert('Failed to save notes');
+      toast.error('Failed to save notes');
     } finally {
       setSavingNotes(false);
     }

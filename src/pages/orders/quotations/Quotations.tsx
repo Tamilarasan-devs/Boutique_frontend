@@ -4,10 +4,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { quotationApi } from '../../../api/quotationApi';
 import { orderApi } from '../../../api/orderApi';
 import { followupApi } from '../../../api/followupApi';
+import { customerApi } from '../../../api/customerApi';
+import { useConfirm } from '../../../context';
 
 interface Quotation {
   id: string;
   customerName: string;
+  customerPhone?: string;
+  customerEmail?: string;
   items: string;
   totalAmount: number;
   discount: number;
@@ -28,13 +32,17 @@ const statusStyles: Record<string, string> = {
 const Quotations: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm } = useConfirm();
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [customers, setCustomers] = useState<any[]>([]);
 
   // Form states
   const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
   const [items, setItems] = useState('');
   const [totalAmount, setTotalAmount] = useState<number | ''>('');
   const [discount, setDiscount] = useState<number | ''>('');
@@ -65,6 +73,8 @@ const Quotations: React.FC = () => {
         const formatted = data.map((item: any) => ({
           id: `QOT-${item.id}`,
           customerName: item.customer_name,
+          customerPhone: item.customer_phone,
+          customerEmail: item.customer_email,
           items: item.items,
           totalAmount: parseFloat(item.total_amount) || 0,
           discount: parseFloat(item.discount) || 0,
@@ -78,7 +88,16 @@ const Quotations: React.FC = () => {
         console.error('Error loading quotations:', error);
       }
     };
+    const fetchCustomers = async () => {
+      try {
+        const data = await customerApi.getCustomers().catch(() => []);
+        setCustomers(data);
+      } catch (err) {
+        console.error('Error loading customers:', err);
+      }
+    };
     fetchData();
+    fetchCustomers();
   }, []);
 
   const filtered = quotations.filter(q => {
@@ -92,19 +111,40 @@ const Quotations: React.FC = () => {
     if (!customerName || !items || !totalAmount || !validUntil) return;
 
     try {
+      // 1. Create or ensure customer exists
+      const existingCustomer = customers.find(c => c.phone === customerPhone && customerPhone !== '');
+      if (!existingCustomer) {
+        try {
+          await customerApi.addCustomer({ 
+            name: customerName, 
+            phone: customerPhone || 'N/A', 
+            email: customerEmail || '',
+            address: '' 
+          });
+        } catch (custError) {
+          console.warn('Customer creation skipped/failed:', custError);
+        }
+      }
+
       const response = await quotationApi.addQuotation({
-        customer_name: customerName, items, total_amount: totalAmount,
-        discount: discount || 0, valid_until: validUntil, terms,
+        customer_name: customerName,
+        customer_phone: customerPhone || '',
+        customer_email: customerEmail || '',
+        items, 
+        total_amount: totalAmount,
+        discount: discount || 0, 
+        valid_until: validUntil, 
+        terms,
       });
       const q = response.quotation;
       setQuotations([{
-        id: `QOT-${q.id}`, customerName: q.customer_name, items: q.items,
+        id: `QOT-${q.id}`, customerName: q.customer_name, customerPhone: q.customer_phone, customerEmail: q.customer_email, items: q.items,
         totalAmount: parseFloat(q.total_amount), discount: parseFloat(q.discount),
         date: new Date(q.date).toISOString().split('T')[0],
         validUntil: new Date(q.valid_until).toISOString().split('T')[0],
         terms: q.terms || '', status: q.status,
       }, ...quotations]);
-      setCustomerName(''); setItems(''); setTotalAmount(''); setDiscount(''); setValidUntil(''); setTerms('');
+      setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setDiscount(''); setValidUntil(''); setTerms('');
       setIsModalOpen(false);
 
       if (followupId) {
@@ -139,15 +179,28 @@ const Quotations: React.FC = () => {
   };
 
   const handleConvertToOrder = async (id: string) => {
-    if (!window.confirm('Convert this quotation to an Order? The quotation will be marked Accepted.')) return;
-    try {
-      await orderApi.convertFromQuotation(id);
-      // Mark accepted locally
-      setQuotations(quotations.map(q => q.id === id ? { ...q, status: 'Accepted' } : q));
-      navigate('/orders/list');
-    } catch (error) {
-      console.error('Error converting quotation:', error);
-    }
+    const q = quotations.find(q => q.id === id);
+    if (!q) return;
+    
+    const isConfirmed = await confirm('Convert this quotation to an Order? You will be asked to add measurements first.', {
+      title: 'Convert Quotation',
+      confirmText: 'Convert to Order'
+    });
+    if (!isConfirmed) return;
+    
+    navigate('/measurements', { 
+      state: { 
+        openNewModal: true,
+        customerName: q.customerName,
+        garment: q.items,
+        returnTo: '/orders/list',
+        cancelReturnTo: '/orders/quotations',
+        actionOnSuccess: {
+          type: 'convertQuotation',
+          quotationId: id
+        }
+      } 
+    });
   };
 
   return (
@@ -205,7 +258,14 @@ const Quotations: React.FC = () => {
                         <span className="font-serif font-bold text-[#16132D]">{q.id}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-6 font-semibold text-[#16132D]">{q.customerName}</td>
+                    <td className="py-4 px-6">
+                      <div className="font-semibold text-[#16132D]">{q.customerName}</div>
+                      {(q.customerPhone || q.customerEmail) && (
+                        <div className="text-xs text-[#16132D]/55 mt-0.5">
+                          {q.customerPhone} {q.customerPhone && q.customerEmail && '•'} {q.customerEmail}
+                        </div>
+                      )}
+                    </td>
                     <td className="py-4 px-6 text-[#16132D]/65 max-w-[200px] truncate">{q.items}</td>
                     <td className="py-4 px-6 text-right">
                       <div className="font-bold text-[#16132D]">₹{q.totalAmount.toLocaleString('en-IN')}</div>
@@ -268,6 +328,30 @@ const Quotations: React.FC = () => {
                   <div>
                     <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
                     <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="e.g. Tanvi Jha" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Phone Number</label>
+                      <input 
+                        type="text" 
+                        value={customerPhone} 
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomerPhone(val);
+                          const existing = customers.find(c => c.phone === val);
+                          if (existing) {
+                            setCustomerName(existing.name);
+                            if (existing.email) setCustomerEmail(existing.email);
+                          }
+                        }} 
+                        placeholder="e.g. +91 98765 43210" 
+                        className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Email</label>
+                      <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="e.g. tanvi@example.com" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Items Description *</label>

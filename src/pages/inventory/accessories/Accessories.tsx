@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, AlertCircle, Trash2, X } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
+import { useConfirm } from '../../../context';
 
 interface Accessory {
   id: number;
@@ -16,6 +17,7 @@ interface Accessory {
 const TYPES = ['All', 'Buttons', 'Zippers', 'Threads', 'Lace', 'Hooks', 'Beads', 'Other'];
 
 const Accessories: React.FC = () => {
+  const { confirm } = useConfirm();
   const [items, setItems] = useState<Accessory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,7 +65,12 @@ const Accessories: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this accessory?')) return;
+    const isConfirmed = await confirm('Delete this accessory?', {
+      title: 'Delete Accessory',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    if (!isConfirmed) return;
     try { await inventoryApi.deleteItem(id); fetchData(); } catch (err) { console.error(err); }
   };
 

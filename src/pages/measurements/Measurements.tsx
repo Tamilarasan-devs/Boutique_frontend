@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useToast } from '../../context';
+import { useToast, useConfirm } from '../../context';
 import { measurementHistoryApi } from '../../api/measurementHistoryApi';
 import { customerApi } from '../../api/customerApi';
 import { FileText, Save, User, Plus, Trash2, Scissors, Edit, X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { orderApi } from '../../api/orderApi';
+import { productionApi } from '../../api/productionApi';
 
 interface MeasurementField {
   name: string;
@@ -11,12 +14,19 @@ interface MeasurementField {
 
 const Measurements: React.FC = () => {
   const { toast } = useToast();
+  const { confirm } = useConfirm();
   const [history, setHistory] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+  const [cancelReturnTo, setCancelReturnTo] = useState<string | null>(null);
+  const [actionOnSuccess, setActionOnSuccess] = useState<any>(null);
+  const [lastAutoFilledCustomer, setLastAutoFilledCustomer] = useState<string>('');
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Form State
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
@@ -28,6 +38,51 @@ const Measurements: React.FC = () => {
     fetchHistory();
     fetchCustomers();
   }, []);
+
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.openNewModal && customers.length > 0) {
+      const match = customers.find(c => c.name.toLowerCase() === state.customerName?.toLowerCase());
+      if (match) {
+        setSelectedCustomerId(String(match.id));
+      }
+      if (state.garment) {
+        setGarmentType(state.garment);
+      }
+      if (state.returnTo) {
+        setReturnTo(state.returnTo);
+      }
+      if (state.cancelReturnTo) {
+        setCancelReturnTo(state.cancelReturnTo);
+      }
+      if (state.actionOnSuccess) {
+        setActionOnSuccess(state.actionOnSuccess);
+      }
+      setIsModalOpen(true);
+      // Clear location state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [customers, location.state, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!editingId && selectedCustomerId && selectedCustomerId !== lastAutoFilledCustomer && history.length > 0) {
+      const lastMeasurement = history.find(h => String(h.customer_id) === selectedCustomerId);
+      if (lastMeasurement && lastMeasurement.measurements) {
+        const fieldsArr = Object.entries(lastMeasurement.measurements).map(([name, value]) => ({
+          name,
+          value: String(value)
+        }));
+        if (fieldsArr.length > 0) {
+          setFields(fieldsArr);
+        } else {
+          setFields([{ name: '', value: '' }]);
+        }
+      } else {
+        setFields([{ name: '', value: '' }]);
+      }
+      setLastAutoFilledCustomer(selectedCustomerId);
+    }
+  }, [selectedCustomerId, history, editingId, lastAutoFilledCustomer]);
 
   const fetchHistory = async () => {
     try {
@@ -53,7 +108,17 @@ const Measurements: React.FC = () => {
     setGarmentType('');
     setFields([{ name: '', value: '' }]);
     setNotes('');
+    setLastAutoFilledCustomer('');
     setIsModalOpen(true);
+  };
+
+  const handleCancelModal = () => {
+    setIsModalOpen(false);
+    if (cancelReturnTo) {
+      navigate(cancelReturnTo);
+    } else if (returnTo) {
+      navigate(returnTo);
+    }
   };
 
   const openEditModal = (record: any) => {
@@ -82,7 +147,12 @@ const Measurements: React.FC = () => {
   };
 
   const handleDelete = async (id: number | string) => {
-    if (!window.confirm('Are you sure you want to delete this measurement record?')) return;
+    const isConfirmed = await confirm('Are you sure you want to delete this measurement record?', {
+      title: 'Delete Measurement',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    if (!isConfirmed) return;
     try {
       await measurementHistoryApi.deleteHistory(id);
       setHistory(prev => prev.filter(h => h.id !== id));
@@ -142,6 +212,20 @@ const Measurements: React.FC = () => {
       
       setIsModalOpen(false);
       fetchHistory(); // Refresh list
+      
+      // Execute pending workflow action
+      if (actionOnSuccess) {
+        if (actionOnSuccess.type === 'convertQuotation') {
+          await orderApi.convertFromQuotation(actionOnSuccess.quotationId);
+        } else if (actionOnSuccess.type === 'sendToProduction') {
+          await productionApi.addProduction(actionOnSuccess.payload);
+          await orderApi.updateOrderStatus(actionOnSuccess.payload.order_id, 'Cutting');
+        }
+      }
+
+      if (returnTo) {
+        navigate(returnTo);
+      }
     } catch (err) {
       toast('Failed to save measurement', 'error');
     }
@@ -244,7 +328,7 @@ const Measurements: React.FC = () => {
                 {editingId ? 'Edit Measurement' : 'New Measurement'}
               </h3>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={handleCancelModal}
                 className="text-slate-500 hover:text-slate-800 hover:bg-slate-200 p-1.5 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -351,7 +435,7 @@ const Measurements: React.FC = () => {
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
               <button 
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={handleCancelModal}
                 className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-200 bg-slate-100 rounded-xl text-sm transition-colors"
               >
                 Cancel

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText } from 'lucide-react';
 import { billingApi, BILLING_EVENTS_URL, Payment, Invoice } from '../../../api/billingApi';
-import { useToast } from '../../../context/context';
+import { useToast, useConfirm } from '../../../context';
 
 const methodIcons: Record<Payment['method'], React.ReactNode> = {
   'Cash': <Banknote className="w-3.5 h-3.5 text-emerald-600" />,
@@ -12,6 +12,7 @@ const methodIcons: Record<Payment['method'], React.ReactNode> = {
 
 const Payments: React.FC = () => {
   const { toast } = useToast();
+  const { confirm } = useConfirm();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -123,7 +124,11 @@ const Payments: React.FC = () => {
 
     const outstanding = calculateOutstanding(targetInvoice);
     if (amountNum > outstanding) {
-      if (!window.confirm(`The entered payment amount (₹${amountNum.toLocaleString('en-IN')}) exceeds the outstanding balance (₹${outstanding.toLocaleString('en-IN')}). Proceed anyway?`)) {
+      const isConfirmed = await confirm(`The entered payment amount (₹${amountNum.toLocaleString('en-IN')}) exceeds the outstanding balance (₹${outstanding.toLocaleString('en-IN')}). Proceed anyway?`, {
+        title: 'Excess Amount Warning',
+        confirmText: 'Proceed'
+      });
+      if (!isConfirmed) {
         return;
       }
     }

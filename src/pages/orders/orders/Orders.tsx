@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { orderApi } from '../../../api/orderApi';
 import { productionApi } from '../../../api/productionApi';
 import { employeeApi, Employee } from '../../../api/employeeApi';
+import { customerApi } from '../../../api/customerApi';
+import { useConfirm } from '../../../context';
 
 interface Order {
   id: string;
@@ -31,6 +33,7 @@ const statusStyles: Record<string, string> = {
 const Orders: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm } = useConfirm();
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,6 +41,7 @@ const Orders: React.FC = () => {
 
   // Form states
   const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [category, setCategory] = useState('');
   const [stitchingCost, setStitchingCost] = useState<number | ''>('');
   const [totalAmount, setTotalAmount] = useState<number | ''>('');
@@ -47,6 +51,7 @@ const Orders: React.FC = () => {
   const [fabricDetails, setFabricDetails] = useState('');
   const [priority, setPriority] = useState<Order['priority']>('Normal');
   const [tailors, setTailors] = useState<Employee[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -81,8 +86,18 @@ const Orders: React.FC = () => {
       }
     };
 
+    const fetchCustomers = async () => {
+      try {
+        const data = await customerApi.getCustomers().catch(() => []);
+        setCustomers(data);
+      } catch (err) {
+        console.error('Error loading customers:', err);
+      }
+    };
+
     fetchOrders();
     fetchTailors();
+    fetchCustomers();
 
     const state = location.state as any;
     if (state?.openModal) {
@@ -102,6 +117,21 @@ const Orders: React.FC = () => {
     if (!customerName || !category || !deliveryDate) return;
 
     try {
+      // 1. Create or ensure customer exists
+      const existingCustomer = customers.find(c => c.phone === customerPhone && customerPhone !== '');
+      if (!existingCustomer) {
+        try {
+          await customerApi.addCustomer({ 
+            name: customerName, 
+            phone: customerPhone || 'N/A', 
+            email: '',
+            address: '' 
+          });
+        } catch (custError) {
+          console.warn('Customer creation skipped/failed:', custError);
+        }
+      }
+
       const response = await orderApi.addOrder({
         customer_name: customerName,
         category,
@@ -131,7 +161,7 @@ const Orders: React.FC = () => {
 
       setOrders([newOrder, ...orders]);
       // Reset
-      setCustomerName(''); setCategory(''); setStitchingCost(''); setTotalAmount('');
+      setCustomerName(''); setCustomerPhone(''); setCategory(''); setStitchingCost(''); setTotalAmount('');
       setAdvancePaid(''); setDeliveryDate(''); setTailor(''); setFabricDetails('');
       setPriority('Normal');
       setIsModalOpen(false);
@@ -162,8 +192,25 @@ const Orders: React.FC = () => {
     }
   };
 
+  const handleTakeMeasurements = (order: Order) => {
+    navigate('/measurements', { 
+      state: { 
+        openNewModal: true,
+        customerName: order.customerName,
+        garment: order.category,
+        returnTo: '/orders/list',
+        cancelReturnTo: '/orders/list',
+      } 
+    });
+  };
+
   const handleSendToProduction = async (order: Order) => {
-    if (!window.confirm(`Send "${order.category}" for ${order.customerName} to the Production queue?`)) return;
+    const isConfirmed = await confirm(`Are you sure you want to send "${order.category}" for ${order.customerName} to the Production queue?`, {
+      title: 'Send to Production',
+      confirmText: 'Send to Production'
+    });
+    if (!isConfirmed) return;
+    
     try {
       await productionApi.addProduction({
         order_id: order.id,
@@ -174,11 +221,12 @@ const Orders: React.FC = () => {
         expected_end_date: order.deliveryDate,
         notes: order.fabricDetails || '',
       });
-      // Update order status to Cutting
-      await handleUpdateStatus(order.id, 'Cutting');
-      navigate('/orders/production');
-    } catch (error) {
-      console.error('Error sending to production:', error);
+      await orderApi.updateOrderStatus(order.id, 'Cutting');
+      
+      setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Cutting' } : o));
+      setSelectedOrder({ ...order, status: 'Cutting' });
+    } catch (err) {
+      console.error('Error sending directly to production:', err);
     }
   };
 
@@ -360,12 +408,20 @@ const Orders: React.FC = () => {
                 </div>
 
                 {selectedOrder.status === 'Received' && (
-                  <button
-                    onClick={() => handleSendToProduction(selectedOrder)}
-                    className="w-full py-2.5 bg-[#7209B7] hover:bg-[#a3531f] text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition shadow-md shadow-[#7209B7]/20"
-                  >
-                    Send to Production <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="space-y-3 pt-2">
+                    <button
+                      onClick={() => handleTakeMeasurements(selectedOrder)}
+                      className="w-full py-2.5 bg-white border border-[#7209B7] text-[#7209B7] hover:bg-[#7209B7]/5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
+                    >
+                      <Scissors className="w-4 h-4" /> Record Measurements
+                    </button>
+                    <button
+                      onClick={() => handleSendToProduction(selectedOrder)}
+                      className="w-full py-2.5 bg-[#7209B7] hover:bg-[#a3531f] text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition shadow-md shadow-[#7209B7]/20"
+                    >
+                      Send to Production <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -391,6 +447,23 @@ const Orders: React.FC = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Phone Number</label>
+                      <input 
+                        type="text" 
+                        value={customerPhone} 
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomerPhone(val);
+                          const existing = customers.find(c => c.phone === val);
+                          if (existing) {
+                            setCustomerName(existing.name);
+                          }
+                        }}
+                        placeholder="e.g. +91 98765 43210" 
+                        className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
                       <input 
                         type="text" 
@@ -401,6 +474,9 @@ const Orders: React.FC = () => {
                         className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
                       />
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Delivery Date *</label>
                       <input 
