@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Save, AlertCircle, TrendingUp, Gift } from 'lucide-react';
+import { Heart, Save, AlertCircle, TrendingUp, Gift, Loader2 } from 'lucide-react';
 import { settingsApi } from '../../../api/settingsApi';
 import { useSettings } from '../../../context/SettingsContext';
 import { toast } from 'sonner';
@@ -130,7 +130,7 @@ const LoyaltySettings: React.FC = () => {
                     disabled={isSaving}
                     className="px-6 py-3 bg-[#16132D] hover:bg-[#2A3441] text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
+                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     {isSaving ? 'Saving...' : 'Save Settings'}
                   </button>
                 </div>

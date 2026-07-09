@@ -28,8 +28,8 @@ const DashboardLayout: React.FC = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900">
       {/* Sidebar */}
-      <Sidebar 
-        collapsed={!sidebarOpen} 
+      <Sidebar
+        collapsed={!sidebarOpen}
         onCollapseToggle={(collapsed) => setSidebarOpen(!collapsed)}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}

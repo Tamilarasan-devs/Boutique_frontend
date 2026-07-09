@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar as CalendarIcon, Clock, CheckCircle, XCircle, MessageSquare, Plus, X, Trash2, AlertTriangle } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, Clock, CheckCircle, XCircle, MessageSquare, Plus, X, Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { trialApi } from '../../../api/trialApi';
 
 interface TrialItem {
@@ -25,6 +25,7 @@ const Trial: React.FC = () => {
   const [trials, setTrials] = useState<TrialItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
   const [orderId, setOrderId] = useState('');
@@ -67,6 +68,7 @@ const Trial: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !garment || !date || !time) return;
+    setIsSubmitting(true);
 
     try {
       const response = await trialApi.addTrial({
@@ -83,6 +85,8 @@ const Trial: React.FC = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error creating trial:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -223,7 +227,10 @@ const Trial: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3">Cancel</button>
-                <button type="submit" form="trialForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition">Schedule Trial</button>
+                <button type="submit" form="trialForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Scheduling...' : 'Schedule Trial'}
+                </button>
               </div>
             </div>
           </div>

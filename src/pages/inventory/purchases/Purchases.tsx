@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, FileText, X } from 'lucide-react';
+import { Plus, Search, FileText, X, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
+import { useConfirm } from '../../../context';
 
 interface Purchase {
   id: number;
@@ -20,11 +21,14 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const Purchases: React.FC = () => {
+  const { confirm } = useConfirm();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const [poNumber, setPoNumber] = useState('');
   const [supplier, setSupplier] = useState('');
@@ -49,17 +53,23 @@ const Purchases: React.FC = () => {
     return match && matchStatus;
   });
 
-  const resetForm = () => { setPoNumber(''); setSupplier(''); setItems(''); setTotalAmount(''); setStatus('Ordered'); };
+  const resetForm = () => { setPoNumber(''); setSupplier(''); setItems(''); setTotalAmount(''); setStatus('Ordered'); setEditingId(null); };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!poNumber || !supplier || !items) return;
+    setIsSubmitting(true);
     try {
-      await inventoryApi.addPurchase({ po_number: poNumber, supplier, items, total_amount: totalAmount || 0, status });
+      if (editingId) {
+        await inventoryApi.updatePurchase(editingId, { po_number: poNumber, supplier, items, total_amount: totalAmount || 0, status });
+      } else {
+        await inventoryApi.addPurchase({ po_number: poNumber, supplier, items, total_amount: totalAmount || 0, status });
+      }
       resetForm();
       setIsModalOpen(false);
       fetchData();
     } catch (err) { console.error(err); }
+    finally { setIsSubmitting(false); }
   };
 
   const handleStatusChange = async (id: number, newStatus: string) => {
@@ -67,6 +77,26 @@ const Purchases: React.FC = () => {
       await inventoryApi.updatePurchaseStatus(id, newStatus);
       setPurchases(purchases.map(p => p.id === id ? { ...p, status: newStatus as Purchase['status'] } : p));
     } catch (err) { console.error(err); }
+  };
+
+  const handleEdit = (p: Purchase) => {
+    setEditingId(p.id);
+    setPoNumber(p.po_number);
+    setSupplier(p.supplier);
+    setItems(p.items);
+    setTotalAmount(p.total_amount);
+    setStatus(p.status);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    const isConfirmed = await confirm('Delete this purchase order?', {
+      title: 'Delete Purchase Order',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    if (!isConfirmed) return;
+    try { await inventoryApi.deletePurchase(id); fetchData(); } catch (err) { console.error(err); }
   };
 
   return (
@@ -115,11 +145,12 @@ const Purchases: React.FC = () => {
                     <th className="py-4 px-6 text-right">Amount</th>
                     <th className="py-4 px-6">Date</th>
                     <th className="py-4 px-6">Status</th>
+                    <th className="py-4 px-6"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#16132D]/[0.04]">
                   {filtered.length === 0 ? (
-                    <tr><td colSpan={6} className="py-12 text-center text-[#16132D]/35 font-semibold">No purchase orders found.</td></tr>
+                    <tr><td colSpan={7} className="py-12 text-center text-[#16132D]/35 font-semibold">No purchase orders found.</td></tr>
                   ) : filtered.map(p => (
                     <tr key={p.id} className="hover:bg-[#16132D]/[0.02] transition">
                       <td className="py-4 px-6">
@@ -144,6 +175,10 @@ const Purchases: React.FC = () => {
                           <option>Cancelled</option>
                         </select>
                       </td>
+                      <td className="py-4 px-6 flex items-center justify-end gap-2">
+                        <button onClick={() => handleEdit(p)} className="p-1.5 text-[#16132D]/30 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(p.id)} className="p-1.5 text-[#16132D]/30 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -157,7 +192,7 @@ const Purchases: React.FC = () => {
           <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
               <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-bold text-[#16132D]">New Purchase Order</h2>
+                <h2 className="text-xl font-bold text-[#16132D]">{editingId ? 'Edit Purchase Order' : 'New Purchase Order'}</h2>
                 <button onClick={() => { setIsModalOpen(false); resetForm(); }} className="p-2 bg-[#16132D]/[0.04] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 rounded-full transition"><X className="w-4 h-4" /></button>
               </div>
               <div className="overflow-y-auto p-6">
@@ -192,7 +227,10 @@ const Purchases: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end gap-3 bg-[#F4F3F8]/50 shrink-0">
                 <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition">Cancel</button>
-                <button type="submit" form="poForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition">Create PO</button>
+                <button type="submit" form="poForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : (editingId ? 'Update PO' : 'Create PO')}
+                </button>
               </div>
             </div>
           </div>

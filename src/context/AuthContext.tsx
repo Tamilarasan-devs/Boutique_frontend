@@ -9,6 +9,7 @@ export interface AuthUser {
   name: string;
   email: string;
   role: UserRole;
+  permissions: Record<string, 'Full' | 'Read' | 'None'>;
 }
 
 interface AuthContextValue {
@@ -20,35 +21,18 @@ interface AuthContextValue {
   hasRole: (...roles: UserRole[]) => boolean;
 }
 
-// ─── Role hierarchy (what each role can access) ───────────────────────────────
-export const ROLE_PAGES: Record<UserRole, string[]> = {
-  owner: ['*'], // all pages
-  manager: [
-    '/', '/crm/leads', '/crm/customers', '/crm/appointments', '/crm/followups',
-    '/orders/quotations', '/orders/list', '/orders/production', '/orders/trial', '/orders/delivery',
-    '/measurements', '/designs/library', '/designs/upload',
-    '/inventory/fabrics', '/inventory/accessories', '/inventory/suppliers', '/inventory/purchases', '/inventory/stock',
-    '/billing/invoice', '/billing/payments', '/staff/employees', '/staff/attendance',
-    '/marketing/campaigns', '/marketing/whatsapp', '/marketing/email', '/marketing/loyalty',
-    '/profile'
-  ],
-  sales_staff: [
-    '/', '/crm/leads', '/crm/customers', '/crm/appointments', '/crm/followups',
-    '/orders/quotations', '/orders/list', '/orders/trial', '/orders/delivery',
-    '/measurements', '/billing/invoice', '/billing/payments',
-    '/marketing/whatsapp', '/marketing/email',
-    '/profile'
-  ],
-  tailor: [
-    '/', '/orders/list', '/orders/production', '/orders/trial', '/orders/delivery',
-    '/measurements', '/inventory/fabrics', '/inventory/accessories', '/inventory/stock',
-    '/profile'
-  ],
-  receptionist: [
-    '/', '/crm/leads', '/crm/customers', '/crm/appointments', '/crm/followups',
-    '/orders/quotations', '/orders/list', '/billing/invoice',
-    '/profile'
-  ],
+// ─── Module to Routes Mapping ────────────────────────────────────────────────
+export const MODULE_ROUTES: Record<string, string[]> = {
+  'Dashboard': ['/'],
+  'CRM': ['/crm'],
+  'Orders': ['/orders/quotations', '/orders/list', '/orders/trial', '/orders/delivery'],
+  'Production': ['/orders/production'], // Specific sub-route of orders
+  'Measurements': ['/measurements'],
+  'Inventory': ['/inventory'],
+  'Billing': ['/billing'],
+  'Staff Management': ['/staff'],
+  'Marketing': ['/marketing'],
+  'Admin Settings': ['/settings', '/profile'],
 };
 
 // ─── Context ──────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, AlertCircle, Trash2, X } from 'lucide-react';
+import { Plus, Search, AlertCircle, Trash2, X, Loader2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
 
@@ -20,6 +20,7 @@ const Fabrics: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
@@ -52,12 +53,14 @@ const Fabrics: React.FC = () => {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code || !name) return;
+    setIsSubmitting(true);
     try {
       await inventoryApi.addItem({ code, name, type: 'Fabric', color, stock: stock || 0, min_stock: minStock || 10, price: price || 0, unit });
       resetForm();
       setIsModalOpen(false);
       fetch();
     } catch (err) { console.error(err); }
+    finally { setIsSubmitting(false); }
   };
 
   const handleDelete = async (id: number) => {
@@ -202,7 +205,10 @@ const Fabrics: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end gap-3 bg-[#F4F3F8]/50 shrink-0">
                 <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition">Cancel</button>
-                <button type="submit" form="fabricForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition">Save Fabric</button>
+                <button type="submit" form="fabricForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : 'Save Fabric'}
+                </button>
               </div>
             </div>
           </div>

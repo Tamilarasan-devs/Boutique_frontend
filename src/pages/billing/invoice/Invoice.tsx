@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, FileText, Eye, X, Trash2, Printer } from 'lucide-react';
+import { Search, Plus, FileText, Eye, X, Trash2, Printer, Loader2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { billingApi, BILLING_EVENTS_URL, Invoice as InvoiceType, InvoiceItemDetail } from '../../../api/billingApi';
 import { customerApi } from '../../../api/customerApi';
@@ -26,6 +26,7 @@ const Invoice: React.FC = () => {
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceType | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New Invoice Form State
   const [customers, setCustomers] = useState<{ id: number; name: string }[]>([]);
@@ -214,6 +215,7 @@ const Invoice: React.FC = () => {
 
     const totalAmount = calculateFormTotal();
 
+    setIsSubmitting(true);
     try {
       const response = await billingApi.createInvoice({
         order_id: null,
@@ -246,6 +248,8 @@ const Invoice: React.FC = () => {
       fetchQuotations(); // Refresh quotations in case one was used
     } catch (err) {
       toast('Error creating invoice', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -564,9 +568,11 @@ const Invoice: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition shadow-sm"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg text-sm font-semibold transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Save Invoice
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : 'Save Invoice'}
                 </button>
               </div>
             </form>

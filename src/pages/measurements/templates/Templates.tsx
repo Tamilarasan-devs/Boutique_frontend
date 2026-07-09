@@ -12,9 +12,9 @@ import {
   Sparkles,
   Settings,
   Grid,
-  CheckCircle,
   AlertCircle,
-  User
+  User,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '../../../context';
 import { measurementTemplateApi } from '../../../api/measurementTemplateApi';
@@ -122,6 +122,7 @@ const Templates: React.FC = () => {
   // Modals state
   const [viewingTemplate, setViewingTemplate] = useState<Template | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
 
   // Form State for creating/editing
@@ -239,6 +240,7 @@ const Templates: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       if (editingTemplate) {
         // Edit
@@ -274,6 +276,8 @@ const Templates: React.FC = () => {
       setIsCreateModalOpen(false);
     } catch (err) {
       toast('Failed to save style profile', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -679,9 +683,11 @@ const Templates: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm shadow-sm transition-colors"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg text-sm shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Save Profile
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : 'Save Profile'}
                 </button>
               </div>
             </form>

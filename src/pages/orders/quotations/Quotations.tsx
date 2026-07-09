@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, FileText, Trash2, X, ArrowRight } from 'lucide-react';
+import { Plus, Search, FileText, Trash2, X, ArrowRight, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { quotationApi } from '../../../api/quotationApi';
 import { orderApi } from '../../../api/orderApi';
@@ -39,6 +39,7 @@ const Quotations: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [customers, setCustomers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Advance Payment Modal
   const [advanceModalOpen, setAdvanceModalOpen] = useState(false);
@@ -51,7 +52,6 @@ const Quotations: React.FC = () => {
   const [customerEmail, setCustomerEmail] = useState('');
   const [items, setItems] = useState('');
   const [totalAmount, setTotalAmount] = useState<number | ''>('');
-  const [discount, setDiscount] = useState<number | ''>('');
   const [validUntil, setValidUntil] = useState('');
   const [terms, setTerms] = useState('');
   
@@ -119,6 +119,7 @@ const Quotations: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !items || !totalAmount || !validUntil) return;
+    setIsSubmitting(true);
 
     try {
       // 1. Create or ensure customer exists
@@ -142,7 +143,7 @@ const Quotations: React.FC = () => {
         customer_email: customerEmail || '',
         items, 
         total_amount: totalAmount,
-        discount: discount || 0, 
+        discount: 0, 
         valid_until: validUntil, 
         terms,
       });
@@ -154,7 +155,7 @@ const Quotations: React.FC = () => {
         validUntil: new Date(q.valid_until).toISOString().split('T')[0],
         terms: q.terms || '', status: q.status,
       }, ...quotations]);
-      setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setDiscount(''); setValidUntil(''); setTerms('');
+      setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setValidUntil(''); setTerms('');
       setIsModalOpen(false);
 
       if (followupId) {
@@ -176,6 +177,8 @@ const Quotations: React.FC = () => {
       }
     } catch (error) {
       console.error('Error creating quotation:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -380,15 +383,9 @@ const Quotations: React.FC = () => {
                     <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Items Description *</label>
                     <textarea value={items} onChange={(e) => setItems(e.target.value)} required placeholder="e.g. Bridal Lehenga + Dupatta + Blouse" rows={2} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition resize-none" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Total Amount (₹) *</label>
-                      <input type="number" value={totalAmount} onChange={(e) => setTotalAmount(Number(e.target.value))} required placeholder="65000" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Discount (%)</label>
-                      <input type="number" value={discount} onChange={(e) => setDiscount(Number(e.target.value))} placeholder="0" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Total Amount (₹) *</label>
+                    <input type="number" value={totalAmount} onChange={(e) => setTotalAmount(Number(e.target.value))} required placeholder="65000" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Valid Until *</label>
@@ -402,7 +399,10 @@ const Quotations: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3">Cancel</button>
-                <button type="submit" form="quotationForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition">Save Quotation</button>
+                <button type="submit" form="quotationForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : 'Save Quotation'}
+                </button>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import React, { useState } from 'react';
-import { Upload as UploadIcon, X, CheckCircle, Image } from 'lucide-react';
+import { Upload as UploadIcon, X, CheckCircle, Image, Loader2 } from 'lucide-react';
 
 interface UploadedFile {
   id: string;
@@ -15,6 +15,7 @@ const Upload: React.FC = () => {
   const [category, setCategory] = useState('Bridal');
   const [style, setStyle] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -44,10 +45,16 @@ const Upload: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!designName || files.length === 0) return;
-    toast.success(`Design "${designName}" uploaded with ${files.length} file(s)!`);
-    setDesignName('');
-    setStyle('');
-    setFiles([]);
+    setIsSubmitting(true);
+    
+    // Simulate upload delay
+    setTimeout(() => {
+      toast.success(`Design "${designName}" uploaded with ${files.length} file(s)!`);
+      setDesignName('');
+      setStyle('');
+      setFiles([]);
+      setIsSubmitting(false);
+    }, 1500);
   };
 
   return (
@@ -131,8 +138,9 @@ const Upload: React.FC = () => {
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Style / Technique</label>
             <input type="text" value={style} onChange={(e) => setStyle(e.target.value)} placeholder="e.g. Zardosi, Thread Work" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
           </div>
-          <button type="submit" disabled={files.length === 0} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition mt-2 shadow-sm">
-            Upload to Library
+          <button type="submit" disabled={files.length === 0 || isSubmitting} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition mt-2 shadow-sm flex items-center justify-center gap-2">
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isSubmitting ? 'Uploading...' : 'Upload to Library'}
           </button>
         </form>
       </div>

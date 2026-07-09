@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Scissors, Sparkles, CheckCircle2, ChevronRight, User, Plus, X, Trash2, Calendar as CalendarIcon, Truck } from 'lucide-react';
+import { Scissors, Sparkles, CheckCircle2, ChevronRight, User, Plus, X, Trash2, Calendar as CalendarIcon, Truck, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { productionApi } from '../../../api/productionApi';
 import { deliveryApi } from '../../../api/deliveryApi';
@@ -36,6 +36,7 @@ const Production: React.FC = () => {
   const { confirm } = useConfirm();
   const [items, setItems] = useState<ProductionItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
   const [orderId, setOrderId] = useState('');
@@ -121,6 +122,7 @@ const Production: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !garment) return;
+    setIsSubmitting(true);
 
     try {
       const response = await productionApi.addProduction({
@@ -140,6 +142,8 @@ const Production: React.FC = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error creating production item:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -289,7 +293,10 @@ const Production: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3">Cancel</button>
-                <button type="submit" form="productionForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition">Add to Queue</button>
+                <button type="submit" form="productionForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Adding...' : 'Add to Queue'}
+                </button>
               </div>
             </div>
           </div>

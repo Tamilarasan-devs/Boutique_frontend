@@ -228,6 +228,7 @@ const Dashboard = () => {
       id: `ORD-${o.id}`,
       customer: o.customer_name,
       items: o.category || '—',
+      tailor: o.tailor || 'Unassigned',
       status: o.status,
       dot: style.dot,
       pill: style.pill,
@@ -484,6 +485,7 @@ const Dashboard = () => {
                         <th className="pb-3 pl-2">Order ID</th>
                         <th className="pb-3">Customer</th>
                         <th className="pb-3">Category</th>
+                        <th className="pb-3">Tailor</th>
                         <th className="pb-3">Status</th>
                         <th className="pb-3">Delivery</th>
                         <th className="pb-3 text-right pr-2">Amount</th>
@@ -495,6 +497,7 @@ const Dashboard = () => {
                           <td className="py-3.5 pl-2 font-semibold text-[#16132D]/80">{order.id}</td>
                           <td className="py-3.5 text-[#16132D]/70">{order.customer}</td>
                           <td className="py-3.5 font-medium text-[#16132D]/85">{order.items}</td>
+                          <td className="py-3.5 text-[#16132D]/70">{order.tailor}</td>
                           <td className="py-3.5">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${order.pill}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${order.dot}`} />

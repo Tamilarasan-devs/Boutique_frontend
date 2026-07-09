@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ArrowDownCircle, ArrowUpCircle, Plus, X } from 'lucide-react';
+import { Search, ArrowDownCircle, ArrowUpCircle, Plus, X, Loader2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 
 interface StockLog {
@@ -20,6 +20,7 @@ const Stock: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'All' | 'Stock In' | 'Stock Out'>('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [itemName, setItemName] = useState('');
   const [itemCode, setItemCode] = useState('');
@@ -54,12 +55,14 @@ const Stock: React.FC = () => {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!itemName || !itemCode || !quantity || !unit) return;
+    setIsSubmitting(true);
     try {
       await inventoryApi.addStockLog({ item_name: itemName, item_code: itemCode, type, quantity, unit, reason, updated_by: updatedBy });
       resetForm();
       setIsModalOpen(false);
       fetchData();
     } catch (err) { console.error(err); }
+    finally { setIsSubmitting(false); }
   };
 
   return (
@@ -214,7 +217,10 @@ const Stock: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end gap-3 bg-[#F4F3F8]/50 shrink-0">
                 <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition">Cancel</button>
-                <button type="submit" form="stockForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition">Log Adjustment</button>
+                <button type="submit" form="stockForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Logging...' : 'Log Adjustment'}
+                </button>
               </div>
             </div>
           </div>

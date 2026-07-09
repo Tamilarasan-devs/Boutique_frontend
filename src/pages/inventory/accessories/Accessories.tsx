@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, AlertCircle, Trash2, X } from 'lucide-react';
+import { Plus, Search, AlertCircle, Trash2, X, Edit2, Loader2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
 
@@ -8,6 +8,7 @@ interface Accessory {
   code: string;
   name: string;
   type: string;
+  color?: string;
   stock: number;
   unit: string;
   min_stock: number;
@@ -23,6 +24,8 @@ const Accessories: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
@@ -45,23 +48,42 @@ const Accessories: React.FC = () => {
 
   const filtered = items.filter(a => {
     const matchSearch = a.name.toLowerCase().includes(searchTerm.toLowerCase()) || a.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchType = typeFilter === 'All' || a.type === typeFilter;
+    const matchType = typeFilter === 'All' || a.color === typeFilter || a.type === typeFilter;
     return matchSearch && matchType;
   });
 
   const lowStockCount = items.filter(a => a.stock < a.min_stock).length;
 
-  const resetForm = () => { setCode(''); setName(''); setType('Buttons'); setStock(''); setUnit('pcs'); setMinStock(20); setPrice(''); };
+  const resetForm = () => { setCode(''); setName(''); setType('Buttons'); setStock(''); setUnit('pcs'); setMinStock(20); setPrice(''); setEditingId(null); };
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code || !name) return;
+    setIsSubmitting(true);
     try {
-      await inventoryApi.addItem({ code, name, type: 'Accessory', color: type, stock: stock || 0, min_stock: minStock || 20, price: price || 0, unit });
+      const payload = { code, name, type: 'Accessory', color: type, stock: stock || 0, min_stock: minStock || 20, price: price || 0, unit };
+      if (editingId) {
+        await inventoryApi.updateItem(editingId, payload);
+      } else {
+        await inventoryApi.addItem(payload);
+      }
       resetForm();
       setIsModalOpen(false);
       fetchData();
     } catch (err) { console.error(err); }
+    finally { setIsSubmitting(false); }
+  };
+
+  const handleEdit = (item: Accessory) => {
+    setEditingId(item.id);
+    setCode(item.code);
+    setName(item.name);
+    setType(item.color || 'Buttons');
+    setStock(item.stock);
+    setUnit(item.unit);
+    setMinStock(item.min_stock);
+    setPrice(item.price);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -137,7 +159,7 @@ const Accessories: React.FC = () => {
                       <tr key={a.id} className="hover:bg-[#16132D]/[0.02] transition">
                         <td className="py-4 px-6 font-mono text-xs font-bold text-[#16132D]/60">{a.code}</td>
                         <td className="py-4 px-6 font-bold text-[#16132D]">{a.name}</td>
-                        <td className="py-4 px-6"><span className="px-2.5 py-1 bg-[#16132D]/[0.05] text-[#16132D]/70 rounded-full text-xs font-bold">{a.type}</span></td>
+                        <td className="py-4 px-6"><span className="px-2.5 py-1 bg-[#16132D]/[0.05] text-[#16132D]/70 rounded-full text-xs font-bold">{a.color || a.type}</span></td>
                         <td className="py-4 px-6 font-bold text-[#16132D]">{a.stock} <span className="text-xs font-semibold text-[#16132D]/40">{a.unit}</span></td>
                         <td className="py-4 px-6 font-semibold text-[#16132D]">₹{a.price}</td>
                         <td className="py-4 px-6">
@@ -147,7 +169,8 @@ const Accessories: React.FC = () => {
                             <span className="text-xs font-bold text-[#10B981]">✓ In Stock</span>
                           )}
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-4 px-6 flex items-center gap-2">
+                          <button onClick={() => handleEdit(a)} className="p-1.5 text-[#16132D]/30 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
                           <button onClick={() => handleDelete(a.id)} className="p-1.5 text-[#16132D]/30 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
                         </td>
                       </tr>
@@ -164,11 +187,11 @@ const Accessories: React.FC = () => {
           <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
               <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-bold text-[#16132D]">Add Accessory</h2>
+                <h2 className="text-xl font-bold text-[#16132D]">{editingId ? 'Edit Accessory' : 'Add Accessory'}</h2>
                 <button onClick={() => { setIsModalOpen(false); resetForm(); }} className="p-2 bg-[#16132D]/[0.04] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 rounded-full transition"><X className="w-4 h-4" /></button>
               </div>
               <div className="overflow-y-auto p-6">
-                <form id="accForm" onSubmit={handleAdd} className="space-y-4">
+                <form id="accForm" onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Item Code *</label>
@@ -212,7 +235,10 @@ const Accessories: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end gap-3 bg-[#F4F3F8]/50 shrink-0">
                 <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition">Cancel</button>
-                <button type="submit" form="accForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition">Save Accessory</button>
+                <button type="submit" form="accForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : (editingId ? 'Update Accessory' : 'Save Accessory')}
+                </button>
               </div>
             </div>
           </div>

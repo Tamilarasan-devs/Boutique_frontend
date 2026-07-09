@@ -25,8 +25,7 @@ import {
   Crown,
   Scissors,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { ROLE_PAGES } from '../../context/AuthContext';
+import { useAuth, MODULE_ROUTES } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
 
 interface SidebarItem {
@@ -176,12 +175,22 @@ const Sidebar: React.FC<SidebarProps> = ({
     navigate('/auth/login', { replace: true });
   };
 
-  // Filter menu items based on the current user's role
-  const allowedPaths = user ? ROLE_PAGES[user.role] || [] : [];
+  // Filter menu items based on the current user's role permissions matrix
+  const permissions = user?.permissions || {};
+  
   const isPathAllowed = (path?: string) => {
     if (!path) return true;
-    if (allowedPaths.includes('*')) return true;
-    return allowedPaths.some(p => path === p || path.startsWith(p + '/') || p.startsWith(path));
+    if (user?.role === 'owner') return true;
+
+    // Check each module in the permissions matrix
+    for (const [moduleName, accessLevel] of Object.entries(permissions)) {
+      if (accessLevel === 'None') continue; // Only Read or Full grants access to the route
+      
+      const routes = MODULE_ROUTES[moduleName] || [];
+      const matches = routes.some(r => path === r || path.startsWith(r + '/') || r.startsWith(path));
+      if (matches) return true;
+    }
+    return false;
   };
 
   const filteredMenuItems = menuItems

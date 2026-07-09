@@ -26,6 +26,10 @@ export interface AttendanceSummary {
   half_days: number;
   late_days: number;
   total_marked: number;
+  daily_records?: Array<{
+    date: string;
+    status: string;
+  }>;
 }
 
 export const attendanceApi = {

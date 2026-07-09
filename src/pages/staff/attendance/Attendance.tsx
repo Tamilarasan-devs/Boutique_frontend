@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { attendanceApi, AttendanceRecord, AttendanceSummary } from '../../../api/attendanceApi';
 import { 
   CalendarDays, Search, CheckCircle2, XCircle, Clock, 
-  FileEdit, RefreshCw, BarChart3, Users, Calendar
+  FileEdit, RefreshCw, BarChart3, Users, Calendar, Eye, X
 } from 'lucide-react';
 
 type AttendanceStatus = 'Login' | 'Absent' | 'Half-Day' | 'Late';
@@ -20,6 +20,14 @@ const statusConfig: Record<AttendanceStatus, { color: string; bg: string; dot: s
 const todayStr = () => new Date().toISOString().split('T')[0];
 const currentMonthStr = () => new Date().toISOString().slice(0, 7);
 
+const getMonthDays = (monthStr: string) => {
+  const [y, m] = monthStr.split('-');
+  const year = parseInt(y, 10);
+  const month = parseInt(m, 10) - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+};
+
 const Attendance: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(todayStr());
   const [search, setSearch] = useState('');
@@ -32,9 +40,11 @@ const Attendance: React.FC = () => {
   const [markingId, setMarkingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'daily' | 'summary'>('daily');
 
-  // Edit notes modal
   const [notesModal, setNotesModal] = useState<{ record: AttendanceRecord; notes: string } | null>(null);
   const [savingNotes, setSavingNotes] = useState(false);
+
+  // Calendar Modal state
+  const [calendarModal, setCalendarModal] = useState<AttendanceSummary | null>(null);
 
   const fetchAttendance = useCallback(async () => {
     setLoading(true);
@@ -168,6 +178,15 @@ const Attendance: React.FC = () => {
   const unmarkedCount = records.filter(r => !r.status).length;
 
   const isToday = selectedDate === todayStr();
+  const currentMonth = currentMonthStr();
+  const monthDays = getMonthDays(currentMonth);
+
+  const getDayStatus = (records: any[] | undefined, day: number) => {
+    if (!records) return null;
+    const dateStr = `${currentMonth}-${String(day).padStart(2, '0')}`;
+    const record = records.find(r => r.date === dateStr);
+    return record ? record.status : null;
+  };
 
   return (
     <div className="flex flex-col h-full space-y-6 p-6 bg-[#F4F3F8]">
@@ -450,11 +469,18 @@ const Attendance: React.FC = () => {
               <table className="w-full text-left text-sm border-separate border-spacing-0">
                 <thead>
                   <tr>
-                    {['Employee', 'Role', 'Login', 'Absent', 'Half-Day', 'Late', 'Total Marked', 'Attendance %'].map((h, i) => (
-                      <th key={h} className={`px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 ${i === 0 ? 'rounded-tl-xl' : ''} ${i === 7 ? 'rounded-tr-xl' : ''}`}>
-                        {h}
-                      </th>
-                    ))}
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/80 rounded-tl-xl sticky left-0 z-10 backdrop-blur-sm min-w-[180px]">
+                      Employee
+                    </th>
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 min-w-[140px]">
+                      Summary
+                    </th>
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 min-w-[100px]">
+                      Attendance %
+                    </th>
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 rounded-tr-xl w-[80px]">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -463,43 +489,55 @@ const Attendance: React.FC = () => {
                     const isLast = i === summary.length - 1;
                     
                     return (
-                      <tr key={s.employee_id} className="hover:bg-[#F4F3F8]/40 transition-colors">
-                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                      <tr key={s.employee_id} className="hover:bg-[#F4F3F8]/40 transition-colors group">
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''} sticky left-0 z-10 bg-white group-hover:bg-[#F4F3F8]/40 transition-colors`}>
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#16132D] to-[#2a3545] flex items-center justify-center text-[#F4F3F8] font-bold text-xs shadow-sm shadow-[#16132D]/10 flex-shrink-0">
                               {s.employee_name.charAt(0).toUpperCase()}
                             </div>
-                            <span className="font-bold text-[#16132D]">{s.employee_name}</span>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-[#16132D] truncate max-w-[120px]" title={s.employee_name}>{s.employee_name}</span>
+                              <span className="text-[10px] font-semibold text-[#7209B7]">{s.employee_role}</span>
+                            </div>
                           </div>
                         </td>
                         <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
-                          <span className="text-[11px] font-bold text-[#7209B7] bg-[#7209B7]/10 px-2.5 py-1 rounded-md">{s.employee_role}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col" title="Present Days">
+                              <span className="text-[10px] font-bold text-[#16132D]/40 uppercase tracking-wider leading-none mb-1">Present</span>
+                              <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#10B981]/10 text-[#10B981]">{s.present_days}</span>
+                            </div>
+                            <div className="w-px h-6 bg-[#16132D]/[0.06]"></div>
+                            <div className="flex flex-col" title="Absent Days">
+                              <span className="text-[10px] font-bold text-[#16132D]/40 uppercase tracking-wider leading-none mb-1">Absent</span>
+                              <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#F43F5E]/10 text-[#F43F5E]">{s.absent_days}</span>
+                            </div>
+                          </div>
                         </td>
+
                         <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#10B981]/10 text-[#10B981]">{s.present_days}</span>
-                        </td>
-                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F43F5E]/10 text-[#F43F5E]">{s.absent_days}</span>
-                        </td>
-                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#7209B7]/10 text-[#7209B7]">{s.half_days}</span>
-                        </td>
-                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#8338EC]/10 text-[#8338EC]">{s.late_days}</span>
-                        </td>
-                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
-                          <span className="font-bold text-[#16132D]/80">{s.total_marked}</span>
-                        </td>
-                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 bg-[#16132D]/[0.06] rounded-full h-2 min-w-[70px] overflow-hidden">
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-black text-[#16132D]">{pct}%</span>
+                              <span className="text-[10px] font-semibold text-[#16132D]/40">{s.total_marked} days</span>
+                            </div>
+                            <div className="bg-[#16132D]/[0.06] rounded-full h-1.5 w-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full transition-all duration-500 ${pct >= 80 ? 'bg-[#10B981]' : pct >= 60 ? 'bg-[#8338EC]' : 'bg-[#F43F5E]'}`}
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
-                            <span className="text-xs font-black text-[#16132D] w-8">{pct}%</span>
                           </div>
+                        </td>
+                        
+                        <td className={`px-4 py-3 border-b border-[#16132D]/[0.04] ${isLast ? 'border-b-0' : ''}`}>
+                          <button
+                            onClick={() => setCalendarModal(s)}
+                            className="flex items-center justify-center w-8 h-8 bg-[#F4F3F8] text-[#16132D]/60 hover:bg-[#7209B7]/10 hover:text-[#7209B7] rounded-xl transition-all"
+                            title="View Calendar"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     );
@@ -551,6 +589,74 @@ const Attendance: React.FC = () => {
                 {savingNotes ? 'Saving...' : 'Save Note'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Calendar Modal */}
+      {calendarModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16132D]/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl shadow-[#16132D]/20 w-full max-w-2xl p-6 transform transition-all">
+            <div className="flex justify-between items-center mb-6 border-b border-[#16132D]/[0.06] pb-4">
+              <div>
+                <h3 className="text-xl font-serif font-bold text-[#16132D] flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#16132D] to-[#2a3545] flex items-center justify-center text-[#F4F3F8] font-bold text-sm shadow-sm shadow-[#16132D]/10">
+                    {calendarModal.employee_name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    {calendarModal.employee_name}&apos;s Calendar
+                    <span className="block text-[11px] font-semibold text-[#7209B7] mt-0.5">{calendarModal.employee_role}</span>
+                  </div>
+                </h3>
+              </div>
+              <button 
+                onClick={() => setCalendarModal(null)}
+                className="p-2 bg-[#F4F3F8] text-[#16132D]/60 hover:bg-[#F43F5E]/10 hover:text-[#F43F5E] rounded-xl transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-2">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(dayName => (
+                <div key={dayName} className="text-center text-[10px] font-bold text-[#16132D]/50 uppercase tracking-wider mb-2">
+                  {dayName}
+                </div>
+              ))}
+              
+              {/* Calculate offset for first day of month */}
+              {Array.from({ length: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay() }).map((_, i) => (
+                <div key={`empty-${i}`} className="h-14 bg-[#F4F3F8]/20 rounded-xl border border-[#16132D]/[0.02]"></div>
+              ))}
+              
+              {monthDays.map(day => {
+                const status = getDayStatus(calendarModal.daily_records, day);
+                let cellClass = "bg-white border-[#16132D]/[0.06] text-[#16132D]/40";
+                let badge = null;
+                
+                if (status === 'Login') { 
+                  cellClass = "bg-[#10B981]/5 border-[#10B981]/20"; 
+                  badge = <span className="absolute bottom-1 right-1 text-[9px] font-bold text-[#10B981] bg-[#10B981]/10 px-1.5 py-0.5 rounded">Present</span>; 
+                } else if (status === 'Absent') { 
+                  cellClass = "bg-[#F43F5E]/5 border-[#F43F5E]/20"; 
+                  badge = <span className="absolute bottom-1 right-1 text-[9px] font-bold text-[#F43F5E] bg-[#F43F5E]/10 px-1.5 py-0.5 rounded">Absent</span>; 
+                } else if (status === 'Half-Day') { 
+                  cellClass = "bg-[#7209B7]/5 border-[#7209B7]/20"; 
+                  badge = <span className="absolute bottom-1 right-1 text-[9px] font-bold text-[#7209B7] bg-[#7209B7]/10 px-1.5 py-0.5 rounded">Half</span>; 
+                } else if (status === 'Late') { 
+                  cellClass = "bg-[#8338EC]/5 border-[#8338EC]/20"; 
+                  badge = <span className="absolute bottom-1 right-1 text-[9px] font-bold text-[#8338EC] bg-[#8338EC]/10 px-1.5 py-0.5 rounded">Late</span>; 
+                }
+
+                return (
+                  <div key={day} className={`h-14 rounded-xl border flex flex-col p-2 relative ${cellClass}`}>
+                    <span className="text-xs font-bold">{day}</span>
+                    {badge}
+                  </div>
+                );
+              })}
+            </div>
+            
           </div>
         </div>
       )}

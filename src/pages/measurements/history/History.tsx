@@ -3,7 +3,7 @@ import { useToast } from '../../../context';
 import { measurementHistoryApi } from '../../../api/measurementHistoryApi';
 import { measurementTemplateApi } from '../../../api/measurementTemplateApi';
 import { customerApi } from '../../../api/customerApi';
-import { Search, Plus, Trash2, X, FileText, CheckCircle, User } from 'lucide-react';
+import { Search, Plus, Trash2, X, FileText, CheckCircle, User, Loader2 } from 'lucide-react';
 
 interface HistoryRecord {
   id: string | number;
@@ -24,6 +24,7 @@ const History: React.FC = () => {
   const [customers, setCustomers] = useState<any[]>([]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [measurements, setMeasurements] = useState<Record<string, string>>({});
@@ -70,6 +71,7 @@ const History: React.FC = () => {
       }
     }
 
+    setIsSubmitting(true);
     try {
       const newHistory = await measurementHistoryApi.createHistory({
         customerId: parseInt(selectedCustomerId, 10),
@@ -94,6 +96,8 @@ const History: React.FC = () => {
       setNotes('');
     } catch (err) {
       toast('Failed to save measurement', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -252,8 +256,9 @@ const History: React.FC = () => {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-                  Save Measurement
+                <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-blue-600 disabled:opacity-60 text-white rounded-md text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : 'Save Measurement'}
                 </button>
               </div>
             </form>

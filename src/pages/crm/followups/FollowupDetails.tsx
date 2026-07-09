@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, MessageSquare, Mail, MoreVertical, User, Calendar, CheckCircle2, Plus, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Phone, MessageSquare, Mail, MoreVertical, User, Calendar, CheckCircle2, Plus, ArrowRight, Clock } from 'lucide-react';
 import { followupApi } from '../../../api/followupApi';
 import { toast } from 'sonner';
 
@@ -207,7 +207,10 @@ const FollowupDetails: React.FC = () => {
                           <div className="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-[13px] font-bold text-slate-800">User</span>
-                              <span className="text-[11px] font-semibold text-slate-400">{match[1]}</span>
+                              <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {match[1]}
+                              </span>
                             </div>
                             <p className="text-[14px] text-slate-600 leading-relaxed whitespace-pre-wrap">{match[2]}</p>
                           </div>

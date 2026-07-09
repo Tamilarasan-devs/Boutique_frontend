@@ -29,6 +29,7 @@ const Leads: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
@@ -90,6 +91,7 @@ const Leads: React.FC = () => {
   const handleSaveLead = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone) return;
+    setIsSubmitting(true);
 
     try {
       const formattedValue = value ? `₹${Number(value).toLocaleString('en-IN')}` : '₹0';
@@ -137,6 +139,8 @@ const Leads: React.FC = () => {
     } catch (error) {
       console.error('Failed to save lead', error);
       alert('Error saving lead. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -177,6 +181,43 @@ const Leads: React.FC = () => {
       // Revert if failed
       setLeads(leads.map(lead => lead.id === id ? { ...lead, status: currentStatus } : lead));
       alert('Failed to update lead status on the server.');
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string, sourceStatus: Lead['status']) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', JSON.stringify({ id, sourceStatus }));
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, targetStatus: Lead['status']) => {
+    e.preventDefault();
+    try {
+      const data = e.dataTransfer.getData('text/plain');
+      if (!data) return;
+      const { id, sourceStatus } = JSON.parse(data);
+      
+      if (id && sourceStatus && sourceStatus !== targetStatus) {
+        if (targetStatus === 'Lost') {
+          handleMarkLost(id, sourceStatus);
+        } else {
+          // optimistically update
+          setLeads(prev => prev.map(l => l.id === id ? { ...l, status: targetStatus } : l));
+          try {
+            await leadApi.updateLeadStatus(id, targetStatus);
+          } catch (error) {
+            console.error('Failed to drop', error);
+            setLeads(prev => prev.map(l => l.id === id ? { ...l, status: sourceStatus } : l));
+            toast.error('Failed to update lead status on the server.');
+          }
+        }
+      }
+    } catch(err) {
+      console.error('Drag data parsing error', err);
     }
   };
 
@@ -325,16 +366,32 @@ const Leads: React.FC = () => {
             {columns.map(column => {
               const style = columnStyles[column];
               const columnLeads = filteredLeads.filter(l => l.status === column);
+              
+              const columnTotal = columnLeads.reduce((acc, l) => {
+                const valStr = l.value || '';
+                const num = Number(valStr.replace(/[^\d.-]/g, ''));
+                return acc + (isNaN(num) ? 0 : num);
+              }, 0);
+              const formattedTotal = `₹${columnTotal.toLocaleString('en-IN')}`;
+
               return (
-                <div key={column} className="bg-[#F8F8FB]/50 border border-[#16132D]/[0.03] p-4 md:p-5 rounded-[20px] flex flex-col min-w-[300px] sm:min-w-[340px] max-w-[360px] shrink-0 snap-start h-full">
+                <div key={column} 
+                     onDragOver={handleDragOver}
+                     onDrop={(e) => handleDrop(e, column)}
+                     className="bg-[#F8F8FB]/50 border border-[#16132D]/[0.03] p-4 md:p-5 rounded-[20px] flex flex-col min-w-[300px] sm:min-w-[340px] max-w-[360px] shrink-0 snap-start h-full">
                   <div className="flex justify-between items-center mb-5 px-1">
                     <span className="flex items-center gap-2.5 text-[15px] font-bold text-[#16132D] tracking-tight">
                       <span className={`w-2 h-2 rounded-full ${style.dot}`} />
                       {column}
                     </span>
-                    <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold tracking-wide ${style.chip}`}>
-                      {columnLeads.length}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold tracking-wide ${style.chip}`}>
+                        {formattedTotal}
+                      </span>
+                      <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold tracking-wide ${style.chip}`}>
+                        {columnLeads.length} {columnLeads.length === 1 ? 'Lead' : 'Leads'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-4 flex-1 overflow-y-auto pr-1">
@@ -346,7 +403,9 @@ const Leads: React.FC = () => {
                     {columnLeads.map(lead => (
                       <div
                         key={lead.id}
-                        className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.05] shadow-[0_2px_10px_-4px_rgba(22,19,45,0.05)] hover:shadow-[0_8px_24px_-8px_rgba(22,19,45,0.08)] hover:border-[#16132D]/[0.1] hover:-translate-y-0.5 transition-all duration-300 flex flex-col gap-4 group"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, lead.id, column)}
+                        className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.05] shadow-[0_2px_10px_-4px_rgba(22,19,45,0.05)] hover:shadow-[0_8px_24px_-8px_rgba(22,19,45,0.08)] hover:border-[#16132D]/[0.1] hover:-translate-y-0.5 transition-all duration-300 flex flex-col gap-4 group cursor-grab active:cursor-grabbing"
                       >
                         <div className="flex justify-between items-start">
                           <span className="text-[10px] font-bold tracking-widest text-[#16132D]/35 uppercase">{lead.lead_id}</span>
@@ -620,9 +679,11 @@ const Leads: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3.5 mt-2 bg-gradient-to-br from-[#16132D] to-[#2D2854] hover:from-[#2D2854] hover:to-[#16132D] text-white rounded-xl text-[13px] font-bold shadow-lg shadow-[#16132D]/20 hover:shadow-[#16132D]/30 hover:-translate-y-0.5 transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 mt-2 bg-gradient-to-br from-[#16132D] to-[#2D2854] hover:from-[#2D2854] hover:to-[#16132D] text-white rounded-xl text-[13px] font-bold shadow-lg shadow-[#16132D]/20 hover:shadow-[#16132D]/30 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {editingLeadId ? 'Update Lead' : 'Save Lead'}
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : editingLeadId ? 'Update Lead' : 'Save Lead'}
                 </button>
               </form>
             </div>

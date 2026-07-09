@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight, Edit3 } from 'lucide-react';
+import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight, Edit3, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { orderApi } from '../../../api/orderApi';
 import { productionApi } from '../../../api/productionApi';
@@ -40,6 +40,7 @@ const Orders: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [productionTailor, setProductionTailor] = useState('');
@@ -125,6 +126,7 @@ const Orders: React.FC = () => {
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !category || !deliveryDate) return;
+    setIsSubmitting(true);
 
     try {
       // 1. Create or ensure customer exists (only if not editing, or always is fine)
@@ -216,6 +218,8 @@ const Orders: React.FC = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error saving order:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -766,9 +770,11 @@ const Orders: React.FC = () => {
                 <button 
                   type="submit"
                   form="orderForm"
-                  className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {isEditMode ? 'Update Order' : 'Save Order'}
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : isEditMode ? 'Update Order' : 'Save Order'}
                 </button>
               </div>
             </div>

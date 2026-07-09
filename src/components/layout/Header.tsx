@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, Bell, Calendar } from 'lucide-react';
 
 export interface HeaderProps {
   className?: string;
@@ -22,6 +22,16 @@ const Header: React.FC<HeaderProps> = ({ className, children, sidebarOpen, setSi
           </button>
         )}
         {children || <span className="font-semibold text-slate-800">Header</span>}
+      </div>
+      
+      <div className="flex items-center gap-2 pr-2">
+        <button className="p-2 text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-full transition-colors relative" title="Calendar">
+          <Calendar size={20} />
+        </button>
+        <button className="p-2 text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-full transition-colors relative" title="Notifications">
+          <Bell size={20} />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-[#F43F5E] rounded-full border-2 border-white"></span>
+        </button>
       </div>
     </div>
   );

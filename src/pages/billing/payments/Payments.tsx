@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText } from 'lucide-react';
+import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText, Loader2 } from 'lucide-react';
 import { billingApi, BILLING_EVENTS_URL, Payment, Invoice } from '../../../api/billingApi';
 import { useToast, useConfirm } from '../../../context';
 
@@ -20,6 +20,7 @@ const Payments: React.FC = () => {
 
   // Modal States
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form States
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
@@ -133,6 +134,7 @@ const Payments: React.FC = () => {
       }
     }
 
+    setIsSubmitting(true);
     try {
       await billingApi.recordPayment({
         invoice_id: invoiceIdNum,
@@ -156,6 +158,8 @@ const Payments: React.FC = () => {
       setInvoices(updatedInvoices);
     } catch (err) {
       toast('Error recording payment', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -380,9 +384,11 @@ const Payments: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition shadow-sm"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg text-sm font-semibold transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Record Payment
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Recording...' : 'Record Payment'}
                 </button>
               </div>
             </form>

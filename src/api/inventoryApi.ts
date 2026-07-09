@@ -32,6 +32,8 @@ export const inventoryApi = {
   // --- Purchases ---
   getPurchases: () => req(`${API_BASE}/purchases`),
   addPurchase: (data: any) => req(`${API_BASE}/purchases`, { method: 'POST', body: JSON.stringify(data) }),
+  updatePurchase: (id: number, data: any) => req(`${API_BASE}/purchases/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePurchase: (id: number) => req(`${API_BASE}/purchases/${id}`, { method: 'DELETE' }),
   updatePurchaseStatus: (id: number, status: string) =>
     req(`${API_BASE}/purchases/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
 

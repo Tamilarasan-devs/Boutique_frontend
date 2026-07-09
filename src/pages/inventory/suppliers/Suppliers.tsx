@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Phone, Mail, MapPin, Trash2, X, Star } from 'lucide-react';
+import { Plus, Search, Phone, Mail, MapPin, Trash2, X, Star, Loader2, Edit2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
 
@@ -20,6 +20,8 @@ const Suppliers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
@@ -45,17 +47,23 @@ const Suppliers: React.FC = () => {
     (s.category || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const resetForm = () => { setName(''); setContact(''); setPhone(''); setEmail(''); setLocation(''); setCategory(''); setRating(5); };
+  const resetForm = () => { setName(''); setContact(''); setPhone(''); setEmail(''); setLocation(''); setCategory(''); setRating(5); setEditingId(null); };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone) return;
+    setIsSubmitting(true);
     try {
-      await inventoryApi.addSupplier({ name, contact, phone, email, location, category, rating });
+      if (editingId) {
+        await inventoryApi.updateSupplier(editingId, { name, contact, phone, email, location, category, rating });
+      } else {
+        await inventoryApi.addSupplier({ name, contact, phone, email, location, category, rating });
+      }
       resetForm();
       setIsModalOpen(false);
       fetchData();
     } catch (err) { console.error(err); }
+    finally { setIsSubmitting(false); }
   };
 
   const handleDelete = async (id: number) => {
@@ -66,6 +74,18 @@ const Suppliers: React.FC = () => {
     });
     if (!isConfirmed) return;
     try { await inventoryApi.deleteSupplier(id); fetchData(); } catch (err) { console.error(err); }
+  };
+
+  const handleEdit = (s: Supplier) => {
+    setEditingId(s.id);
+    setName(s.name);
+    setContact(s.contact || '');
+    setPhone(s.phone || '');
+    setEmail(s.email || '');
+    setLocation(s.location || '');
+    setCategory(s.category || '');
+    setRating(s.rating || 5);
+    setIsModalOpen(true);
   };
 
   return (
@@ -120,7 +140,8 @@ const Suppliers: React.FC = () => {
                   {s.location && <p className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[#16132D]/35 flex-shrink-0" />{s.location}</p>}
                 </div>
 
-                <div className="pt-3 border-t border-[#16132D]/[0.05] flex justify-end">
+                <div className="pt-3 border-t border-[#16132D]/[0.05] flex justify-end gap-2">
+                  <button onClick={() => handleEdit(s)} className="p-1.5 text-[#16132D]/30 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
                   <button onClick={() => handleDelete(s.id)} className="p-1.5 text-[#16132D]/30 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
@@ -133,7 +154,7 @@ const Suppliers: React.FC = () => {
           <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
               <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-bold text-[#16132D]">Add New Supplier</h2>
+                <h2 className="text-xl font-bold text-[#16132D]">{editingId ? 'Edit Supplier' : 'Add New Supplier'}</h2>
                 <button onClick={() => { setIsModalOpen(false); resetForm(); }} className="p-2 bg-[#16132D]/[0.04] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 rounded-full transition"><X className="w-4 h-4" /></button>
               </div>
               <div className="overflow-y-auto p-6">
@@ -180,7 +201,10 @@ const Suppliers: React.FC = () => {
               </div>
               <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end gap-3 bg-[#F4F3F8]/50 shrink-0">
                 <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition">Cancel</button>
-                <button type="submit" form="supForm" className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition">Save Supplier</button>
+                <button type="submit" form="supForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Saving...' : (editingId ? 'Update Supplier' : 'Save Supplier')}
+                </button>
               </div>
             </div>
           </div>

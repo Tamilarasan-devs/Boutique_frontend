@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Calendar as CalendarIcon, Clock, User, MessageSquare, Check, X, Phone, UserCheck, Trash2 } from 'lucide-react';
+import { Plus, Search, Calendar as CalendarIcon, Clock, User, MessageSquare, Check, X, Phone, UserCheck, Trash2, Loader2 } from 'lucide-react';
 import { appointmentApi } from '../../../api/appointmentApi';
 
 interface Appointment {
@@ -41,6 +41,7 @@ const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
   const [customerName, setCustomerName] = useState('');
@@ -83,6 +84,7 @@ const Appointments: React.FC = () => {
     e.preventDefault();
     if (!customerName || !date || !time) return;
 
+    setIsSubmitting(true);
     try {
       const response = await appointmentApi.addAppointment({
         customer_name: customerName,
@@ -118,6 +120,8 @@ const Appointments: React.FC = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error adding appointment:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -349,9 +353,11 @@ const Appointments: React.FC = () => {
                 </div>
                 <button 
                   type="submit" 
-                  className="w-full py-3 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold transition mt-2 shadow-md shadow-[#16132D]/10"
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-semibold transition mt-2 shadow-md shadow-[#16132D]/10 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Schedule Appointment
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Scheduling...' : 'Schedule Appointment'}
                 </button>
               </form>
             </div>

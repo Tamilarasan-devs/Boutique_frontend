@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth, UserRole, ROLE_PAGES } from '../../context/AuthContext';
+import { useAuth, UserRole, MODULE_ROUTES } from '../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -33,14 +33,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     return <>{children}</>;
   }
 
-  // Check if this specific route is in the allowed pages for the user's role
-  const allowedPages = ROLE_PAGES[user.role] || [];
-  const currentPath = location.pathname;
-  const hasPageAccess =
-    allowedPages.includes('*') ||
-    allowedPages.some(p => currentPath === p || currentPath.startsWith(p + '/'));
+  const permissions = user.permissions || {};
+  
+  const isPathAllowed = () => {
+    if (user.role === 'owner') return true;
 
-  if (!hasPageAccess) {
+    // Check each module in the permissions matrix
+    for (const [moduleName, accessLevel] of Object.entries(permissions)) {
+      if (accessLevel === 'None') continue;
+      
+      const routes = MODULE_ROUTES[moduleName] || [];
+      const matches = routes.some(r => location.pathname === r || location.pathname.startsWith(r + '/'));
+      if (matches) return true;
+    }
+    return false;
+  };
+
+  if (!isPathAllowed()) {
     return <AccessDenied />;
   }
 

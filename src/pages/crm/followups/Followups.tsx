@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Search, Phone, MessageSquare, Mail, Calendar, Check, AlertCircle, X, Edit3, Clock, ChevronRight, FileText, ArrowRight, Trash2, List } from 'lucide-react';
+import { Plus, Search, Phone, MessageSquare, Mail, Calendar, Check, AlertCircle, X, Edit3, Clock, ChevronRight, FileText, ArrowRight, Trash2, List, Loader2 } from 'lucide-react';
 import { followupApi, FOLLOWUP_EVENTS_URL } from '../../../api/followupApi';
 import { useConfirm } from '../../../context/ConfirmContext';
 import { toast } from 'sonner';
@@ -41,6 +41,7 @@ const Followups: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [calendarView, setCalendarView] = useState<any>('month');
   const [calendarDate, setCalendarDate] = useState(new Date());
@@ -202,6 +203,7 @@ const Followups: React.FC = () => {
   const handleCreateFollowUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !dueDate || !reason) return;
+    setIsSubmitting(true);
 
     try {
       const response = await followupApi.addFollowup({
@@ -237,6 +239,8 @@ const Followups: React.FC = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error adding followup:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -247,6 +251,7 @@ const Followups: React.FC = () => {
       state: {
         fromLead: true,
         customerName: fol.customerName,
+        customerPhone: fol.customerPhone || '',
         followupId: fol.id
       }
     });
@@ -607,8 +612,9 @@ const Followups: React.FC = () => {
                 <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Reason</label>
                 <textarea value={reason} onChange={(e) => setReason(e.target.value)} required placeholder="Why are we following up?" rows={3} className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium resize-none" />
               </div>
-              <button type="submit" className="w-full py-3.5 bg-[#16132D] hover:bg-[#2A3441] text-white rounded-xl text-sm font-bold transition-all shadow-md mt-2">
-                Create Follow-up
+              <button type="submit" disabled={isSubmitting} className="w-full py-3.5 bg-[#16132D] hover:bg-[#2A3441] disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all shadow-md mt-2 flex items-center justify-center gap-2 cursor-pointer">
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isSubmitting ? 'Creating...' : 'Create Follow-up'}
               </button>
             </form>
           </div>

@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { Save, Shield, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, Shield, CheckCircle2, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '../../../constants';
+import { fetchWithAuth } from '../../../api/client';
+import { toast } from 'react-hot-toast';
 
 type AccessLevel = 'Full' | 'Read' | 'None';
 
@@ -12,27 +15,19 @@ interface ModulePermission {
   receptionist: AccessLevel;
 }
 
-const defaultPermissions: ModulePermission[] = [
-  { module: 'Dashboard', owner: 'Full', manager: 'Full', salesStaff: 'Read', tailor: 'Read', receptionist: 'Read' },
-  { module: 'CRM', owner: 'Full', manager: 'Full', salesStaff: 'Full', tailor: 'None', receptionist: 'Full' },
-  { module: 'Orders', owner: 'Full', manager: 'Full', salesStaff: 'Full', tailor: 'Read', receptionist: 'Read' },
-  { module: 'Production', owner: 'Full', manager: 'Full', salesStaff: 'None', tailor: 'Full', receptionist: 'None' },
-  { module: 'Measurements', owner: 'Full', manager: 'Full', salesStaff: 'Read', tailor: 'Full', receptionist: 'None' },
-  { module: 'Inventory', owner: 'Full', manager: 'Full', salesStaff: 'None', tailor: 'Read', receptionist: 'None' },
-  { module: 'Billing', owner: 'Full', manager: 'Full', salesStaff: 'Full', tailor: 'None', receptionist: 'Read' },
-  { module: 'Staff Management', owner: 'Full', manager: 'Full', salesStaff: 'None', tailor: 'None', receptionist: 'None' },
-  { module: 'Marketing', owner: 'Full', manager: 'Full', salesStaff: 'Full', tailor: 'None', receptionist: 'None' },
-  { module: 'Admin Settings', owner: 'Full', manager: 'None', salesStaff: 'None', tailor: 'None', receptionist: 'None' },
+const MODULES = [
+  'Dashboard', 'CRM', 'Orders', 'Production', 'Measurements', 
+  'Inventory', 'Billing', 'Staff Management', 'Marketing', 'Admin Settings'
 ];
 
 type RoleKey = 'owner' | 'manager' | 'salesStaff' | 'tailor' | 'receptionist';
 
-const roles: { key: RoleKey; label: string }[] = [
-  { key: 'owner', label: 'Owner' },
-  { key: 'manager', label: 'Manager' },
-  { key: 'salesStaff', label: 'Sales Staff' },
-  { key: 'tailor', label: 'Tailor' },
-  { key: 'receptionist', label: 'Receptionist' },
+const roles: { key: RoleKey; label: string; apiRole: string }[] = [
+  { key: 'owner', label: 'Owner', apiRole: 'owner' },
+  { key: 'manager', label: 'Manager', apiRole: 'manager' },
+  { key: 'salesStaff', label: 'Sales Staff', apiRole: 'sales_staff' },
+  { key: 'tailor', label: 'Tailor', apiRole: 'tailor' },
+  { key: 'receptionist', label: 'Receptionist', apiRole: 'receptionist' },
 ];
 
 const levelColor: Record<AccessLevel, string> = {
@@ -42,8 +37,37 @@ const levelColor: Record<AccessLevel, string> = {
 };
 
 const PermissionsSettings: React.FC = () => {
-  const [permissions, setPermissions] = useState<ModulePermission[]>(defaultPermissions);
+  const [permissions, setPermissions] = useState<ModulePermission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    fetchPermissions();
+  }, []);
+
+  const fetchPermissions = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE_URL}/settings/roles`);
+      if (!res.ok) throw new Error('Failed to fetch roles');
+      const data = await res.json();
+      
+      const newPermissions: ModulePermission[] = MODULES.map(module => {
+        const row: any = { module };
+        roles.forEach(r => {
+          row[r.key] = data[r.apiRole]?.[module] || 'None';
+        });
+        return row as ModulePermission;
+      });
+      setPermissions(newPermissions);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load permissions');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const cycle = (current: AccessLevel): AccessLevel => {
     if (current === 'Full') return 'Read';
@@ -56,9 +80,37 @@ const PermissionsSettings: React.FC = () => {
     setPermissions(perms => perms.map((p, i) => i === index ? { ...p, [role]: cycle(p[role]) } : p));
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // We need to update each role individually except owner
+      const promises = roles.filter(r => r.key !== 'owner').map(r => {
+        // Build the permission object for this role
+        const rolePerms: Record<string, AccessLevel> = {};
+        permissions.forEach(p => {
+          rolePerms[p.module] = p[r.key];
+        });
+        
+        return fetchWithAuth(`${API_BASE_URL}/settings/roles/${r.apiRole}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ permissions: rolePerms })
+        }).then(res => {
+          if (!res.ok) throw new Error(`Failed for role ${r.apiRole}`);
+        });
+      });
+      
+      await Promise.all(promises);
+      
+      setSaved(true);
+      toast.success('Permissions saved successfully');
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save permissions');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -73,64 +125,71 @@ const PermissionsSettings: React.FC = () => {
           </div>
           <button
             onClick={handleSave}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-md self-start sm:self-auto cursor-pointer ${
+            disabled={isLoading || isSaving}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-md self-start sm:self-auto ${
               saved
                 ? 'bg-[#10B981] text-white shadow-[#10B981]/20'
-                : 'bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] shadow-[#16132D]/10'
-            }`}
+                : 'bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] shadow-[#16132D]/10 cursor-pointer'
+            } ${(isLoading || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saved ? 'Saved!' : 'Save Changes'}
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {isSaving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-          {/* Legend */}
-          <div className="px-5 py-3 border-b border-[#16132D]/[0.07] bg-[#F4F3F8]/30 flex flex-wrap items-center gap-3">
-            <Shield className="w-4 h-4 text-[#16132D]/40" />
-            <span className="text-xs font-bold text-[#16132D]/50 uppercase tracking-wider">Access Legend:</span>
-            {(['Full', 'Read', 'None'] as AccessLevel[]).map(l => (
-              <span key={l} className={`text-[10px] font-bold px-2.5 py-1 rounded-full ring-1 ${levelColor[l]}`}>{l}</span>
-            ))}
-            <span className="text-xs text-[#16132D]/40 ml-1 italic">(Click to toggle)</span>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-[#7209B7]" />
           </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
+            {/* Legend */}
+            <div className="px-5 py-3 border-b border-[#16132D]/[0.07] bg-[#F4F3F8]/30 flex flex-wrap items-center gap-3">
+              <Shield className="w-4 h-4 text-[#16132D]/40" />
+              <span className="text-xs font-bold text-[#16132D]/50 uppercase tracking-wider">Access Legend:</span>
+              {(['Full', 'Read', 'None'] as AccessLevel[]).map(l => (
+                <span key={l} className={`text-[10px] font-bold px-2.5 py-1 rounded-full ring-1 ${levelColor[l]}`}>{l}</span>
+              ))}
+              <span className="text-xs text-[#16132D]/40 ml-1 italic">(Click to toggle)</span>
+            </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-[#16132D]/[0.08] bg-[#F4F3F8]/70 text-[#16132D]/40 font-semibold text-xs uppercase tracking-wide">
-                  <th className="py-4 px-6 min-w-[160px]">Module</th>
-                  {roles.map(r => (
-                    <th key={r.key} className="py-4 px-4 text-center min-w-[110px]">{r.label}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#16132D]/[0.05]">
-                {permissions.map((p, i) => (
-                  <tr key={p.module} className="hover:bg-[#F4F3F8]/60 transition">
-                    <td className="py-4 px-6 font-semibold text-[#16132D]">{p.module}</td>
-                    {roles.map(r => {
-                      const level = p[r.key];
-                      const isOwner = r.key === 'owner';
-                      return (
-                        <td key={r.key} className="py-4 px-4 text-center">
-                          <button
-                            onClick={() => toggle(i, r.key)}
-                            disabled={isOwner}
-                            className={`px-3 py-1 rounded-full text-[10px] font-bold ring-1 transition ${levelColor[level]} ${isOwner ? 'cursor-not-allowed opacity-80' : 'hover:opacity-80 active:scale-95 cursor-pointer'}`}
-                          >
-                            {level}
-                          </button>
-                        </td>
-                      );
-                    })}
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-[#16132D]/[0.08] bg-[#F4F3F8]/70 text-[#16132D]/40 font-semibold text-xs uppercase tracking-wide">
+                    <th className="py-4 px-6 min-w-[160px]">Module</th>
+                    {roles.map(r => (
+                      <th key={r.key} className="py-4 px-4 text-center min-w-[110px]">{r.label}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#16132D]/[0.05]">
+                  {permissions.map((p, i) => (
+                    <tr key={p.module} className="hover:bg-[#F4F3F8]/60 transition">
+                      <td className="py-4 px-6 font-semibold text-[#16132D]">{p.module}</td>
+                      {roles.map(r => {
+                        const level = p[r.key];
+                        const isOwner = r.key === 'owner';
+                        return (
+                          <td key={r.key} className="py-4 px-4 text-center">
+                            <button
+                              onClick={() => toggle(i, r.key)}
+                              disabled={isOwner}
+                              className={`px-3 py-1 rounded-full text-[10px] font-bold ring-1 transition ${levelColor[level]} ${isOwner ? 'cursor-not-allowed opacity-80' : 'hover:opacity-80 active:scale-95 cursor-pointer'}`}
+                            >
+                              {level}
+                            </button>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
