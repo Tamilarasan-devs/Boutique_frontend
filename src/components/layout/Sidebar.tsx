@@ -48,9 +48,7 @@ const menuItems: SidebarItem[] = [
       { title: 'Followups', path: '/crm/followups', icon: <CalendarDays className="w-4 h-4" /> },
     ]
   },
-  {
-    title: 'Measurements', path: '/measurements', icon: <Ruler className="w-5 h-5" />,
-  },
+
   // {
   //   title: 'Design Library', icon: <Layers className="w-5 h-5" />,
   //   children: [
@@ -62,6 +60,9 @@ const menuItems: SidebarItem[] = [
     title: 'Orders', icon: <ShoppingCart className="w-5 h-5" />,
     children: [
       { title: 'Quotations', path: '/orders/quotations', icon: <ShoppingCart className="w-4 h-4" /> },
+      {
+        title: 'Measurements', path: '/measurements', icon: <Ruler className="w-5 h-5" />,
+      },
       { title: 'Orders', path: '/orders/list', icon: <ShoppingCart className="w-4 h-4" /> },
       { title: 'Production', path: '/orders/production', icon: <Factory className="w-4 h-4" /> },
       // { title: 'Trial', path: '/orders/trial', icon: <ShoppingCart className="w-4 h-4" /> },
@@ -133,12 +134,12 @@ export interface SidebarProps {
   onCollapseToggle?: (collapsed: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ 
-  className, 
-  mobileOpen, 
-  onMobileClose, 
+const Sidebar: React.FC<SidebarProps> = ({
+  className,
+  mobileOpen,
+  onMobileClose,
   collapsed: controlledCollapsed,
-  onCollapseToggle 
+  onCollapseToggle
 }) => {
   const { user, logout } = useAuth();
   const { companySettings } = useSettings();

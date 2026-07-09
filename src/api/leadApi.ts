@@ -33,7 +33,11 @@ export const leadApi = {
         },
         body: JSON.stringify(leadData),
       });
-      if (!response.ok) throw new Error('Failed to add lead');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to add lead. Server responded with:', errorText);
+        throw new Error(`Failed to add lead: ${errorText}`);
+      }
       return await response.json();
     } catch (error) {
       console.error('Error adding lead:', error);

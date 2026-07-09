@@ -23,8 +23,8 @@ const localizer = dateFnsLocalizer({
 interface FollowUp {
   id: string;
   customerName: string;
-  customerEmail?: string;
-  channel: 'Call' | 'WhatsApp' | 'Email'|"Instagram"|"Facebook";
+  customerPhone?: string;
+  channel: 'Call' | 'WhatsApp' | 'Email' | "Instagram" | "Facebook";
   reason: string;
   notes?: string;
   dueDate: string;
@@ -47,7 +47,7 @@ const Followups: React.FC = () => {
 
   // Create Form states
   const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [channel, setChannel] = useState<FollowUp['channel']>('WhatsApp');
   const [reason, setReason] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -62,7 +62,7 @@ const Followups: React.FC = () => {
   // Helper to format notes for display
   const renderNotesHistory = (notes?: string) => {
     if (!notes) return <div className="text-sm text-[#16132D]/40 italic">No notes logged yet.</div>;
-    
+
     // Notes are appended in the backend like: [06-Jul-2026]: Customer said yes\n[07-Jul-2026]: Another note
     const lines = notes.split('\n').filter(line => line.trim() !== '');
     return (
@@ -102,7 +102,7 @@ const Followups: React.FC = () => {
         const formatted = data.map((item: any) => ({
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
-          customerEmail: item.customer_email || '',
+          customerPhone: item.customer_phone || '',
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
@@ -129,7 +129,7 @@ const Followups: React.FC = () => {
       const newFol: FollowUp = {
         id: `FOL-${item.id}`,
         customerName: item.customer_name,
-        customerEmail: item.customer_email || '',
+        customerPhone: item.customer_phone || '',
         channel: item.channel,
         reason: item.reason,
         notes: item.notes || '',
@@ -144,7 +144,7 @@ const Followups: React.FC = () => {
       const updatedFol: FollowUp = {
         id: `FOL-${item.id}`,
         customerName: item.customer_name,
-        customerEmail: item.customer_email || '',
+        customerPhone: item.customer_phone || '',
         channel: item.channel,
         reason: item.reason,
         notes: item.notes || '',
@@ -152,7 +152,7 @@ const Followups: React.FC = () => {
         status: item.status
       };
       setFollowups(prev => prev.map(fol => fol.id === updatedFol.id ? updatedFol : fol));
-      
+
       // Update selected followup in drawer if it's the one being modified
       // Update selected followup in drawer if it's the one being modified
       setSelectedFollowup(prev => (prev?.id === updatedFol.id ? updatedFol : prev));
@@ -178,6 +178,7 @@ const Followups: React.FC = () => {
     const state = location.state as any;
     if (state?.fromLead && state.customerName) {
       setCustomerName(state.customerName || '');
+      setCustomerPhone(state.customerPhone || '');
       setReason(state.requirement || '');
       if (state.source) {
         if (state.source.includes('WhatsApp')) setChannel('WhatsApp');
@@ -193,7 +194,7 @@ const Followups: React.FC = () => {
 
   const filteredFollowUps = followups.filter(fol => {
     const matchesSearch = fol.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          fol.reason.toLowerCase().includes(searchTerm.toLowerCase());
+      fol.reason.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTab = activeTab === 'All' || fol.status === activeTab;
     return matchesSearch && matchesTab;
   });
@@ -205,13 +206,13 @@ const Followups: React.FC = () => {
     try {
       const response = await followupApi.addFollowup({
         customer_name: customerName,
-        customer_email: customerEmail,
+        customer_phone: customerPhone,
         channel,
         reason,
         due_date: dueDate,
         status: 'Pending'
       });
-      
+
       if (response && response.followup) {
         const item = response.followup;
         const d = new Date(item.due_date);
@@ -219,7 +220,7 @@ const Followups: React.FC = () => {
         const newFol: FollowUp = {
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
-          customerEmail: item.customer_email || '',
+          customerPhone: item.customer_phone || '',
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
@@ -230,7 +231,7 @@ const Followups: React.FC = () => {
       }
 
       setCustomerName('');
-      setCustomerEmail('');
+      setCustomerPhone('');
       setReason('');
       setDueDate('');
       setIsModalOpen(false);
@@ -242,12 +243,12 @@ const Followups: React.FC = () => {
   const handleConvert = async (fol: FollowUp, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     // Navigate to Quotations page with the customer's name and followup ID
-    navigate('/orders/quotations', { 
-      state: { 
-        fromLead: true, 
+    navigate('/orders/quotations', {
+      state: {
+        fromLead: true,
         customerName: fol.customerName,
         followupId: fol.id
-      } 
+      }
     });
   };
 
@@ -267,7 +268,7 @@ const Followups: React.FC = () => {
   const handleDelete = async (fol: FollowUp, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const isConfirmed = await confirm(
-      "Are you sure you want to delete this follow-up? This action cannot be undone.", 
+      "Are you sure you want to delete this follow-up? This action cannot be undone.",
       { title: "Delete Follow-up", destructive: true }
     );
     if (isConfirmed) {
@@ -287,11 +288,7 @@ const Followups: React.FC = () => {
   };
 
   const handleOpenDrawer = (fol: FollowUp) => {
-    setSelectedFollowup(fol);
-    setUpdateNotes('');
-    setUpdateDueDate(fol.dueDate);
-    setUpdateStatus(fol.status);
-    setIsDrawerOpen(true);
+    navigate(`/crm/followups/${fol.id}`, { state: { fol } });
   };
 
   const handleCloseDrawer = () => {
@@ -310,7 +307,7 @@ const Followups: React.FC = () => {
         due_date: updateDueDate,
         status: updateStatus
       });
-      
+
       if (response && response.followup) {
         const item = response.followup;
         const d = new Date(item.due_date);
@@ -318,7 +315,7 @@ const Followups: React.FC = () => {
         const updatedFol: FollowUp = {
           id: `FOL-${item.id}`,
           customerName: item.customer_name,
-          customerEmail: item.customer_email || '',
+          customerPhone: item.customer_phone || '',
           channel: item.channel,
           reason: item.reason,
           notes: item.notes || '',
@@ -328,7 +325,7 @@ const Followups: React.FC = () => {
         setFollowups(prev => prev.map(fol => fol.id === updatedFol.id ? updatedFol : fol));
         setSelectedFollowup(updatedFol);
       }
-      
+
       setUpdateNotes('');
     } catch (error) {
       console.error("Error updating followup:", error);
@@ -341,7 +338,7 @@ const Followups: React.FC = () => {
     // Parse the date and set a default time (10:00 AM - 11:00 AM) so it shows up nicely in Week/Day views
     const startDate = new Date(fol.dueDate);
     startDate.setHours(10, 0, 0, 0);
-    
+
     const endDate = new Date(fol.dueDate);
     endDate.setHours(11, 0, 0, 0);
 
@@ -372,7 +369,7 @@ const Followups: React.FC = () => {
   return (
     <div className="flex h-full bg-[#F4F3F8] relative overflow-hidden">
       <div className={`flex flex-col flex-1 p-8 transition-all duration-300 ease-in-out ${isDrawerOpen ? 'mr-[420px]' : ''}`}>
-        
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -396,7 +393,7 @@ const Followups: React.FC = () => {
                 <Calendar className="w-4 h-4" />
               </button>
             </div>
-            <button 
+            <button
               onClick={() => setIsModalOpen(true)}
               className="px-5 py-2.5 bg-[#16132D] hover:bg-[#2A3441] text-white rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
@@ -412,11 +409,10 @@ const Followups: React.FC = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${
-                  activeTab === tab 
-                    ? 'bg-white text-[#16132D] shadow-sm ring-1 ring-[#16132D]/5' 
+                className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === tab
+                    ? 'bg-white text-[#16132D] shadow-sm ring-1 ring-[#16132D]/5'
                     : 'text-[#16132D]/50 hover:text-[#16132D]/80 hover:bg-[#16132D]/5'
-                }`}
+                  }`}
               >
                 {tab}
               </button>
@@ -425,9 +421,9 @@ const Followups: React.FC = () => {
 
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#16132D]/40" />
-            <input 
-              type="text" 
-              placeholder="Search customers or tasks..." 
+            <input
+              type="text"
+              placeholder="Search customers or tasks..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 bg-[#F4F3F8] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium text-[#16132D] placeholder-[#16132D]/40 transition-shadow"
@@ -439,7 +435,8 @@ const Followups: React.FC = () => {
         <div className="flex-1 bg-white rounded-3xl border border-[#16132D]/5 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
           {viewMode === 'calendar' ? (
             <div className="flex-1 p-6 h-[700px]">
-              <style dangerouslySetInnerHTML={{__html: `
+              <style dangerouslySetInnerHTML={{
+                __html: `
                 .rbc-calendar { font-family: inherit; }
                 .rbc-toolbar button { font-weight: 600; border-radius: 8px; border: 1px solid #e2e8f0; color: #475569; }
                 .rbc-toolbar button.rbc-active { background-color: #16132D; color: white; border-color: #16132D; }
@@ -468,219 +465,109 @@ const Followups: React.FC = () => {
             </div>
           ) : (
             <div className="overflow-x-auto flex-1">
-            {isLoading ? (
-              <div className="flex h-full items-center justify-center text-[#16132D]/40 font-medium">Loading...</div>
-            ) : filteredFollowUps.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-[#16132D]/40">
-                <MessageSquare className="w-12 h-12 mb-3 opacity-20" />
-                <p className="font-semibold text-lg">No follow-ups found</p>
-                <p className="text-sm">You are all caught up!</p>
-              </div>
-            ) : (
-              <table className="w-full text-left text-sm">
-                <thead className="sticky top-0 bg-white/95 backdrop-blur-sm z-10">
-                  <tr className="border-b border-[#16132D]/5 text-[#16132D]/60 font-bold uppercase tracking-wider text-xs">
-                    <th className="py-4 px-6">Customer</th>
-                    <th className="py-4 px-6">Task & Status</th>
-                    <th className="py-4 px-6">Channel</th>
-                    <th className="py-4 px-6">Due Date</th>
-                    <th className="py-4 px-6 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#16132D]/5">
-                  {filteredFollowUps.map((fol) => (
-                    <tr 
-                      key={fol.id} 
-                      onClick={() => handleOpenDrawer(fol)}
-                      className="hover:bg-[#F4F3F8]/50 transition-colors cursor-pointer group"
-                    >
-                      <td className="py-3.5 px-6 font-bold text-[#16132D]">{fol.customerName}</td>
-                      <td className="py-3.5 px-6 max-w-[300px]">
-                        <div className="font-medium text-[#16132D] truncate" title={fol.reason}>{fol.reason}</div>
-                        <div className="mt-1.5 flex items-center gap-2">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide flex items-center gap-1 w-fit ${
-                            fol.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' 
-                            : fol.status === 'Overdue' ? 'bg-rose-100 text-rose-800'
-                            : fol.status === 'Rejected' ? 'bg-slate-200 text-slate-700'
-                            : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {fol.status === 'Overdue' && <AlertCircle className="w-3 h-3" />}
-                            {fol.status}
-                          </span>
-                          {fol.notes && (
-                            <span className="text-[11px] font-bold text-[#16132D]/40 flex items-center gap-1">
-                              <Edit3 className="w-3 h-3" /> Has Notes
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-6">
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#16132D]/70">
-                          {fol.channel === 'WhatsApp' && <MessageSquare className="w-4 h-4 text-emerald-500" />}
-                          {fol.channel === 'Call' && <Phone className="w-4 h-4 text-blue-500" />}
-                          {fol.channel === 'Email' && <Mail className="w-4 h-4 text-purple-500" />}
-                          {fol.channel}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-6">
-                        <div className="flex items-center gap-1.5 font-semibold text-[#16132D]/70">
-                          <Calendar className="w-4 h-4 text-[#16132D]/40" />
-                          {fol.dueDate}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-6 text-right">
-                        <div className="flex justify-end gap-2 items-center">
-                          {fol.status !== 'Completed' && fol.status !== 'Rejected' && (
-                            <>
-                              <button 
-                                onClick={(e) => handleConvert(fol, e)}
-                                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-lg transition-colors flex items-center gap-1"
-                                title="Convert to Quotation"
-                              >
-                                <ArrowRight className="w-3.5 h-3.5" /> Convert
-                              </button>
-                              <button 
-                                onClick={(e) => handleMarkRejected(fol.id, e)}
-                                className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-lg transition-colors flex items-center gap-1"
-                                title="Reject Follow-up"
-                              >
-                                <X className="w-3.5 h-3.5" /> Reject
-                              </button>
-                            </>
-                          )}
-                         
-                          <button 
-                            onClick={(e) => handleDelete(fol, e)}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete Follow-up"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          <ChevronRight className="w-5 h-5 text-[#16132D]/20 group-hover:text-[#16132D]/60 transition-colors ml-2" />
-
-                        </div>
-                      </td>
+              {isLoading ? (
+                <div className="flex h-full items-center justify-center text-[#16132D]/40 font-medium">Loading...</div>
+              ) : filteredFollowUps.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-[#16132D]/40">
+                  <MessageSquare className="w-12 h-12 mb-3 opacity-20" />
+                  <p className="font-semibold text-lg">No follow-ups found</p>
+                  <p className="text-sm">You are all caught up!</p>
+                </div>
+              ) : (
+                <table className="w-full text-left text-sm">
+                  <thead className="sticky top-0 bg-white/95 backdrop-blur-sm z-10">
+                    <tr className="border-b border-[#16132D]/5 text-[#16132D]/60 font-bold uppercase tracking-wider text-xs">
+                      <th className="py-4 px-6">Customer</th>
+                      <th className="py-4 px-6">Task & Status</th>
+                      <th className="py-4 px-6">Channel</th>
+                      <th className="py-4 px-6">Due Date</th>
+                      <th className="py-4 px-6 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-[#16132D]/5">
+                    {filteredFollowUps.map((fol) => (
+                      <tr
+                        key={fol.id}
+                        onClick={() => handleOpenDrawer(fol)}
+                        className="hover:bg-[#F4F3F8]/50 transition-colors cursor-pointer group"
+                      >
+                        <td className="py-3.5 px-6 font-bold text-[#16132D]">{fol.customerName}</td>
+                        <td className="py-3.5 px-6 max-w-[300px]">
+                          <div className="font-medium text-[#16132D] truncate" title={fol.reason}>{fol.reason}</div>
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide flex items-center gap-1 w-fit ${fol.status === 'Completed' ? 'bg-emerald-100 text-emerald-800'
+                                : fol.status === 'Overdue' ? 'bg-rose-100 text-rose-800'
+                                  : fol.status === 'Rejected' ? 'bg-slate-200 text-slate-700'
+                                    : 'bg-blue-100 text-blue-800'
+                              }`}>
+                              {fol.status === 'Overdue' && <AlertCircle className="w-3 h-3" />}
+                              {fol.status}
+                            </span>
+                            {fol.notes && (() => {
+                              const noteCount = fol.notes.split('\n').filter(line => line.trim() !== '').length;
+                              return noteCount > 0 ? (
+                                <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm ring-1 ring-blue-500/20">
+                                  <MessageSquare className="w-3 h-3" /> {noteCount}
+                                </span>
+                              ) : null;
+                            })()}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-6">
+                          <span className="flex items-center gap-1.5 text-xs font-bold text-[#16132D]/70">
+                            {fol.channel === 'WhatsApp' && <MessageSquare className="w-4 h-4 text-emerald-500" />}
+                            {fol.channel === 'Call' && <Phone className="w-4 h-4 text-blue-500" />}
+                            {fol.channel === 'Email' && <Mail className="w-4 h-4 text-purple-500" />}
+                            {fol.channel}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-6">
+                          <div className="flex items-center gap-1.5 font-semibold text-[#16132D]/70">
+                            <Calendar className="w-4 h-4 text-[#16132D]/40" />
+                            {fol.dueDate}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-6 text-right">
+                          <div className="flex justify-end gap-2 items-center">
+                            {fol.status !== 'Completed' && fol.status !== 'Rejected' && (
+                              <>
+                                <button
+                                  onClick={(e) => handleConvert(fol, e)}
+                                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-lg transition-colors flex items-center gap-1"
+                                  title="Convert to Quotation"
+                                >
+                                  <ArrowRight className="w-3.5 h-3.5" /> Convert
+                                </button>
+                                <button
+                                  onClick={(e) => handleMarkRejected(fol.id, e)}
+                                  className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-lg transition-colors flex items-center gap-1"
+                                  title="Reject Follow-up"
+                                >
+                                  <X className="w-3.5 h-3.5" /> Reject
+                                </button>
+                              </>
+                            )}
+
+                            <button
+                              onClick={(e) => handleDelete(fol, e)}
+                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Follow-up"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <ChevronRight className="w-5 h-5 text-[#16132D]/20 group-hover:text-[#16132D]/60 transition-colors ml-2" />
+
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           )}
         </div>
       </div>
-
-      {/* Side Drawer for Details & Updating */}
-      <div className={`fixed inset-y-0 right-0 w-[420px] bg-white shadow-2xl border-l border-[#16132D]/10 transform transition-transform duration-300 ease-in-out z-40 flex flex-col ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        {selectedFollowup && (
-          <>
-            <div className="flex items-center justify-between px-8 py-6 border-b border-[#16132D]/5 bg-[#F4F3F8]/30">
-              <h2 className="text-xl font-extrabold text-[#16132D]">Follow-up Details</h2>
-              <button onClick={handleCloseDrawer} className="p-2 hover:bg-[#16132D]/5 rounded-full transition-colors text-[#16132D]/40 hover:text-[#16132D]">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-8 space-y-8">
-                
-                <div className="bg-[#F4F3F8] p-5 rounded-2xl border border-[#16132D]/5">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Customer</p>
-                      <p className="text-lg font-bold text-[#16132D]">{selectedFollowup.customerName}</p>
-                      {selectedFollowup.customerEmail && (
-                        <p className="text-sm font-medium text-[#16132D]/60 mt-1">{selectedFollowup.customerEmail}</p>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                          selectedFollowup.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' 
-                          : selectedFollowup.status === 'Overdue' ? 'bg-rose-100 text-rose-800'
-                          : selectedFollowup.status === 'Rejected' ? 'bg-slate-200 text-slate-700'
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {selectedFollowup.status}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Original Reason</p>
-                    <p className="text-sm font-medium text-[#16132D]/80 leading-relaxed">{selectedFollowup.reason}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-bold text-[#16132D] uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-[#16132D]/40" /> Discussion History
-                  </h3>
-                  <div className="bg-[#F4F3F8]/50 p-4 rounded-2xl border border-[#16132D]/5 max-h-[300px] overflow-y-auto">
-                    {renderNotesHistory(selectedFollowup.notes)}
-                  </div>
-                </div>
-
-                {selectedFollowup.status !== 'Completed' && selectedFollowup.status !== 'Rejected' && (
-                  <div className="border-t border-[#16132D]/5 pt-8">
-                    <h3 className="text-sm font-bold text-[#16132D] uppercase tracking-wider mb-4 flex items-center gap-2">
-                      <Edit3 className="w-4 h-4 text-[#16132D]/40" /> Log & Reschedule
-                    </h3>
-                    <form onSubmit={handleUpdateSubmit} className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Add New Note</label>
-                        <textarea 
-                          value={updateNotes} 
-                          onChange={(e) => setUpdateNotes(e.target.value)} 
-                          placeholder="E.g. Called customer, they need 2 more days..." 
-                          rows={3}
-                          className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium transition-shadow resize-none"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Next Follow-up</label>
-                          <input 
-                            type="date" 
-                            value={updateDueDate} 
-                            onChange={(e) => setUpdateDueDate(e.target.value)} 
-                            required
-                            className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Status</label>
-                          <select 
-                            value={updateStatus} 
-                            onChange={(e) => setUpdateStatus(e.target.value as FollowUp['status'])} 
-                            className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium appearance-none"
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Overdue">Overdue</option>
-                            <option value="Rejected">Rejected</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <button 
-                        type="submit" 
-                        disabled={isUpdating}
-                        className="w-full py-3.5 mt-4 bg-[#16132D] hover:bg-[#2A3441] text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
-                      >
-                        {isUpdating ? 'Saving...' : 'Save Updates'}
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {isDrawerOpen && (
-        <div className="fixed inset-0 bg-[#16132D]/20 backdrop-blur-sm z-30 transition-opacity" onClick={handleCloseDrawer} />
-      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#16132D]/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -697,8 +584,8 @@ const Followups: React.FC = () => {
                 <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="E.g. Shalini Roy" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Customer Email (Optional, for Calendar Invite)</label>
-                <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="E.g. shalini@example.com" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
+                <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Customer Phone (Optional)</label>
+                <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="E.g. +91 9876543210" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

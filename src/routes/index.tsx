@@ -21,6 +21,7 @@ const Dashboard = lazy(() => import('../pages/dashboard/Dashboard'));
 const Leads = lazy(() => import('../pages/crm/leads/Leads'));
 const Appointments = lazy(() => import('../pages/crm/appointments/Appointments'));
 const Followups = lazy(() => import('../pages/crm/followups/Followups'));
+const FollowupDetails = lazy(() => import('../pages/crm/followups/FollowupDetails'));
 
 // Orders Pages
 const Quotations = lazy(() => import('../pages/orders/quotations/Quotations'));
@@ -66,7 +67,7 @@ const UsersSettings = lazy(() => import('../pages/settings/users/UsersSettings')
 const RolesSettings = lazy(() => import('../pages/settings/roles/RolesSettings'));
 const PermissionsSettings = lazy(() => import('../pages/settings/permissions/PermissionsSettings'));
 const TaxesSettings = lazy(() => import('../pages/settings/taxes/TaxesSettings'));
-const LoyaltySettings = lazy(() => import('../pages/settings/loyalty/LoyaltySettings'));
+const LoyaltySettings = lazy(() => import("../pages/settings/loyalty/LoyaltySettings"));
 
 const Profile = lazy(() => import('../pages/profile/Profile'));
 
@@ -97,6 +98,7 @@ export const router = createBrowserRouter([
       { path: 'crm/leads', element: <Leads /> },
       { path: 'crm/appointments', element: <Appointments /> },
       { path: 'crm/followups', element: <Followups /> },
+      { path: 'crm/followups/:id', element: <FollowupDetails /> },
 
       // Orders
       { path: 'orders/quotations', element: <Quotations /> },

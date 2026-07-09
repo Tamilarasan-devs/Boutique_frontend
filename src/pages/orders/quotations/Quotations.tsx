@@ -5,6 +5,7 @@ import { quotationApi } from '../../../api/quotationApi';
 import { orderApi } from '../../../api/orderApi';
 import { followupApi } from '../../../api/followupApi';
 import { customerApi } from '../../../api/customerApi';
+import { leadApi } from '../../../api/leadApi';
 import { useConfirm } from '../../../context';
 
 interface Quotation {
@@ -55,14 +56,18 @@ const Quotations: React.FC = () => {
   const [terms, setTerms] = useState('');
   
   const [followupId, setFollowupId] = useState<string | null>(null);
+  const [leadId, setLeadId] = useState<string | null>(null);
 
   // If navigated from a converted lead, auto-open the modal with pre-filled data
   useEffect(() => {
     const state = location.state as any;
     if (state?.fromLead) {
       setCustomerName(state.customerName || '');
+      setCustomerPhone(state.customerPhone || '');
+      setCustomerEmail(state.customerEmail || '');
       setItems(state.items || '');
       setFollowupId(state.followupId || null);
+      setLeadId(state.leadId || null);
       const numericValue = parseFloat(String(state.totalAmount).replace(/[^0-9.]/g, ''));
       setTotalAmount(isNaN(numericValue) ? '' : numericValue);
       setIsModalOpen(true);
@@ -159,6 +164,15 @@ const Quotations: React.FC = () => {
           console.error('Failed to complete followup:', err);
         }
         setFollowupId(null);
+      }
+
+      if (leadId) {
+        try {
+          await leadApi.updateLeadStatus(leadId, 'Won');
+        } catch (err) {
+          console.error('Failed to complete lead conversion:', err);
+        }
+        setLeadId(null);
       }
     } catch (error) {
       console.error('Error creating quotation:', error);

@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Filter, Phone, Calendar, MoreVertical, Trash2, ShieldCheck, HelpCircle, FileText, Upload, ChevronRight, X, Loader2, Edit, MessageSquare } from 'lucide-react';
+import { Plus, Search, Filter, Phone, Calendar, MoreVertical, Trash2, ShieldCheck, HelpCircle, FileText, Upload, ChevronRight, X, Loader2, Edit, MessageSquare, LayoutGrid, List } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { leadApi, Lead } from '../../../api/leadApi';
 import { customerApi } from '../../../api/customerApi';
@@ -24,6 +24,7 @@ const Leads: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm } = useConfirm();
+  const [viewMode, setViewMode] = useState<'board' | 'table'>('board');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,12 +95,24 @@ const Leads: React.FC = () => {
       const formattedValue = value ? `₹${Number(value).toLocaleString('en-IN')}` : '₹0';
 
       if (editingLeadId) {
+        // Check for duplicates excluding current lead
+        if (leads.some(l => l.phone === phone && l.id !== editingLeadId)) {
+          toast.error('A lead with this phone number already exists.');
+          return;
+        }
+
         const updatedLead = await leadApi.updateLead(editingLeadId, {
           name, phone, source, requirement, value: formattedValue
         });
         setLeads(leads.map(l => l.id === editingLeadId ? updatedLead : l));
       } else {
-        const uniqueSuffix = Math.floor(1000 + Math.random() * 9000);
+        // Check for duplicates
+        if (leads.some(l => l.phone === phone)) {
+          toast.error('A lead with this phone number already exists.');
+          return;
+        }
+
+        const uniqueSuffix = Math.floor(Math.random() * 9000) + Date.now().toString().slice(-4);
         const newLeadData = {
           lead_id: `LEAD-${uniqueSuffix}`,
           name,
@@ -174,43 +187,29 @@ const Leads: React.FC = () => {
     });
     if (!confirmConvert) return;
 
-    // Optimistic UI update to Won status
-    setLeads(leads.map(l => l.id === lead.id ? { ...l, status: 'Won' as Lead['status'] } : l));
-
-    try {
-      // 1. Update lead status to Won in database
-      await leadApi.updateLeadStatus(lead.id, 'Won');
-
-      // 2. Add customer to database
-      await customerApi.addCustomer({
-        name: lead.name,
-        phone: lead.phone,
-        email: '',
-        address: ''
-      });
-
-      // 3. Navigate to Quotations page with lead data pre-filled
-      navigate('/orders/quotations', {
-        state: {
-          fromLead: true,
-          customerName: lead.name,
-          items: lead.requirement || '',
-          totalAmount: lead.value ? lead.value.replace(/[₹,]/g, '') : '',
-        }
-      });
-    } catch (error) {
-      console.error('Failed to convert lead', error);
-      // Revert status on failure
-      setLeads(leads.map(l => l.id === lead.id ? { ...l, status: lead.status } : l));
-      alert('Failed to convert lead to customer.');
-    }
+    // Navigate to Quotations page with lead data pre-filled
+    // Status update will be handled there upon successful save
+    navigate('/orders/quotations', {
+      state: {
+        fromLead: true,
+        leadId: lead.id,
+        customerName: lead.name,
+        customerPhone: lead.phone || '',
+        customerEmail: '',
+        items: lead.requirement || '',
+        totalAmount: lead.value ? lead.value.replace(/[₹,]/g, '') : '',
+      }
+    });
   };
 
   const handleCreateQuotation = (lead: Lead) => {
     navigate('/orders/quotations', {
       state: {
         fromLead: true,
+        leadId: lead.id,
         customerName: lead.name,
+        customerPhone: lead.phone || '',
+        customerEmail: '',
         items: lead.requirement || '',
         totalAmount: lead.value ? lead.value.replace(/[₹,]/g, '') : '',
       }
@@ -222,10 +221,30 @@ const Leads: React.FC = () => {
       state: {
         fromLead: true,
         customerName: lead.name,
+        customerPhone: lead.phone,
         requirement: lead.requirement,
         source: lead.source
       }
     });
+  };
+
+  const handleDeleteLead = async (id: string) => {
+    const isConfirmed = await confirm('Are you sure you want to delete this lead? This action cannot be undone.', {
+      title: 'Delete Lead',
+      confirmText: 'Delete',
+      destructive: true
+    });
+    
+    if (!isConfirmed) return;
+
+    try {
+      await leadApi.deleteLead(id);
+      setLeads(leads.filter(lead => lead.id !== id));
+      toast.success('Lead deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete lead', error);
+      toast.error('Failed to delete lead');
+    }
   };
 
   return (
@@ -247,6 +266,32 @@ const Leads: React.FC = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto mt-4 lg:mt-0">
+            {/* View Toggle */}
+            <div className="flex bg-white rounded-xl border border-[#16132D]/10 p-1 shadow-sm h-[46px]">
+              <button
+                onClick={() => setViewMode('board')}
+                className={`flex items-center justify-center px-4 rounded-lg transition-all ${
+                  viewMode === 'board'
+                    ? 'bg-[#16132D] text-white shadow-md'
+                    : 'text-[#16132D]/40 hover:text-[#16132D] hover:bg-[#16132D]/5'
+                }`}
+                title="Board View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`flex items-center justify-center px-4 rounded-lg transition-all ${
+                  viewMode === 'table'
+                    ? 'bg-[#16132D] text-white shadow-md'
+                    : 'text-[#16132D]/40 hover:text-[#16132D] hover:bg-[#16132D]/5'
+                }`}
+                title="Table View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+
             {/* Search Filter */}
             <div className="relative group w-full sm:w-[320px]">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -275,7 +320,7 @@ const Leads: React.FC = () => {
           <div className="flex items-center justify-center h-[500px]">
             <Loader2 className="w-8 h-8 text-[#16132D]/40 animate-spin" />
           </div>
-        ) : (
+        ) : viewMode === 'board' ? (
           <div className="flex-1 flex gap-5 overflow-x-auto pb-6 h-full min-h-[600px] snap-x snap-mandatory">
             {columns.map(column => {
               const style = columnStyles[column];
@@ -326,6 +371,9 @@ const Leads: React.FC = () => {
                             )}
                             <button onClick={() => openEditModal(lead)} className="text-[#16132D]/30 hover:text-[#7209B7] transition p-1.5 hover:bg-[#7209B7]/10 rounded-lg" title="Edit Lead">
                               <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDeleteLead(lead.id)} className="text-[#16132D]/30 hover:text-red-500 transition p-1.5 hover:bg-red-500/10 rounded-lg" title="Delete Lead">
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
@@ -393,6 +441,102 @@ const Leads: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-[#16132D]/[0.05] shadow-[0_2px_10px_-4px_rgba(22,19,45,0.05)] overflow-hidden flex-1 flex flex-col">
+            <div className="overflow-x-auto flex-1">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-[#F8F8FB] border-b border-[#16132D]/[0.05] sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">ID</th>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Name</th>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Phone</th>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Requirement</th>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Source</th>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Value</th>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px]">Status</th>
+                    <th className="px-6 py-4 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#16132D]/[0.03]">
+                  {filteredLeads.map(lead => (
+                    <tr key={lead.id} className="hover:bg-[#F8F8FB]/50 transition-colors group">
+                      <td className="px-6 py-4 text-[12px] font-bold text-[#16132D]/40">{lead.lead_id}</td>
+                      <td className="px-6 py-4 font-bold text-[#16132D] text-[14px]">{lead.name}</td>
+                      <td className="px-6 py-4 text-[#16132D]/70 font-medium">{lead.phone}</td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-[200px] truncate text-[#16132D]/60 text-[13px]" title={lead.requirement}>
+                          {lead.requirement || '-'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-[11px] px-2.5 py-1 rounded-full border font-bold tracking-wide ${
+                          lead.source === 'WhatsApp' ? 'text-[#10B981] border-[#10B981]/20 bg-[#10B981]/5' :
+                          lead.source === 'Instagram Direct' ? 'text-[#F43F5E] border-[#F43F5E]/20 bg-[#F43F5E]/5' :
+                          lead.source === 'Email' ? 'text-[#3B82F6] border-[#3B82F6]/20 bg-[#3B82F6]/5' :
+                          lead.source === 'Phone Call' ? 'text-[#8B5CF6] border-[#8B5CF6]/20 bg-[#8B5CF6]/5' :
+                          'text-[#16132D]/60 border-[#16132D]/[0.08] bg-[#F8F8FB]'
+                        }`}>
+                          {lead.source}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-[#10B981]">{lead.value}</td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={lead.status}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value as Lead['status'];
+                            if (newStatus === 'Lost') {
+                              handleMarkLost(lead.id, lead.status);
+                            } else {
+                              setLeads(leads.map(l => l.id === lead.id ? { ...l, status: newStatus } : l));
+                              try {
+                                await leadApi.updateLeadStatus(lead.id, newStatus);
+                              } catch (error) {
+                                setLeads(leads.map(l => l.id === lead.id ? { ...l, status: lead.status } : l));
+                                toast.error('Failed to update lead status on the server.');
+                              }
+                            }
+                          }}
+                          className={`text-[12px] font-bold px-3 py-1.5 rounded-lg border focus:ring-2 focus:ring-[#7209B7]/20 outline-none cursor-pointer appearance-none ${columnStyles[lead.status].chip}`}
+                        >
+                          {columns.map(col => (
+                            <option key={col} value={col}>{col}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          {lead.status === 'Won' && (
+                            <button onClick={() => handleCreateQuotation(lead)} className="p-1.5 text-[#7A5AA8] hover:bg-[#7A5AA8]/10 rounded-lg transition-colors" title="Create Quotation">
+                              <FileText className="w-4 h-4" />
+                            </button>
+                          )}
+                          {lead.status !== 'Lost' && lead.status !== 'Won' && (
+                            <button onClick={() => handleAddFollowup(lead)} className="p-1.5 text-[#3B82F6] hover:bg-[#3B82F6]/10 rounded-lg transition-colors" title="Add Follow up">
+                              <MessageSquare className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button onClick={() => openEditModal(lead)} className="p-1.5 text-[#16132D]/40 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-lg transition-colors" title="Edit Lead">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDeleteLead(lead.id)} className="p-1.5 text-[#16132D]/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete Lead">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredLeads.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-12 text-center text-[#16132D]/40 font-medium text-[13px]">
+                        No leads found matching your search.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

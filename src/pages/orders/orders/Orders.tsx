@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight } from 'lucide-react';
+import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight, Edit3 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { orderApi } from '../../../api/orderApi';
 import { productionApi } from '../../../api/productionApi';
@@ -39,7 +39,10 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [productionTailor, setProductionTailor] = useState('');
 
   // Form states
   const [customerName, setCustomerName] = useState('');
@@ -124,9 +127,9 @@ const Orders: React.FC = () => {
     if (!customerName || !category || !deliveryDate) return;
 
     try {
-      // 1. Create or ensure customer exists
+      // 1. Create or ensure customer exists (only if not editing, or always is fine)
       const existingCustomer = customers.find(c => c.phone === customerPhone && customerPhone !== '');
-      if (!existingCustomer) {
+      if (!existingCustomer && customerName) {
         try {
           await customerApi.addCustomer({ 
             name: customerName, 
@@ -139,46 +142,115 @@ const Orders: React.FC = () => {
         }
       }
 
-      const response = await orderApi.addOrder({
-        customer_name: customerName,
-        category,
-        stitching_cost: stitchingCost || 0,
-        total_amount: totalAmount || 0,
-        advance_paid: advancePaid || 0,
-        delivery_date: deliveryDate,
-        tailor,
-        fabric_details: fabricDetails,
-        priority,
-        points_redeemed: pointsRedeemed || 0
-      });
-      
-      const newOrder: Order = {
-        id: `ORD-${response.order.id}`,
-        customerName: response.order.customer_name,
-        category: response.order.category,
-        stitchingCost: parseFloat(response.order.stitching_cost) || 0,
-        totalAmount: parseFloat(response.order.total_amount) || 0,
-        advancePaid: parseFloat(response.order.advance_paid) || 0,
-        deliveryDate: new Date(response.order.delivery_date).toISOString().split('T')[0],
-        orderDate: new Date(response.order.order_date).toISOString().split('T')[0],
-        tailor: response.order.tailor || '',
-        fabricDetails: response.order.fabric_details || '',
-        priority: response.order.priority,
-        status: response.order.status,
-        pointsEarned: response.order.points_earned || 0,
-        loyaltyDiscount: parseFloat(response.order.loyalty_discount) || 0
-      };
+      if (isEditMode && editingOrderId) {
+        const response = await orderApi.updateOrder(editingOrderId, {
+          customer_name: customerName,
+          category,
+          stitching_cost: stitchingCost || 0,
+          total_amount: totalAmount || 0,
+          advance_paid: advancePaid || 0,
+          delivery_date: deliveryDate,
+          tailor,
+          fabric_details: fabricDetails,
+          priority,
+          points_redeemed: pointsRedeemed || 0
+        });
 
-      setOrders([newOrder, ...orders]);
+        const updatedOrder: Order = {
+          id: editingOrderId,
+          customerName: response.order.customer_name,
+          category: response.order.category,
+          stitchingCost: parseFloat(response.order.stitching_cost) || 0,
+          totalAmount: parseFloat(response.order.total_amount) || 0,
+          advancePaid: parseFloat(response.order.advance_paid) || 0,
+          deliveryDate: new Date(response.order.delivery_date).toISOString().split('T')[0],
+          orderDate: new Date(response.order.order_date).toISOString().split('T')[0],
+          tailor: response.order.tailor || '',
+          fabricDetails: response.order.fabric_details || '',
+          priority: response.order.priority,
+          status: response.order.status,
+          pointsEarned: response.order.points_earned || 0,
+          loyaltyDiscount: parseFloat(response.order.loyalty_discount) || 0
+        };
+
+        setOrders(orders.map(o => o.id === editingOrderId ? updatedOrder : o));
+        if (selectedOrder && selectedOrder.id === editingOrderId) {
+          setSelectedOrder(updatedOrder);
+        }
+      } else {
+        const response = await orderApi.addOrder({
+          customer_name: customerName,
+          category,
+          stitching_cost: stitchingCost || 0,
+          total_amount: totalAmount || 0,
+          advance_paid: advancePaid || 0,
+          delivery_date: deliveryDate,
+          tailor,
+          fabric_details: fabricDetails,
+          priority,
+          points_redeemed: pointsRedeemed || 0
+        });
+        
+        const newOrder: Order = {
+          id: `ORD-${response.order.id}`,
+          customerName: response.order.customer_name,
+          category: response.order.category,
+          stitchingCost: parseFloat(response.order.stitching_cost) || 0,
+          totalAmount: parseFloat(response.order.total_amount) || 0,
+          advancePaid: parseFloat(response.order.advance_paid) || 0,
+          deliveryDate: new Date(response.order.delivery_date).toISOString().split('T')[0],
+          orderDate: new Date(response.order.order_date).toISOString().split('T')[0],
+          tailor: response.order.tailor || '',
+          fabricDetails: response.order.fabric_details || '',
+          priority: response.order.priority,
+          status: response.order.status,
+          pointsEarned: response.order.points_earned || 0,
+          loyaltyDiscount: parseFloat(response.order.loyalty_discount) || 0
+        };
+
+        setOrders([newOrder, ...orders]);
+      }
+
       // Reset
-      setCustomerName(''); setCustomerPhone(''); setCategory(''); setStitchingCost(''); setTotalAmount('');
-      setAdvancePaid(''); setDeliveryDate(''); setTailor(''); setFabricDetails(''); setPointsRedeemed('');
-      setPriority('Normal');
+      resetForm();
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error creating order:", error);
+      console.error("Error saving order:", error);
     }
   };
+
+  const handleOpenCreateModal = () => {
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (order: Order) => {
+    setCustomerName(order.customerName);
+    setCustomerPhone(''); // We don't store phone in order yet, but can leave empty
+    setCategory(order.category);
+    setStitchingCost(order.stitchingCost);
+    setTotalAmount(order.totalAmount);
+    setAdvancePaid(order.advancePaid);
+    setDeliveryDate(order.deliveryDate);
+    setTailor(order.tailor);
+    setFabricDetails(order.fabricDetails);
+    setPriority(order.priority);
+    setPointsRedeemed(''); // Points redeemed can't easily be re-edited
+    
+    setIsEditMode(true);
+    setEditingOrderId(order.id);
+    setIsModalOpen(true);
+  };
+
+  const resetForm = () => {
+    setCustomerName(''); setCustomerPhone(''); setCategory(''); setStitchingCost(''); setTotalAmount('');
+    setAdvancePaid(''); setDeliveryDate(''); setTailor(''); setFabricDetails(''); setPointsRedeemed('');
+    setPriority('Normal');
+    setIsEditMode(false);
+    setEditingOrderId(null);
+  };
+
+  // Removed block to avoid duplication
 
   const handleUpdateStatus = async (id: string, nextStatus: string) => {
     try {
@@ -215,6 +287,12 @@ const Orders: React.FC = () => {
   };
 
   const handleSendToProduction = async (order: Order) => {
+    const assignedTailor = productionTailor || order.tailor || '';
+    if (!assignedTailor) {
+      alert("Please assign a tailor before sending to production.");
+      return;
+    }
+
     const isConfirmed = await confirm(`Are you sure you want to send "${order.category}" for ${order.customerName} to the Production queue?`, {
       title: 'Send to Production',
       confirmText: 'Send to Production'
@@ -222,19 +300,37 @@ const Orders: React.FC = () => {
     if (!isConfirmed) return;
     
     try {
+      if (assignedTailor !== order.tailor) {
+        try {
+          await orderApi.updateOrder(order.id, {
+            customer_name: order.customerName,
+            category: order.category,
+            stitching_cost: order.stitchingCost,
+            total_amount: order.totalAmount,
+            advance_paid: order.advancePaid,
+            delivery_date: order.deliveryDate,
+            tailor: assignedTailor,
+            fabric_details: order.fabricDetails,
+            priority: order.priority
+          });
+        } catch (e) {
+          console.warn("Failed to update order tailor, but proceeding to production", e);
+        }
+      }
+
       await productionApi.addProduction({
         order_id: order.id,
         customer_name: order.customerName,
         garment: order.category,
-        tailor: order.tailor || '',
+        tailor: assignedTailor,
         priority: order.priority === 'Rush' ? 'High' : 'Medium',
         expected_end_date: order.deliveryDate,
         notes: order.fabricDetails || '',
       });
       await orderApi.updateOrderStatus(order.id, 'Cutting');
       
-      setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Cutting' } : o));
-      setSelectedOrder({ ...order, status: 'Cutting' });
+      setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Cutting', tailor: assignedTailor } : o));
+      setSelectedOrder({ ...order, status: 'Cutting', tailor: assignedTailor });
     } catch (err) {
       console.error('Error sending directly to production:', err);
     }
@@ -258,9 +354,9 @@ const Orders: React.FC = () => {
             </p>
           </div>
           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto"
-          >
+              onClick={handleOpenCreateModal}
+              className="bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto"
+            >
             <Plus className="w-4 h-4" /> New Order
           </button>
         </div>
@@ -326,7 +422,17 @@ const Orders: React.FC = () => {
                       </td>
                       <td className="py-4 px-6 text-right space-x-2">
                         <button 
-                          onClick={() => setSelectedOrder(order)}
+                          onClick={() => handleOpenEditModal(order)}
+                          className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                          title="Edit Order"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setProductionTailor(order.tailor || '');
+                          }}
                           className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
                           title="View Details"
                         >
@@ -359,12 +465,28 @@ const Orders: React.FC = () => {
             <div className="w-full lg:w-80 flex-shrink-0 bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] space-y-6">
               <div className="flex justify-between items-center pb-4 border-b border-[#16132D]/[0.06]">
                 <h3 className="font-serif font-bold text-[#16132D] text-lg">Order Details</h3>
-                <button 
-                  onClick={() => setSelectedOrder(null)}
-                  className="p-1.5 text-[#16132D]/40 hover:text-[#16132D]/70 rounded-lg hover:bg-[#16132D]/5 transition"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => handleOpenEditModal(selectedOrder)}
+                    className="p-1.5 text-[#16132D]/40 hover:text-[#7209B7] rounded-lg hover:bg-[#7209B7]/10 transition"
+                    title="Edit Order"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteOrder(selectedOrder.id)}
+                    className="p-1.5 text-[#16132D]/40 hover:text-[#F43F5E] rounded-lg hover:bg-[#F43F5E]/10 transition"
+                    title="Delete Order"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setSelectedOrder(null)}
+                    className="p-1.5 text-[#16132D]/40 hover:text-[#16132D]/70 rounded-lg hover:bg-[#16132D]/5 transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               
               <div className="space-y-4 text-sm font-semibold text-[#16132D]/65">
@@ -429,7 +551,20 @@ const Orders: React.FC = () => {
                 </div>
 
                 {selectedOrder.status === 'Received' && (
-                  <div className="space-y-3 pt-2">
+                  <div className="space-y-3 pt-2 border-t border-[#16132D]/[0.06]">
+                    <div>
+                      <label className="block text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 mb-1.5">Assign Tailor for Production</label>
+                      <select 
+                        value={productionTailor}
+                        onChange={(e) => setProductionTailor(e.target.value)}
+                        className="w-full px-3 py-2 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm bg-white transition cursor-pointer mb-1"
+                      >
+                        <option value="">-- Select Tailor --</option>
+                        {tailors.map(t => (
+                          <option key={t.id} value={t.name}>{t.name}</option>
+                        ))}
+                      </select>
+                    </div>
                     <button
                       onClick={() => handleTakeMeasurements(selectedOrder)}
                       className="w-full py-2.5 bg-white border border-[#7209B7] text-[#7209B7] hover:bg-[#7209B7]/5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
@@ -455,9 +590,14 @@ const Orders: React.FC = () => {
           <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
               <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-serif font-bold text-[#16132D]">Create New Order</h2>
+                <h2 className="text-xl font-serif font-bold text-[#16132D]">
+                  {isEditMode ? 'Edit Order' : 'Create New Order'}
+                </h2>
                 <button 
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    resetForm();
+                  }}
                   className="p-2 bg-[#16132D]/[0.03] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 hover:text-[#16132D] rounded-full transition"
                 >
                   <X className="w-4 h-4" />
@@ -628,7 +768,7 @@ const Orders: React.FC = () => {
                   form="orderForm"
                   className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition"
                 >
-                  Save Order
+                  {isEditMode ? 'Update Order' : 'Save Order'}
                 </button>
               </div>
             </div>
