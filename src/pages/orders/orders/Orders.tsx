@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight, Edit3, Loader2 } from 'lucide-react';
+import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight, Edit3, Loader2, List, LayoutGrid } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { orderApi } from '../../../api/orderApi';
 import { productionApi } from '../../../api/productionApi';
@@ -8,7 +8,8 @@ import { customerApi } from '../../../api/customerApi';
 import { useConfirm } from '../../../context';
 
 interface Order {
-  id: string;
+  id: string; // The database ID used for API calls
+  displayId: string; // The formatted sequence ID for UI
   customerName: string;
   category: string;
   stitchingCost: number;
@@ -42,8 +43,13 @@ const Orders: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [productionTailor, setProductionTailor] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
+    return (localStorage.getItem('ordersViewMode') as 'table' | 'card') || 'table';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ordersViewMode', viewMode);
+  }, [viewMode]);
 
   // Form states
   const [customerName, setCustomerName] = useState('');
@@ -67,7 +73,8 @@ const Orders: React.FC = () => {
       try {
         const data = await orderApi.getOrders();
         const formatted = data.map((item: any) => ({
-          id: `ORD-${item.id}`,
+          id: item.id.toString(),
+          displayId: item.display_id || `ORD-${item.id}`,
           customerName: item.customer_name,
           category: item.category,
           stitchingCost: parseFloat(item.stitching_cost) || 0,
@@ -160,6 +167,7 @@ const Orders: React.FC = () => {
 
         const updatedOrder: Order = {
           id: editingOrderId,
+          displayId: response.order.display_id || `ORD-${response.order.id}`,
           customerName: response.order.customer_name,
           category: response.order.category,
           stitchingCost: parseFloat(response.order.stitching_cost) || 0,
@@ -176,9 +184,6 @@ const Orders: React.FC = () => {
         };
 
         setOrders(orders.map(o => o.id === editingOrderId ? updatedOrder : o));
-        if (selectedOrder && selectedOrder.id === editingOrderId) {
-          setSelectedOrder(updatedOrder);
-        }
       } else {
         const response = await orderApi.addOrder({
           customer_name: customerName,
@@ -194,7 +199,8 @@ const Orders: React.FC = () => {
         });
         
         const newOrder: Order = {
-          id: `ORD-${response.order.id}`,
+          id: response.order.id.toString(),
+          displayId: response.order.display_id || `ORD-${response.order.id}`,
           customerName: response.order.customer_name,
           category: response.order.category,
           stitchingCost: parseFloat(response.order.stitching_cost) || 0,
@@ -260,9 +266,6 @@ const Orders: React.FC = () => {
     try {
       await orderApi.updateOrderStatus(id, nextStatus);
       setOrders(orders.map(o => o.id === id ? { ...o, status: nextStatus as Order['status'] } : o));
-      if (selectedOrder && selectedOrder.id === id) {
-        setSelectedOrder({ ...selectedOrder, status: nextStatus as Order['status'] });
-      }
     } catch (error) {
       console.error("Error updating order status:", error);
     }
@@ -272,73 +275,12 @@ const Orders: React.FC = () => {
     try {
       await orderApi.deleteOrder(id);
       setOrders(orders.filter(o => o.id !== id));
-      if (selectedOrder && selectedOrder.id === id) setSelectedOrder(null);
     } catch (error) {
       console.error("Error deleting order:", error);
     }
   };
 
-  const handleTakeMeasurements = (order: Order) => {
-    navigate('/measurements', { 
-      state: { 
-        openNewModal: true,
-        customerName: order.customerName,
-        garment: order.category,
-        returnTo: '/orders/list',
-        cancelReturnTo: '/orders/list',
-      } 
-    });
-  };
 
-  const handleSendToProduction = async (order: Order) => {
-    const assignedTailor = productionTailor || order.tailor || '';
-    if (!assignedTailor) {
-      alert("Please assign a tailor before sending to production.");
-      return;
-    }
-
-    const isConfirmed = await confirm(`Are you sure you want to send "${order.category}" for ${order.customerName} to the Production queue?`, {
-      title: 'Send to Production',
-      confirmText: 'Send to Production'
-    });
-    if (!isConfirmed) return;
-    
-    try {
-      if (assignedTailor !== order.tailor) {
-        try {
-          await orderApi.updateOrder(order.id, {
-            customer_name: order.customerName,
-            category: order.category,
-            stitching_cost: order.stitchingCost,
-            total_amount: order.totalAmount,
-            advance_paid: order.advancePaid,
-            delivery_date: order.deliveryDate,
-            tailor: assignedTailor,
-            fabric_details: order.fabricDetails,
-            priority: order.priority
-          });
-        } catch (e) {
-          console.warn("Failed to update order tailor, but proceeding to production", e);
-        }
-      }
-
-      await productionApi.addProduction({
-        order_id: order.id,
-        customer_name: order.customerName,
-        garment: order.category,
-        tailor: assignedTailor,
-        priority: order.priority === 'Rush' ? 'High' : 'Medium',
-        expected_end_date: order.deliveryDate,
-        notes: order.fabricDetails || '',
-      });
-      await orderApi.updateOrderStatus(order.id, 'Cutting');
-      
-      setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Cutting', tailor: assignedTailor } : o));
-      setSelectedOrder({ ...order, status: 'Cutting', tailor: assignedTailor });
-    } catch (err) {
-      console.error('Error sending directly to production:', err);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
@@ -365,227 +307,202 @@ const Orders: React.FC = () => {
           </button>
         </div>
 
-        {/* Filter Area & Search */}
-        <div className="flex items-center bg-white border border-[#16132D]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 focus-within:border-[#7209B7]/40 transition">
-          <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
-          <input 
-            type="text" 
-            placeholder="Search by customer or garment..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm text-[#16132D] placeholder-[#16132D]/35 w-full"
-          />
+        {/* Filter Area & View Toggle */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center bg-white border border-[#16132D]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 focus-within:border-[#7209B7]/40 transition">
+            <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
+            <input 
+              type="text" 
+              placeholder="Search by customer or garment..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-transparent border-none outline-none text-sm text-[#16132D] placeholder-[#16132D]/35 w-full"
+            />
+          </div>
+
+          {/* View Toggle */}
+          <div className="flex bg-[#16132D]/[0.05] p-1 rounded-xl self-end sm:self-auto">
+            <button 
+              onClick={() => setViewMode('table')}
+              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'table' ? 'bg-white text-[#16132D] shadow-sm' : 'text-[#16132D]/50 hover:text-[#16132D]'}`}
+              title="Table View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => setViewMode('card')}
+              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'card' ? 'bg-white text-[#16132D] shadow-sm' : 'text-[#16132D]/50 hover:text-[#16132D]'}`}
+              title="Card View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Main Content (Table & Detail Sidebar side-by-side) */}
         <div className="flex gap-6 items-start flex-col lg:flex-row">
           
-          {/* Orders Table */}
-          <div className="flex-1 w-full bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-[#16132D]/75">
-                <thead>
-                  <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-semibold text-xs tracking-wider uppercase">
-                    <th className="py-4 px-6">Order Details</th>
-                    <th className="py-4 px-6">Financials</th>
-                    <th className="py-4 px-6">Delivery Date</th>
-                    <th className="py-4 px-6">Status</th>
-                    <th className="py-4 px-6 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#16132D]/[0.04]">
-                  {filteredOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-[#16132D]/[0.02] transition">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
-                            <Scissors className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <div className="font-serif font-bold text-[#16132D] text-base">{order.category}</div>
-                            <div className="text-xs text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.id})</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="font-bold text-[#16132D]">₹{order.totalAmount.toLocaleString('en-IN')}</div>
-                        <div className="text-[10px] font-semibold text-[#16132D]/50 uppercase tracking-wide mt-0.5">
-                          Adv: ₹{order.advancePaid.toLocaleString('en-IN')}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 font-semibold">
-                        <div className="flex items-center gap-1.5 text-[#16132D]/65">
-                          <CalendarIcon className="w-4 h-4 text-[#16132D]/40" />
-                          {order.deliveryDate}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusStyles[order.status] || statusStyles['Received']}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-right space-x-2">
-                        <button 
-                          onClick={() => handleOpenEditModal(order)}
-                          className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
-                          title="Edit Order"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setProductionTailor(order.tailor || '');
-                          }}
-                          className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
-                          title="View Details"
-                        >
-                          <Info className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteOrder(order.id)}
-                          className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
-                          title="Delete Order"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredOrders.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#16132D]/35">
-                        No orders found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Selected Order Drawer */}
-          {selectedOrder && (
-            <div className="w-full lg:w-80 flex-shrink-0 bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-[#16132D]/[0.06]">
-                <h3 className="font-serif font-bold text-[#16132D] text-lg">Order Details</h3>
-                <div className="flex items-center gap-1">
-                  <button 
-                    onClick={() => handleOpenEditModal(selectedOrder)}
-                    className="p-1.5 text-[#16132D]/40 hover:text-[#7209B7] rounded-lg hover:bg-[#7209B7]/10 transition"
-                    title="Edit Order"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteOrder(selectedOrder.id)}
-                    className="p-1.5 text-[#16132D]/40 hover:text-[#F43F5E] rounded-lg hover:bg-[#F43F5E]/10 transition"
-                    title="Delete Order"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => setSelectedOrder(null)}
-                    className="p-1.5 text-[#16132D]/40 hover:text-[#16132D]/70 rounded-lg hover:bg-[#16132D]/5 transition"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+          {/* Orders List Area */}
+          <div className="flex-1 w-full">
+            {viewMode === 'table' ? (
+              <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-[#16132D]/75">
+                    <thead>
+                      <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-semibold text-xs tracking-wider uppercase">
+                        <th className="py-4 px-6">Order Details</th>
+                        <th className="py-4 px-6">Financials</th>
+                        <th className="py-4 px-6">Delivery Date</th>
+                        <th className="py-4 px-6">Status</th>
+                        <th className="py-4 px-6 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#16132D]/[0.04]">
+                      {filteredOrders.map((order) => (
+                        <tr key={order.id} className="hover:bg-[#16132D]/[0.02] transition">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
+                                <Scissors className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <div className="font-serif font-bold text-[#16132D] text-base">{order.category}</div>
+                                <div className="text-xs text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.displayId})</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="font-bold text-[#16132D]">₹{order.totalAmount.toLocaleString('en-IN')}</div>
+                            <div className="text-[10px] font-semibold text-[#16132D]/50 uppercase tracking-wide mt-0.5">
+                              Adv: ₹{order.advancePaid.toLocaleString('en-IN')}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 font-semibold">
+                            <div className="flex items-center gap-1.5 text-[#16132D]/65">
+                              <CalendarIcon className="w-4 h-4 text-[#16132D]/40" />
+                              {order.deliveryDate}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusStyles[order.status] || statusStyles['Received']}`}>
+                              {order.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-right space-x-2">
+                            <button 
+                              onClick={() => handleOpenEditModal(order)}
+                              className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                              title="Edit Order"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                navigate('/orders/details', { state: { order } });
+                              }}
+                              className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                              title="View Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteOrder(order.id)}
+                              className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
+                              title="Delete Order"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredOrders.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#16132D]/35">
+                            No orders found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              
-              <div className="space-y-4 text-sm font-semibold text-[#16132D]/65">
-                <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">ORDER ID</span>
-                  <span className="text-[#16132D]">{selectedOrder.id}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">CUSTOMER NAME</span>
-                  <span className="text-[#16132D]">{selectedOrder.customerName}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">GARMENT SPECIFICATION</span>
-                  <span className="text-[#16132D]">{selectedOrder.category}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">FABRIC DETAILS</span>
-                  <span className="text-[#16132D] whitespace-pre-wrap">{selectedOrder.fabricDetails || 'N/A'}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">ASSIGNED TAILOR</span>
-                  <span className="text-[#16132D]">{selectedOrder.tailor || 'Unassigned'}</span>
-                </div>
-                <div className="bg-[#F4F3F8] p-3 rounded-xl border border-[#16132D]/[0.04] space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[#16132D]/50">Total Amount</span>
-                    <span className="text-[#16132D]">₹{selectedOrder.totalAmount.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#16132D]/50">Advance Paid</span>
-                    <span className="text-[#234638]">₹{selectedOrder.advancePaid.toLocaleString('en-IN')}</span>
-                  </div>
-                  {(selectedOrder.loyaltyDiscount || 0) > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-[#16132D]/50">Loyalty Discount</span>
-                      <span className="text-[#F43F5E]">- ₹{selectedOrder.loyaltyDiscount?.toLocaleString('en-IN')}</span>
+            ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredOrders.map((order) => (
+                <div key={order.id} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-md transition flex flex-col relative h-full">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
+                        <Scissors className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-serif font-bold text-[#16132D] text-lg">{order.category}</div>
+                        <div className="text-sm text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.id})</div>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex justify-between pt-2 border-t border-[#16132D]/[0.06]">
-                    <span className="text-[#16132D]/80">Balance Due</span>
-                    <span className="text-[#F43F5E]">₹{Math.max(0, selectedOrder.totalAmount - selectedOrder.advancePaid).toLocaleString('en-IN')}</span>
                   </div>
-                </div>
-                {(selectedOrder.pointsEarned || 0) > 0 && (
-                  <div className="bg-gradient-to-r from-[#7209B7]/10 to-[#7209B7]/5 p-3 rounded-xl border border-[#7209B7]/20 flex items-center gap-2 text-[#7209B7]">
-                    <span className="text-[11px] font-bold">💎 Earned {selectedOrder.pointsEarned} Loyalty Points!</span>
-                  </div>
-                )}
-                <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1.5">UPDATE STATUS</span>
-                  <select 
-                    value={selectedOrder.status} 
-                    onChange={(e) => handleUpdateStatus(selectedOrder.id, e.target.value)}
-                    className="w-full px-3 py-2 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm bg-white transition cursor-pointer"
-                  >
-                    <option>Received</option>
-                    <option>Cutting</option>
-                    <option>Stitching</option>
-                    <option>Trial Scheduled</option>
-                    <option>Completed</option>
-                  </select>
-                </div>
 
-                {selectedOrder.status === 'Received' && (
-                  <div className="space-y-3 pt-2 border-t border-[#16132D]/[0.06]">
+                  <div className="flex flex-col gap-2 mb-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-[#16132D]/60 font-semibold">Status:</span>
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusStyles[order.status] || statusStyles['Received']}`}>
+                        {order.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-[#16132D]/60 font-semibold">Delivery:</span>
+                      <div className="flex items-center gap-1.5 text-[#16132D]/80 font-bold">
+                        <CalendarIcon className="w-3.5 h-3.5 text-[#16132D]/40" />
+                        {order.deliveryDate}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04]">
                     <div>
-                      <label className="block text-[10px] font-bold tracking-wider uppercase text-[#16132D]/40 mb-1.5">Assign Tailor for Production</label>
-                      <select 
-                        value={productionTailor}
-                        onChange={(e) => setProductionTailor(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm bg-white transition cursor-pointer mb-1"
-                      >
-                        <option value="">-- Select Tailor --</option>
-                        {tailors.map(t => (
-                          <option key={t.id} value={t.name}>{t.name}</option>
-                        ))}
-                      </select>
+                      <div className="font-bold text-[#16132D] text-lg">₹{order.totalAmount.toLocaleString('en-IN')}</div>
+                      <div className="text-[10px] font-semibold text-[#10B981] uppercase tracking-wide mt-0.5">
+                        Adv: ₹{order.advancePaid.toLocaleString('en-IN')}
+                      </div>
                     </div>
-                    <button
-                      onClick={() => handleTakeMeasurements(selectedOrder)}
-                      className="w-full py-2.5 bg-white border border-[#7209B7] text-[#7209B7] hover:bg-[#7209B7]/5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
-                    >
-                      <Scissors className="w-4 h-4" /> Record Measurements
-                    </button>
-                    <button
-                      onClick={() => handleSendToProduction(selectedOrder)}
-                      className="w-full py-2.5 bg-[#7209B7] hover:bg-[#a3531f] text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition shadow-md shadow-[#7209B7]/20"
-                    >
-                      Send to Production <ArrowRight className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={() => handleOpenEditModal(order)}
+                        className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                        title="Edit Order"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          navigate('/orders/details', { state: { order } });
+                        }}
+                        className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                        title="View Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
+                        title="Delete Order"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              ))}
+              {filteredOrders.length === 0 && (
+                <div className="col-span-full py-12 text-center text-sm font-semibold text-[#16132D]/35 bg-white rounded-2xl border border-[#16132D]/[0.06]">
+                  No orders found.
+                </div>
+              )}
             </div>
           )}
+        </div>
+
+
 
         </div>
 

@@ -3,7 +3,8 @@ import { Search, Calendar as CalendarIcon, Clock, CheckCircle, XCircle, MessageS
 import { trialApi } from '../../../api/trialApi';
 
 interface TrialItem {
-  id: string;
+  id: string; // Database ID
+  displayId: string; // UI display ID
   orderId: string;
   customerName: string;
   garment: string;
@@ -41,7 +42,8 @@ const Trial: React.FC = () => {
       try {
         const data = await trialApi.getTrials();
         const formatted = data.map((item: any) => ({
-          id: `TRL-${item.id}`,
+          id: item.id.toString(),
+          displayId: item.display_id || `TRL-${item.id}`,
           orderId: item.order_id || '',
           customerName: item.customer_name,
           garment: item.garment,
@@ -77,9 +79,9 @@ const Trial: React.FC = () => {
       });
       const t = response.trial;
       setTrials([{
-        id: `TRL-${t.id}`, orderId: t.order_id || '', customerName: t.customer_name,
-        garment: t.garment, date: new Date(t.date).toISOString().split('T')[0],
-        time: t.time, tailor: t.tailor || '', alterationNotes: t.alteration_notes || '', status: t.status,
+        id: t.id.toString(), displayId: t.display_id || `TRL-${t.id}`, orderId: t.order_id || '', customerName: t.customer_name,
+        garment: t.garment, date: new Date(t.date).toISOString().split('T')[0], time: t.time,
+        tailor: t.tailor || '', alterationNotes: t.alteration_notes || '', status: t.status
       }, ...trials]);
       setOrderId(''); setCustomerName(''); setGarment(''); setDate(''); setTime(''); setTailor(''); setAlterationNotes('');
       setIsModalOpen(false);
@@ -137,8 +139,11 @@ const Trial: React.FC = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider">{trial.orderId || 'NO ORDER'}</span>
-                  <h3 className="text-base font-serif font-bold text-[#16132D] mt-1">{trial.garment}</h3>
-                  <p className="text-xs text-[#16132D]/55 mt-0.5">For {trial.customerName}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="font-serif font-bold text-[#16132D]">{trial.customerName}</span>
+                    <span className="text-[10px] bg-[#16132D]/[0.05] text-[#16132D]/60 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{trial.displayId}</span>
+                  </div>
+                  <p className="text-xs text-[#16132D]/55 mt-0.5">{trial.garment}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${statusStyles[trial.status]}`}>{trial.status}</span>

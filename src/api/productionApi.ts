@@ -19,8 +19,7 @@ export const productionApi = {
   },
 
   updateStage: async (id: string, stage: string) => {
-    const numericId = id.replace('PRD-', '');
-    const response = await fetchWithAuth(`${API_BASE_URL}/production/${numericId}/stage`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/production/${id}/stage`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stage }),
@@ -30,8 +29,7 @@ export const productionApi = {
   },
 
   deleteProduction: async (id: string) => {
-    const numericId = id.replace('PRD-', '');
-    const response = await fetchWithAuth(`${API_BASE_URL}/production/${numericId}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/production/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete production item');
     return await response.json();
   },

@@ -6,7 +6,8 @@ import { deliveryApi } from '../../../api/deliveryApi';
 import { useConfirm } from '../../../context';
 
 interface ProductionItem {
-  id: string;
+  id: string; // Database ID
+  displayId: string; // UI display ID
   orderId: string;
   customerName: string;
   garment: string;
@@ -55,7 +56,8 @@ const Production: React.FC = () => {
       try {
         const data = await productionApi.getProduction();
         const formatted = data.map((item: any) => ({
-          id: `PRD-${item.id}`,
+          id: item.id.toString(),
+          displayId: item.display_id || `PRD-${item.id}`,
           orderId: item.order_id || '',
           customerName: item.customer_name,
           garment: item.garment,
@@ -83,6 +85,28 @@ const Production: React.FC = () => {
       setItems(items.map(item => item.id === id ? { ...item, stage: nextStage } : item));
     } catch (error) {
       console.error('Error promoting stage:', error);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    e.dataTransfer.setData('itemId', id);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetStage: ProductionItem['stage']) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('itemId');
+    const item = items.find(i => i.id === id);
+    if (item && item.stage !== targetStage) {
+      try {
+        await productionApi.updateStage(id, targetStage);
+        setItems(items.map(i => i.id === id ? { ...i, stage: targetStage } : i));
+      } catch (error) {
+        console.error('Error updating stage via drag and drop:', error);
+      }
     }
   };
 
@@ -130,13 +154,14 @@ const Production: React.FC = () => {
         priority, start_date: startDate || undefined, expected_end_date: expectedEndDate || undefined, notes,
       });
       const p = response.production;
-      setItems([{
-        id: `PRD-${p.id}`, orderId: p.order_id || '', customerName: p.customer_name,
+      const newItem: ProductionItem = {
+        id: p.id.toString(), displayId: p.display_id || `PRD-${p.id}`, orderId: p.order_id || '', customerName: p.customer_name,
         garment: p.garment, tailor: p.tailor || '', stage: p.stage, priority: p.priority,
         startDate: p.start_date ? new Date(p.start_date).toISOString().split('T')[0] : '',
         expectedEndDate: p.expected_end_date ? new Date(p.expected_end_date).toISOString().split('T')[0] : '',
-        notes: p.notes || '',
-      }, ...items]);
+        notes: p.notes || ''
+      };
+      setItems([newItem, ...items]);
       setOrderId(''); setCustomerName(''); setGarment(''); setTailor('');
       setPriority('Medium'); setStartDate(''); setExpectedEndDate(''); setNotes('');
       setIsModalOpen(false);
@@ -171,7 +196,12 @@ const Production: React.FC = () => {
             const stageItems = items.filter(item => item.stage === stage);
             
             return (
-              <div key={stage} className={`${config.bgColor} p-4 rounded-2xl flex flex-col min-h-[400px]`}>
+              <div 
+                key={stage} 
+                className={`${config.bgColor} p-4 rounded-2xl flex flex-col min-h-[400px] border-2 border-transparent hover:border-[#16132D]/10 transition-all`}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, stage)}
+              >
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2">
                     <StageIcon className={`w-4 h-4 ${config.color}`} />
@@ -184,9 +214,14 @@ const Production: React.FC = () => {
 
                 <div className="space-y-3 flex-1 overflow-y-auto">
                   {stageItems.map((item) => (
-                    <div key={item.id} className="bg-white p-4 rounded-xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-[0_4px_12px_rgba(28,36,48,0.08)] transition-all duration-200 space-y-3">
+                    <div 
+                      key={item.id} 
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, item.id)}
+                      className="bg-white p-4 rounded-xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-[0_4px_12px_rgba(28,36,48,0.08)] cursor-grab active:cursor-grabbing transition-all duration-200 space-y-3"
+                    >
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider">{item.orderId || 'NO ORDER'}</span>
+                        <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider">{item.displayId}</span>
                         <div className="flex items-center gap-1.5">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${priorityStyles[item.priority] || priorityStyles['Medium']}`}>
                             {item.priority}
@@ -223,6 +258,7 @@ const Production: React.FC = () => {
                           Promote <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       )}
+
                       {stage === 'Ready' && (
                         <button
                           onClick={() => handleSendToDelivery(item)}

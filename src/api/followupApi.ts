@@ -38,8 +38,7 @@ export const followupApi = {
 
   updateFollowupStatus: async (id: string, status: string) => {
     try {
-      const numericId = id.replace('FOL-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${numericId}/status`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -56,10 +55,9 @@ export const followupApi = {
     }
   },
 
-  updateFollowup: async (id: string, data: { notes: string, due_date: string, status: string }) => {
+  updateFollowup: async (id: string, data: any) => {
     try {
-      const numericId = id.replace('FOL-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${numericId}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -80,8 +78,7 @@ export const followupApi = {
 
   deleteFollowup: async (id: string) => {
     try {
-      const numericId = id.replace('FOL-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${numericId}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

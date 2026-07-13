@@ -25,7 +25,9 @@ const FollowupDetails = lazy(() => import('../pages/crm/followups/FollowupDetail
 
 // Orders Pages
 const Quotations = lazy(() => import('../pages/orders/quotations/Quotations'));
+const QuotationDetails = lazy(() => import('../pages/orders/quotations/QuotationDetails'));
 const Orders = lazy(() => import('../pages/orders/orders/Orders'));
+const OrderDetails = lazy(() => import('../pages/orders/orders/OrderDetails'));
 const Production = lazy(() => import('../pages/orders/production/Production'));
 const Trial = lazy(() => import('../pages/orders/trial/Trial'));
 const Delivery = lazy(() => import('../pages/orders/delivery/Delivery'));
@@ -102,7 +104,9 @@ export const router = createBrowserRouter([
 
       // Orders
       { path: 'orders/quotations', element: <Quotations /> },
+      { path: 'orders/quotations/details', element: <QuotationDetails /> },
       { path: 'orders/list', element: <Orders /> },
+      { path: 'orders/details', element: <OrderDetails /> },
       { path: 'orders/production', element: <Production /> },
       { path: 'orders/trial', element: <Trial /> },
       { path: 'orders/delivery', element: <Delivery /> },

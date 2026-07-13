@@ -3,7 +3,8 @@ import { Plus, Search, Calendar as CalendarIcon, Clock, User, MessageSquare, Che
 import { appointmentApi } from '../../../api/appointmentApi';
 
 interface Appointment {
-  id: string;
+  id: string; // Database ID
+  displayId: string; // UI display ID
   customerName: string;
   type: string;
   date: string;
@@ -15,10 +16,10 @@ interface Appointment {
 }
 
 const mockAppointments: Appointment[] = [
-  { id: 'APT-001', customerName: 'Anjali Sharma', type: 'Fitting', date: '2026-06-28', time: '11:00 AM', phone: '9876543210', assignedTo: 'Ritu (Lead Designer)', notes: 'First fitting for wedding lehenga', status: 'Scheduled' },
-  { id: 'APT-002', customerName: 'Priyanka Sen', type: 'Design Consultation', date: '2026-06-28', time: '02:30 PM', phone: '9876543211', notes: 'Discussion about reception gown styles', status: 'Scheduled' },
-  { id: 'APT-003', customerName: 'Sanjana Roy', type: 'Fabric Selection', date: '2026-06-29', time: '10:00 AM', assignedTo: 'Amit (Fabric Specialist)', notes: 'Needs to review new silk stock', status: 'Scheduled' },
-  { id: 'APT-004', customerName: 'Kriti Sen', type: 'Measurement Collection', date: '2026-06-27', time: '04:00 PM', phone: '9876543213', status: 'Completed' },
+  { id: '1001', displayId: 'APT-1001', customerName: 'Anjali Sharma', type: 'Fitting', date: '2026-06-28', time: '11:00 AM', phone: '9876543210', assignedTo: 'Ritu (Lead Designer)', notes: 'First fitting for wedding lehenga', status: 'Scheduled' },
+  { id: '1002', displayId: 'APT-1002', customerName: 'Priyanka Sen', type: 'Design Consultation', date: '2026-06-28', time: '02:30 PM', phone: '9876543211', notes: 'Discussion about reception gown styles', status: 'Scheduled' },
+  { id: '1003', displayId: 'APT-1003', customerName: 'Sanjana Roy', type: 'Fabric Selection', date: '2026-06-29', time: '10:00 AM', assignedTo: 'Amit (Fabric Specialist)', notes: 'Needs to review new silk stock', status: 'Scheduled' },
+  { id: '1004', displayId: 'APT-1004', customerName: 'Kriti Sen', type: 'Measurement Collection', date: '2026-06-27', time: '04:00 PM', phone: '9876543213', status: 'Completed' },
 ];
 
 const getTypeStyle = (type: string) => {
@@ -57,7 +58,8 @@ const Appointments: React.FC = () => {
       try {
         const data = await appointmentApi.getAppointments();
         const formatted = data.map((item: any) => ({
-          id: `APT-${item.id}`,
+          id: item.id.toString(),
+          displayId: item.display_id || `APT-${item.id}`,
           customerName: item.customer_name,
           type: item.type,
           date: new Date(item.date).toISOString().split('T')[0], // Format date if needed
@@ -97,8 +99,9 @@ const Appointments: React.FC = () => {
         status: 'Scheduled'
       });
       
-      const newApt: Appointment = {
-        id: `APT-${response.appointment.id}`,
+      const newAppointment: Appointment = {
+        id: response.appointment.id.toString(),
+        displayId: response.appointment.display_id || `APT-${response.appointment.id}`,
         customerName: response.appointment.customer_name,
         type: response.appointment.type,
         date: new Date(response.appointment.date).toISOString().split('T')[0],
@@ -109,7 +112,7 @@ const Appointments: React.FC = () => {
         status: response.appointment.status
       };
 
-      setAppointments([newApt, ...appointments]);
+      setAppointments([newAppointment, ...appointments]);
       setCustomerName('');
       setDate('');
       setTime('');
@@ -190,6 +193,11 @@ const Appointments: React.FC = () => {
                     {apt.type}
                   </span>
                   <h3 className="text-lg font-serif font-semibold text-[#16132D] mt-3">{apt.customerName}</h3>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[10px] bg-[#16132D]/[0.05] text-[#16132D]/55 font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                      {apt.displayId}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${statusStyles[apt.status]}`}>

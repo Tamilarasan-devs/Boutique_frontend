@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, FileText, Trash2, X, ArrowRight, Loader2 } from 'lucide-react';
+import { Plus, Search, FileText, Trash2, X, ArrowRight, Loader2, LayoutGrid, List, Eye } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { quotationApi } from '../../../api/quotationApi';
 import { orderApi } from '../../../api/orderApi';
@@ -9,7 +9,8 @@ import { leadApi } from '../../../api/leadApi';
 import { useConfirm } from '../../../context';
 
 interface Quotation {
-  id: string;
+  id: string; // database ID
+  displayId: string; // UI display ID
   customerName: string;
   customerPhone?: string;
   customerEmail?: string;
@@ -40,6 +41,13 @@ const Quotations: React.FC = () => {
   const [customers, setCustomers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
+    return (localStorage.getItem('quotationsViewMode') as 'table' | 'card') || 'table';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('quotationsViewMode', viewMode);
+  }, [viewMode]);
 
   // Advance Payment Modal
   const [advanceModalOpen, setAdvanceModalOpen] = useState(false);
@@ -74,6 +82,11 @@ const Quotations: React.FC = () => {
       // Clear the state so refreshing the page doesn't re-open the modal
       navigate(location.pathname, { replace: true, state: {} });
     }
+
+    if (state?.convertQuotationId) {
+      handleConvertToOrder(state.convertQuotationId);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
   }, []);
 
   useEffect(() => {
@@ -81,7 +94,8 @@ const Quotations: React.FC = () => {
       try {
         const data = await quotationApi.getQuotations();
         const formatted = data.map((item: any) => ({
-          id: `QOT-${item.id}`,
+          id: item.id.toString(),
+          displayId: item.display_id || `QOT-${item.id}`,
           customerName: item.customer_name,
           customerPhone: item.customer_phone,
           customerEmail: item.customer_email,
@@ -148,13 +162,13 @@ const Quotations: React.FC = () => {
         terms,
       });
       const q = response.quotation;
-      setQuotations([{
-        id: `QOT-${q.id}`, customerName: q.customer_name, customerPhone: q.customer_phone, customerEmail: q.customer_email, items: q.items,
-        totalAmount: parseFloat(q.total_amount), discount: parseFloat(q.discount),
-        date: new Date(q.date).toISOString().split('T')[0],
-        validUntil: new Date(q.valid_until).toISOString().split('T')[0],
-        terms: q.terms || '', status: q.status,
-      }, ...quotations]);
+      const newQuotation: Quotation = {
+        id: q.id.toString(), displayId: q.display_id || `QOT-${q.id}`, customerName: q.customer_name, customerPhone: q.customer_phone, customerEmail: q.customer_email, items: q.items,
+        totalAmount: parseFloat(q.total_amount) || 0, discount: parseFloat(q.discount) || 0,
+        date: new Date(q.date).toISOString().split('T')[0], validUntil: new Date(q.valid_until).toISOString().split('T')[0],
+        terms: q.terms || '', status: q.status
+      };
+      setQuotations([newQuotation, ...quotations]);
       setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setValidUntil(''); setTerms('');
       setIsModalOpen(false);
 
@@ -245,22 +259,43 @@ const Quotations: React.FC = () => {
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex items-center bg-white border border-[#16132D]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition">
-            <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
-            <input type="text" placeholder="Search quotations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm text-[#16132D] placeholder-[#16132D]/35 w-full" />
+        {/* Filters & View Toggle */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <div className="flex items-center bg-white border border-[#16132D]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition">
+              <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
+              <input type="text" placeholder="Search quotations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm text-[#16132D] placeholder-[#16132D]/35 w-full" />
+            </div>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2.5 border border-[#16132D]/[0.08] rounded-xl bg-white text-sm font-semibold text-[#16132D]/70 focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 transition cursor-pointer">
+              <option value="All">All Statuses</option>
+              <option>Draft</option>
+              <option>Sent</option>
+              <option>Accepted</option>
+              <option>Rejected</option>
+            </select>
           </div>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2.5 border border-[#16132D]/[0.08] rounded-xl bg-white text-sm font-semibold text-[#16132D]/70 focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 transition cursor-pointer">
-            <option value="All">All Statuses</option>
-            <option>Draft</option>
-            <option>Sent</option>
-            <option>Accepted</option>
-            <option>Rejected</option>
-          </select>
+          
+          {/* View Toggle */}
+          <div className="flex bg-[#16132D]/[0.05] p-1 rounded-xl self-end sm:self-auto mt-2 sm:mt-0">
+            <button 
+              onClick={() => setViewMode('table')}
+              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'table' ? 'bg-white text-[#16132D] shadow-sm' : 'text-[#16132D]/50 hover:text-[#16132D]'}`}
+              title="Table View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => setViewMode('card')}
+              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'card' ? 'bg-white text-[#16132D] shadow-sm' : 'text-[#16132D]/50 hover:text-[#16132D]'}`}
+              title="Card View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Table */}
+        {/* Content */}
+        {viewMode === 'table' ? (
         <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-[#16132D]/75">
@@ -281,7 +316,7 @@ const Quotations: React.FC = () => {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-[#16132D]/35" />
-                        <span className="font-serif font-bold text-[#16132D]">{q.id}</span>
+                        <span className="font-serif font-bold text-[#16132D]">{q.displayId}</span>
                       </div>
                     </td>
                     <td className="py-4 px-6">
@@ -326,6 +361,9 @@ const Quotations: React.FC = () => {
                             ✓ Converted
                           </span>
                         )}
+                        <button onClick={() => navigate('/orders/quotations/details', { state: { quotation: q } })} className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition" title="View Details">
+                          <Eye className="w-4 h-4" />
+                        </button>
                         <button onClick={() => handleDelete(q.id)} className="p-1.5 rounded-lg text-[#16132D]/35 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -340,6 +378,90 @@ const Quotations: React.FC = () => {
             </table>
           </div>
         </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filtered.map(q => (
+              <div key={q.id} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-md transition flex flex-col h-full">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#16132D]/[0.03] flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-[#16132D]/60" />
+                    </div>
+                    <span className="font-serif font-bold text-[#16132D] text-lg">{q.displayId}</span>
+                  </div>
+                  <select
+                    value={q.status}
+                    onChange={(e) => handleUpdateStatus(q.id, e.target.value)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border-none cursor-pointer focus:outline-none ${statusStyles[q.status]}`}
+                  >
+                    <option>Draft</option>
+                    <option>Sent</option>
+                    <option>Accepted</option>
+                    <option>Rejected</option>
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <h3 className="font-bold text-[#16132D] text-[15px] truncate">{q.customerName}</h3>
+                  {(q.customerPhone || q.customerEmail) && (
+                    <p className="text-xs text-[#16132D]/60 mt-1 truncate">
+                      {q.customerPhone} {q.customerPhone && q.customerEmail && '•'} {q.customerEmail}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-4 flex-1">
+                  <p className="text-xs text-[#16132D]/50 font-bold uppercase tracking-wider mb-1">Items</p>
+                  <p className="text-sm text-[#16132D]/70 line-clamp-2">{q.items}</p>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-xs text-[#16132D]/50 font-bold uppercase tracking-wider">Valid Until</p>
+                    <p className="text-sm font-semibold text-[#16132D]/80">{q.validUntil}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04]">
+                  <div className="flex flex-col">
+                     <span className="text-xs text-[#16132D]/50 font-bold uppercase tracking-wider mb-0.5">Amount</span>
+                     <div className="flex items-center gap-2">
+                        <span className="font-bold text-[#16132D] text-lg">₹{q.totalAmount.toLocaleString('en-IN')}</span>
+                        {q.discount > 0 && <span className="text-[10px] text-[#10B981] font-semibold bg-[#10B981]/10 px-1.5 py-0.5 rounded">{q.discount}% off</span>}
+                     </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {q.status !== 'Rejected' && q.status !== 'Accepted' && (
+                      <button
+                        onClick={() => handleConvertToOrder(q.id)}
+                        className="p-1.5 rounded-lg text-[#10B981] hover:bg-[#10B981]/10 transition"
+                        title="Convert to Order"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
+                    {q.status === 'Accepted' && (
+                      <span className="p-1.5 text-xs font-bold text-[#10B981] flex items-center gap-1" title="Converted">
+                        ✓
+                      </span>
+                    )}
+                    <button onClick={() => navigate('/orders/quotations/details', { state: { quotation: q } })} className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition" title="View Details">
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDelete(q.id)} className="p-1.5 rounded-lg text-[#16132D]/35 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition" title="Delete">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div className="col-span-full py-12 text-center text-sm font-semibold text-[#16132D]/35 bg-white rounded-2xl border border-[#16132D]/[0.06]">
+                No quotations found.
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Create Modal */}
         {isModalOpen && (
@@ -432,6 +554,9 @@ const Quotations: React.FC = () => {
         )}
 
       </div>
+
+
+
     </div>
   );
 };

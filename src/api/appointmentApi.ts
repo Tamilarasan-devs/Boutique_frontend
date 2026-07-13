@@ -36,9 +36,7 @@ export const appointmentApi = {
 
   updateAppointmentStatus: async (id: string, status: string) => {
     try {
-      // Remove APT- prefix if present for backend compat
-      const numericId = id.replace('APT-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${numericId}/status`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -57,8 +55,7 @@ export const appointmentApi = {
 
   deleteAppointment: async (id: string) => {
     try {
-      const numericId = id.replace('APT-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${numericId}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

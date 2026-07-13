@@ -19,10 +19,9 @@ export const trialApi = {
   },
 
   updateStatus: async (id: string, status: string, alteration_notes?: string) => {
-    const numericId = id.replace('TRL-', '');
     const body: any = { status };
     if (alteration_notes !== undefined) body.alteration_notes = alteration_notes;
-    const response = await fetchWithAuth(`${API_BASE_URL}/trials/${numericId}/status`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/trials/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -32,8 +31,7 @@ export const trialApi = {
   },
 
   deleteTrial: async (id: string) => {
-    const numericId = id.replace('TRL-', '');
-    const response = await fetchWithAuth(`${API_BASE_URL}/trials/${numericId}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/trials/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete trial');
     return await response.json();
   },

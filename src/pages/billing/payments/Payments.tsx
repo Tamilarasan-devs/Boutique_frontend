@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText, Loader2 } from 'lucide-react';
+import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText, Loader2, Eye } from 'lucide-react';
 import { billingApi, BILLING_EVENTS_URL, Payment, Invoice } from '../../../api/billingApi';
 import { useToast, useConfirm } from '../../../context';
 
@@ -20,6 +20,7 @@ const Payments: React.FC = () => {
 
   // Modal States
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [viewingPayment, setViewingPayment] = useState<Payment | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form States
@@ -234,6 +235,7 @@ const Payments: React.FC = () => {
                   <th className="py-4 px-6">Method</th>
                   <th className="py-4 px-6">Date</th>
                   <th className="py-4 px-6">Note</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -255,6 +257,15 @@ const Payments: React.FC = () => {
                       <td className="py-4 px-6 text-slate-500">{new Date(p.payment_date).toLocaleDateString('en-IN')}</td>
                       <td className="py-4 px-6 text-slate-500 max-w-[200px] truncate text-xs" title={p.note}>
                         {p.note || '—'}
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <button
+                          onClick={() => setViewingPayment(p)}
+                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -392,6 +403,70 @@ const Payments: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW DETAILS MODAL */}
+      {viewingPayment && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                Payment Details
+              </h2>
+              <button onClick={() => setViewingPayment(null)} className="p-1 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Receipt Number</p>
+                  <p className="text-sm font-bold text-slate-800">{viewingPayment.receipt_number}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Date</p>
+                  <p className="text-sm font-semibold text-slate-800">{new Date(viewingPayment.payment_date).toLocaleDateString('en-IN')}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Customer</p>
+                  <p className="text-sm font-bold text-slate-800">{viewingPayment.customer_name}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Amount</p>
+                  <p className="text-sm font-extrabold text-emerald-600">₹{parseFloat(viewingPayment.amount as any).toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Method</p>
+                  <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                    {methodIcons[viewingPayment.method]} {viewingPayment.method}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Linked Invoice</p>
+                  <p className="text-sm font-medium text-slate-600">
+                    {invoices.find(inv => inv.id === viewingPayment.invoice_id)?.invoice_number || '—'}
+                  </p>
+                </div>
+              </div>
+
+              {viewingPayment.note && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Note</p>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-sm text-slate-600">
+                    {viewingPayment.note}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

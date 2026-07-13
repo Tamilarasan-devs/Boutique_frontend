@@ -36,8 +36,7 @@ export const orderApi = {
 
   updateOrder: async (id: string, orderData: any) => {
     try {
-      const numericId = id.replace('ORD-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${numericId}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -56,8 +55,7 @@ export const orderApi = {
 
   updateOrderStatus: async (id: string, status: string) => {
     try {
-      const numericId = id.replace('ORD-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${numericId}/status`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -76,8 +74,7 @@ export const orderApi = {
 
   deleteOrder: async (id: string) => {
     try {
-      const numericId = id.replace('ORD-', '');
-      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${numericId}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -91,8 +88,7 @@ export const orderApi = {
   },
 
   convertFromQuotation: async (quotationId: string, advanceAmount?: number) => {
-    const numericId = quotationId.replace('QOT-', '');
-    const response = await fetchWithAuth(`${API_BASE_URL}/orders/from-quotation/${numericId}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/orders/from-quotation/${quotationId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ advance_amount: advanceAmount || 0 })

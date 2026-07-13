@@ -107,7 +107,6 @@ const menuItems: SidebarItem[] = [
     title: 'Admin',
     icon: <Settings className="w-5 h-5" />,
     children: [
-      { title: 'Billing & Plan', path: '/billing/pricing', icon: <CreditCard className="w-4 h-4" /> },
       { title: 'Settings', path: '/settings', icon: <Settings className="w-4 h-4" /> }
     ]
   }

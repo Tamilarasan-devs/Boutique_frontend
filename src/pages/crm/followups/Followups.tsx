@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Search, Phone, MessageSquare, Mail, Calendar, Check, AlertCircle, X, Edit3, Clock, ChevronRight, FileText, ArrowRight, Trash2, List, Loader2 } from 'lucide-react';
+import { Plus, Search, Phone, MessageSquare, Mail, Calendar, Check, AlertCircle, X, Edit3, Clock, ChevronRight, FileText, ArrowRight, Trash2, List, LayoutGrid, Loader2 } from 'lucide-react';
 import { followupApi, FOLLOWUP_EVENTS_URL } from '../../../api/followupApi';
 import { useConfirm } from '../../../context/ConfirmContext';
 import { toast } from 'sonner';
@@ -21,7 +21,8 @@ const localizer = dateFnsLocalizer({
 })
 
 interface FollowUp {
-  id: string;
+  id: string; // Database ID
+  displayId: string; // UI display ID
   customerName: string;
   customerPhone?: string;
   channel: 'Call' | 'WhatsApp' | 'Email' | "Instagram" | "Facebook";
@@ -42,7 +43,13 @@ const Followups: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'card' | 'calendar'>(() => {
+    return (localStorage.getItem('followupsViewMode') as 'list' | 'card' | 'calendar') || 'list';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('followupsViewMode', viewMode);
+  }, [viewMode]);
   const [calendarView, setCalendarView] = useState<any>('month');
   const [calendarDate, setCalendarDate] = useState(new Date());
 
@@ -101,7 +108,8 @@ const Followups: React.FC = () => {
       try {
         const data = await followupApi.getFollowups();
         const formatted = data.map((item: any) => ({
-          id: `FOL-${item.id}`,
+          id: item.id.toString(),
+          displayId: item.display_id || `FOL-${item.id}`,
           customerName: item.customer_name,
           customerPhone: item.customer_phone || '',
           channel: item.channel,
@@ -128,7 +136,8 @@ const Followups: React.FC = () => {
     eventSource.addEventListener('followup_created', (e) => {
       const item = JSON.parse(e.data);
       const newFol: FollowUp = {
-        id: `FOL-${item.id}`,
+        id: item.id.toString(),
+        displayId: item.display_id || `FOL-${item.id}`,
         customerName: item.customer_name,
         customerPhone: item.customer_phone || '',
         channel: item.channel,
@@ -143,7 +152,8 @@ const Followups: React.FC = () => {
     eventSource.addEventListener('followup_updated', (e) => {
       const item = JSON.parse(e.data);
       const updatedFol: FollowUp = {
-        id: `FOL-${item.id}`,
+        id: item.id.toString(),
+        displayId: item.display_id || `FOL-${item.id}`,
         customerName: item.customer_name,
         customerPhone: item.customer_phone || '',
         channel: item.channel,
@@ -220,8 +230,9 @@ const Followups: React.FC = () => {
         const d = new Date(item.due_date);
         const formattedDate = item.due_date ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
         const newFol: FollowUp = {
-          id: `FOL-${item.id}`,
-          customerName: item.customer_name,
+          id: response.followup.id.toString(),
+          displayId: response.followup.display_id || `FOL-${response.followup.id}`,
+          customerName: response.followup.customer_name,
           customerPhone: item.customer_phone || '',
           channel: item.channel,
           reason: item.reason,
@@ -307,18 +318,19 @@ const Followups: React.FC = () => {
     setIsUpdating(true);
 
     try {
-      const response = await followupApi.updateFollowup(selectedFollowup.id, {
+      const data = await followupApi.updateFollowup(selectedFollowup.id, {
         notes: updateNotes,
         due_date: updateDueDate,
         status: updateStatus
       });
 
-      if (response && response.followup) {
-        const item = response.followup;
+      if (data && data.followup) {
+        const item = data.followup;
         const d = new Date(item.due_date);
         const formattedDate = item.due_date ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
         const updatedFol: FollowUp = {
-          id: `FOL-${item.id}`,
+          id: item.id.toString(),
+          displayId: item.display_id || `FOL-${item.id}`,
           customerName: item.customer_name,
           customerPhone: item.customer_phone || '',
           channel: item.channel,
@@ -389,6 +401,13 @@ const Followups: React.FC = () => {
                 title="List View"
               >
                 <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('card')}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'card' ? 'bg-[#16132D] text-white shadow-sm' : 'text-[#16132D]/60 hover:bg-[#16132D]/5 hover:text-[#16132D]'}`}
+                title="Card View"
+              >
+                <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('calendar')}
@@ -478,7 +497,7 @@ const Followups: React.FC = () => {
                   <p className="font-semibold text-lg">No follow-ups found</p>
                   <p className="text-sm">You are all caught up!</p>
                 </div>
-              ) : (
+              ) : viewMode === 'list' ? (
                 <table className="w-full text-left text-sm">
                   <thead className="sticky top-0 bg-white/95 backdrop-blur-sm z-10">
                     <tr className="border-b border-[#16132D]/5 text-[#16132D]/60 font-bold uppercase tracking-wider text-xs">
@@ -496,7 +515,14 @@ const Followups: React.FC = () => {
                         onClick={() => handleOpenDrawer(fol)}
                         className="hover:bg-[#F4F3F8]/50 transition-colors cursor-pointer group"
                       >
-                        <td className="py-3.5 px-6 font-bold text-[#16132D]">{fol.customerName}</td>
+                        <td className="py-3.5 px-6">
+                          <div className="flex items-center gap-2">
+                            <span className="font-serif font-bold text-[#16132D] text-sm">{fol.customerName}</span>
+                            <span className="text-[9px] bg-[#16132D]/[0.05] text-[#16132D]/55 font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
+                              {fol.displayId}
+                            </span>
+                          </div>
+                        </td>
                         <td className="py-3.5 px-6 max-w-[300px]">
                           <div className="font-medium text-[#16132D] truncate" title={fol.reason}>{fol.reason}</div>
                           <div className="mt-1.5 flex items-center gap-2">
@@ -568,6 +594,80 @@ const Followups: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 p-6 bg-[#F4F3F8]/30 min-h-full">
+                  {filteredFollowUps.map((fol) => (
+                    <div
+                      key={fol.id}
+                      onClick={() => handleOpenDrawer(fol)}
+                      className="bg-white rounded-2xl p-5 border border-[#16132D]/[0.06] shadow-[0_2px_10px_-4px_rgba(22,19,45,0.05)] hover:shadow-md transition-all cursor-pointer flex flex-col group relative overflow-hidden"
+                    >
+                      <div className={`absolute top-0 left-0 w-full h-1 ${fol.status === 'Completed' ? 'bg-emerald-500' : fol.status === 'Overdue' ? 'bg-rose-500' : fol.status === 'Rejected' ? 'bg-slate-500' : 'bg-blue-500'}`} />
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider uppercase block mb-1">{fol.displayId}</span>
+                          <h3 className="font-serif font-bold text-lg text-[#16132D] leading-tight">{fol.customerName}</h3>
+                        </div>
+                        <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                          fol.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : fol.status === 'Overdue' ? 'bg-rose-100 text-rose-800' : fol.status === 'Rejected' ? 'bg-slate-100 text-slate-700' : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {fol.status === 'Overdue' && <AlertCircle className="w-3 h-3" />}
+                          {fol.status}
+                        </span>
+                      </div>
+                      
+                      <div className="flex-1 mt-1 mb-4">
+                        <p className="text-sm font-medium text-[#16132D]/80 line-clamp-2" title={fol.reason}>{fol.reason}</p>
+                      </div>
+
+                      <div className="bg-[#F4F3F8]/80 rounded-xl p-3 grid grid-cols-2 gap-2 mb-4 border border-[#16132D]/[0.03]">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#16132D]/40 block mb-0.5">Due Date</span>
+                          <div className="flex items-center gap-1 text-xs font-bold text-[#16132D]/80">
+                            <Calendar className="w-3.5 h-3.5 text-[#16132D]/40" />
+                            {fol.dueDate}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#16132D]/40 block mb-0.5">Channel</span>
+                          <span className="flex items-center gap-1 text-xs font-bold text-[#16132D]/80">
+                            {fol.channel === 'WhatsApp' && <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />}
+                            {fol.channel === 'Call' && <Phone className="w-3.5 h-3.5 text-blue-500" />}
+                            {fol.channel === 'Email' && <Mail className="w-3.5 h-3.5 text-purple-500" />}
+                            {fol.channel !== 'WhatsApp' && fol.channel !== 'Call' && fol.channel !== 'Email' && <MessageSquare className="w-3.5 h-3.5 text-blue-500" />}
+                            {fol.channel}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-[#16132D]/5">
+                        <div className="flex items-center gap-2">
+                          {fol.notes && (
+                            <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md flex items-center gap-1" title="Notes added">
+                              <MessageSquare className="w-3 h-3" />
+                              {fol.notes.split('\n').filter(line => line.trim() !== '').length}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex justify-end gap-1.5 items-center">
+                          {fol.status !== 'Completed' && fol.status !== 'Rejected' && (
+                            <>
+                              <button onClick={(e) => handleConvert(fol, e)} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Convert to Quotation">
+                                <ArrowRight className="w-4 h-4" />
+                              </button>
+                              <button onClick={(e) => handleMarkRejected(fol.id, e)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Reject Follow-up">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          <button onClick={(e) => handleDelete(fol, e)} className="p-1.5 text-[#16132D]/30 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition" title="Delete Follow-up">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}

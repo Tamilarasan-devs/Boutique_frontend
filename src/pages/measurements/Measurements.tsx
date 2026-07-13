@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast, useConfirm } from '../../context';
 import { measurementHistoryApi } from '../../api/measurementHistoryApi';
 import { customerApi } from '../../api/customerApi';
-import { FileText, Save, User, Plus, Trash2, Scissors, Edit, X } from 'lucide-react';
+import { FileText, Save, User, Plus, Trash2, Scissors, Edit, X, Eye } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { orderApi } from '../../api/orderApi';
 import { productionApi } from '../../api/productionApi';
@@ -24,6 +24,7 @@ const Measurements: React.FC = () => {
   const [cancelReturnTo, setCancelReturnTo] = useState<string | null>(null);
   const [actionOnSuccess, setActionOnSuccess] = useState<any>(null);
   const [lastAutoFilledCustomer, setLastAutoFilledCustomer] = useState<string>('');
+  const [viewingRecord, setViewingRecord] = useState<any>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -294,6 +295,13 @@ const Measurements: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <button 
+                            onClick={() => setViewingRecord(record)}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                            title="View Record"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button 
                             onClick={() => openEditModal(record)}
                             className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                             title="Edit Record"
@@ -445,6 +453,75 @@ const Measurements: React.FC = () => {
                 className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95"
               >
                 <Save className="w-4 h-4" /> {editingId ? 'Update' : 'Save'} Measurement
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* View Modal */}
+      {viewingRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-scale-in">
+            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold font-serif text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-emerald-600" />
+                View Measurement Details
+              </h3>
+              <button 
+                onClick={() => setViewingRecord(null)}
+                className="text-slate-500 hover:text-slate-800 hover:bg-slate-200 p-1.5 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Customer</p>
+                  <p className="text-base font-bold text-slate-900">{viewingRecord.customer_name || `Customer #${viewingRecord.customer_id}`}</p>
+                  {(() => {
+                    const customer = customers.find(c => String(c.id) === String(viewingRecord.customer_id));
+                    return customer ? (
+                      <div className="mt-1">
+                        {customer.phone && <p className="text-sm font-medium text-slate-600">{customer.phone}</p>}
+                        {customer.email && <p className="text-sm font-medium text-slate-600">{customer.email}</p>}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Date</p>
+                  <p className="text-base font-medium text-slate-800">{new Date(viewingRecord.created_at || viewingRecord.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div className="col-span-2">
+                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Garment & Notes</p>
+                   <p className="text-sm text-slate-700 whitespace-pre-wrap font-medium">{viewingRecord.notes || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-base font-bold font-serif text-slate-900 mb-3 border-b border-slate-100 pb-2">Measurement Dimensions</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {Object.entries(viewingRecord.measurements || {}).map(([key, value]) => (
+                    <div key={key} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-center">
+                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1 truncate">{key}</span>
+                      <span className="text-lg font-bold text-slate-900">{String(value)}</span>
+                    </div>
+                  ))}
+                  {Object.keys(viewingRecord.measurements || {}).length === 0 && (
+                     <p className="text-sm text-slate-500 col-span-3">No dimensions recorded.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <button 
+                onClick={() => setViewingRecord(null)}
+                className="px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold shadow-md hover:bg-slate-900 transition-all"
+              >
+                Close
               </button>
             </div>
           </div>

@@ -19,8 +19,7 @@ export const quotationApi = {
   },
 
   updateStatus: async (id: string, status: string) => {
-    const numericId = id.replace('QOT-', '');
-    const response = await fetchWithAuth(`${API_BASE_URL}/quotations/${numericId}/status`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/quotations/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -30,8 +29,7 @@ export const quotationApi = {
   },
 
   deleteQuotation: async (id: string) => {
-    const numericId = id.replace('QOT-', '');
-    const response = await fetchWithAuth(`${API_BASE_URL}/quotations/${numericId}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`${API_BASE_URL}/quotations/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete quotation');
     return await response.json();
   },
