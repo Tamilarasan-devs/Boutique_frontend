@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, X, Loader2, Shield, Crown } from 'lucide-react';
 import { authApi } from '../../../api/authApi';
 import { API_BASE_URL } from '../../../constants';
 import { fetchWithAuth } from '../../../api/client';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 interface StaffUser {
   id: string;
@@ -168,10 +169,8 @@ const UsersSettings: React.FC = () => {
         {/* Users Table */}
         <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
           {isLoading ? (
-            <div className="flex items-center justify-center h-48">
-              <Loader2 className="w-7 h-7 animate-spin text-[#7209B7]" />
-            </div>
-          ) : users.length === 0 ? (
+          <TableSkeleton />
+        ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-[#16132D]/40 gap-2">
               <Shield className="w-8 h-8 opacity-40" />
               <p className="text-sm font-medium">No staff users yet</p>

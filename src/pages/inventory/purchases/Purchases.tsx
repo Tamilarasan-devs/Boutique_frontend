@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, FileText, X, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
+import { TableSkeleton } from '../../../components/ui/Skeleton';
 
 interface Purchase {
   id: number;
@@ -131,13 +132,10 @@ const Purchases: React.FC = () => {
         </div>
 
         {/* Table */}
-        {loading ? (
-          <p className="text-center text-[#16132D]/50 font-semibold py-12">Loading purchase orders...</p>
-        ) : (
-          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-[#16132D]/75">
-                <thead>
+        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-[#16132D]/75">
+              <thead>
                   <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-bold text-xs tracking-wider uppercase">
                     <th className="py-4 px-6">PO Number</th>
                     <th className="py-4 px-6">Supplier</th>
@@ -148,9 +146,15 @@ const Purchases: React.FC = () => {
                     <th className="py-4 px-6"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#16132D]/[0.04]">
-                  {filtered.length === 0 ? (
-                    <tr><td colSpan={7} className="py-12 text-center text-[#16132D]/35 font-semibold">No purchase orders found.</td></tr>
+              <tbody className="divide-y divide-[#16132D]/[0.04]">
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="p-0">
+                      <TableSkeleton rows={5} />
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={7} className="py-12 text-center text-[#16132D]/35 font-semibold">No purchase orders found.</td></tr>
                   ) : filtered.map(p => (
                     <tr key={p.id} className="hover:bg-[#16132D]/[0.02] transition">
                       <td className="py-4 px-6">
@@ -182,10 +186,9 @@ const Purchases: React.FC = () => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+            </table>
           </div>
-        )}
+        </div>
 
         {/* Modal */}
         {isModalOpen && (

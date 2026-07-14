@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import React, { useState, useEffect, useCallback } from 'react';
 import { LayoutList, LayoutGrid } from 'lucide-react';
 import { employeeApi, Employee } from '../../../api/employeeApi';
+import { TableSkeleton } from '../../../components/ui/Skeleton';
 
 const ROLES = ['Tailor', 'Receptionist', 'Manager', 'Other'] as const;
 const STATUSES = ['Active', 'Inactive'] as const;
@@ -219,11 +220,23 @@ const Employees: React.FC = () => {
       {/* Table */}
       <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-500">Loading employees...</p>
-            </div>
+          <div className="p-0">
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead className="bg-gray-50">
+                <tr>
+                  {['Name', 'Role', 'Phone', 'Email', 'Join Date', 'Salary', 'Orders', 'Status', 'Actions'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={9} className="p-0">
+                    <TableSkeleton rows={5} />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-64">

@@ -32,12 +32,14 @@ const Invoice: React.FC = () => {
   // New Invoice Form State
   const [customers, setCustomers] = useState<{ id: number; name: string }[]>([]);
   const [quotations, setQuotations] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [creationMode, setCreationMode] = useState<'Manual' | 'FromQuotation'>('Manual');
   const [selectedQuotationId, setSelectedQuotationId] = useState<string>('');
 
   const [customerName, setCustomerName] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('');
+  const [advancePaid, setAdvancePaid] = useState<number>(0);
   const [items, setItems] = useState<Omit<InvoiceItemDetail, 'amount'>[]>([
     { description: '', quantity: 1, price: 0 }
   ]);
@@ -75,10 +77,21 @@ const Invoice: React.FC = () => {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const { orderApi } = await import('../../../api/orderApi');
+      const data = await orderApi.getOrders();
+      setOrders(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchInvoices();
     fetchCustomers();
     fetchQuotations();
+    fetchOrders();
 
     const state = location.state as any;
     if (state?.openModal) {
@@ -195,6 +208,14 @@ const Invoice: React.FC = () => {
           price: parseFloat(quotation.total_amount) || 0 
         }]);
       }
+
+      // Auto-fill advancePaid if a matching order is found
+      const matchingOrder = orders.find(o => o.customer_name === quotation.customer_name);
+      if (matchingOrder && matchingOrder.advance_paid) {
+        setAdvancePaid(parseFloat(matchingOrder.advance_paid) || 0);
+      } else {
+        setAdvancePaid(0);
+      }
     }
   };
 
@@ -214,7 +235,16 @@ const Invoice: React.FC = () => {
       amount: item.quantity * item.price
     }));
 
-    const totalAmount = calculateFormTotal();
+    if (advancePaid > 0) {
+      finalItems.push({
+        description: 'Less: Advance Paid',
+        quantity: 1,
+        price: -advancePaid,
+        amount: -advancePaid
+      });
+    }
+
+    const totalAmount = Math.max(0, calculateFormTotal() - advancePaid);
 
     setIsSubmitting(true);
     try {
@@ -242,6 +272,7 @@ const Invoice: React.FC = () => {
       setCustomerName('');
       setInvoiceDate(new Date().toISOString().split('T')[0]);
       setDueDate('');
+      setAdvancePaid(0);
       setItems([{ description: '', quantity: 1, price: 0 }]);
       setCreationMode('Manual');
       setSelectedQuotationId('');
@@ -573,6 +604,18 @@ const Invoice: React.FC = () => {
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Advance Paid</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={advancePaid || ''}
+                    onChange={(e) => setAdvancePaid(parseFloat(e.target.value) || 0)}
+                    placeholder="e.g. 500"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
 
               <div>
@@ -638,10 +681,27 @@ const Invoice: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
-                <span className="text-sm font-bold text-slate-500">Total Invoice Amount</span>
-                <span className="text-xl font-extrabold text-slate-900">₹{calculateFormTotal().toLocaleString('en-IN')}</span>
-              </div>
+              {advancePaid > 0 ? (
+                <div className="pt-4 border-t border-slate-100">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-semibold text-slate-500">Subtotal</span>
+                    <span className="text-sm font-semibold text-slate-700">₹{calculateFormTotal().toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-semibold text-emerald-600">Less: Advance Paid</span>
+                    <span className="text-sm font-semibold text-emerald-600">- ₹{advancePaid.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="pt-2 flex justify-between items-center">
+                    <span className="text-sm font-bold text-slate-500">Net Invoice Amount</span>
+                    <span className="text-xl font-extrabold text-slate-900">₹{Math.max(0, calculateFormTotal() - advancePaid).toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-500">Total Invoice Amount</span>
+                  <span className="text-xl font-extrabold text-slate-900">₹{calculateFormTotal().toLocaleString('en-IN')}</span>
+                </div>
+              )}
 
               <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
                 <button

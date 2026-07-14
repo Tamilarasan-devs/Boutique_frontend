@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 import React, { useState, useEffect, useCallback } from 'react';
 import { attendanceApi, AttendanceRecord, AttendanceSummary } from '../../../api/attendanceApi';
+import { TableSkeleton } from '../../../components/ui/Skeleton';
 import { 
   CalendarDays, Search, CheckCircle2, XCircle, Clock, 
   FileEdit, RefreshCw, BarChart3, Users, Calendar, Eye, X
@@ -292,12 +293,7 @@ const Attendance: React.FC = () => {
 
           {/* Attendance Table */}
           <div className="bg-white rounded-2xl shadow-sm border border-[#16132D]/[0.08] overflow-hidden">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center h-64 gap-4">
-                <RefreshCw className="w-8 h-8 text-[#7209B7] animate-spin" />
-                <p className="text-sm font-semibold text-[#16132D]/60">Loading attendance data...</p>
-              </div>
-            ) : error ? (
+            {error ? (
               <div className="flex flex-col items-center justify-center h-64 gap-3 text-center px-4">
                 <div className="w-12 h-12 rounded-full bg-[#F43F5E]/10 flex items-center justify-center mb-2">
                   <XCircle className="w-6 h-6 text-[#F43F5E]" />
@@ -329,7 +325,13 @@ const Attendance: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#16132D]/[0.04]">
-                    {filteredRecords.map(record => {
+                    {loading ? (
+                      <tr>
+                        <td colSpan={6} className="p-0">
+                          <TableSkeleton rows={5} />
+                        </td>
+                      </tr>
+                    ) : filteredRecords.map(record => {
                       const isMarking = markingId === record.employee_id;
                       const cfg = record.status ? statusConfig[record.status as AttendanceStatus] : null;
                       const checkInVal = record.check_in ? record.check_in.substring(0, 5) : '';
@@ -452,9 +454,32 @@ const Attendance: React.FC = () => {
           </div>
           
           {summaryLoading ? (
-            <div className="flex flex-col items-center justify-center h-64 gap-4">
-              <RefreshCw className="w-8 h-8 text-[#7209B7] animate-spin" />
-              <p className="text-sm font-semibold text-[#16132D]/60">Analyzing monthly data...</p>
+            <div className="p-4">
+              <table className="w-full text-left text-sm border-separate border-spacing-0">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/80 rounded-tl-xl sticky left-0 z-10 backdrop-blur-sm min-w-[180px]">
+                      Employee
+                    </th>
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 min-w-[140px]">
+                      Summary
+                    </th>
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 min-w-[100px]">
+                      Attendance %
+                    </th>
+                    <th className="px-4 py-3 font-bold text-[#16132D]/60 uppercase tracking-wider text-[11px] bg-[#F4F3F8]/50 rounded-tr-xl w-[80px]">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={4} className="p-0">
+                      <TableSkeleton rows={5} />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           ) : summary.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 gap-3 text-center px-4">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Users, Megaphone, CheckCircle2, X, Loader2 } from 'lucide-react';
 import { campaignApi, MarketingCampaign } from '../../../api/campaignApi';
 import { toast } from 'sonner';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 const channelColor: Record<string, string> = {
   Email: 'bg-blue-50 text-blue-700 border-blue-100',
@@ -141,10 +142,8 @@ const Campaigns: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        </div>
-      ) : campaigns.length === 0 ? (
+          <TableSkeleton />
+        ) : campaigns.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
           <Megaphone className="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-slate-900">No campaigns yet</h3>

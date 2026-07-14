@@ -8,6 +8,7 @@ import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 const locales = {
   'en-US': enUS,
@@ -490,8 +491,8 @@ const Followups: React.FC = () => {
           ) : (
             <div className="overflow-x-auto flex-1">
               {isLoading ? (
-                <div className="flex h-full items-center justify-center text-[#16132D]/40 font-medium">Loading...</div>
-              ) : filteredFollowUps.length === 0 ? (
+          <TableSkeleton />
+        ) : filteredFollowUps.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-[#16132D]/40">
                   <MessageSquare className="w-12 h-12 mb-3 opacity-20" />
                   <p className="font-semibold text-lg">No follow-ups found</p>

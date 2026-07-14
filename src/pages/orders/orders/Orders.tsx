@@ -6,6 +6,7 @@ import { productionApi } from '../../../api/productionApi';
 import { employeeApi, Employee } from '../../../api/employeeApi';
 import { customerApi } from '../../../api/customerApi';
 import { useConfirm } from '../../../context';
+import { TableSkeleton, CardSkeleton } from '../../../components/ui/Skeleton';
 
 interface Order {
   id: string; // The database ID used for API calls
@@ -43,6 +44,7 @@ const Orders: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
     return (localStorage.getItem('ordersViewMode') as 'table' | 'card') || 'table';
   });
@@ -113,9 +115,7 @@ const Orders: React.FC = () => {
       }
     };
 
-    fetchOrders();
-    fetchTailors();
-    fetchCustomers();
+    Promise.all([fetchOrders(), fetchTailors(), fetchCustomers()]).finally(() => setIsLoading(false));
 
     const state = location.state as any;
     if (state?.openModal) {
@@ -358,77 +358,105 @@ const Orders: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#16132D]/[0.04]">
-                      {filteredOrders.map((order) => (
-                        <tr key={order.id} className="hover:bg-[#16132D]/[0.02] transition">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
-                                <Scissors className="w-4 h-4" />
-                              </div>
-                              <div>
-                                <div className="font-serif font-bold text-[#16132D] text-base">{order.category}</div>
-                                <div className="text-xs text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.displayId})</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-bold text-[#16132D]">₹{order.totalAmount.toLocaleString('en-IN')}</div>
-                            <div className="text-[10px] font-semibold text-[#16132D]/50 uppercase tracking-wide mt-0.5">
-                              Adv: ₹{order.advancePaid.toLocaleString('en-IN')}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 font-semibold">
-                            <div className="flex items-center gap-1.5 text-[#16132D]/65">
-                              <CalendarIcon className="w-4 h-4 text-[#16132D]/40" />
-                              {order.deliveryDate}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusStyles[order.status] || statusStyles['Received']}`}>
-                              {order.status}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 text-right space-x-2">
-                            <button 
-                              onClick={() => handleOpenEditModal(order)}
-                              className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
-                              title="Edit Order"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => {
-                                navigate('/orders/details', { state: { order } });
-                              }}
-                              className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
-                              title="View Details"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteOrder(order.id)}
-                              className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
-                              title="Delete Order"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan={5} className="p-0">
+                            <TableSkeleton rows={5} />
                           </td>
                         </tr>
-                      ))}
-                      {filteredOrders.length === 0 && (
+                      ) : filteredOrders.length === 0 ? (
                         <tr>
                           <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#16132D]/35">
                             No orders found.
                           </td>
                         </tr>
+                      ) : (
+                        filteredOrders.map((order) => (
+                          <tr key={order.id} className="hover:bg-[#16132D]/[0.02] transition">
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-3">
+                                <div className={`p-2 rounded-lg ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
+                                  <Scissors className="w-4 h-4" />
+                                </div>
+                                <div>
+                                  <div className="font-serif font-bold text-[#16132D] text-base">{order.category}</div>
+                                  <div className="text-xs text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.displayId})</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-2">
+                                <div className="font-bold text-[#16132D]">₹{order.totalAmount.toLocaleString('en-IN')}</div>
+                                {order.advancePaid >= order.totalAmount ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#10B981]/15 text-[#10B981]">Paid</span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#F59E0B]/15 text-[#F59E0B]">Pending</span>
+                                )}
+                              </div>
+                              <div className="text-[10px] font-semibold text-[#16132D]/50 uppercase tracking-wide mt-0.5">
+                                Adv: ₹{order.advancePaid.toLocaleString('en-IN')}
+                                {order.advancePaid < order.totalAmount && (
+                                  <span className="text-[#F59E0B] ml-1 font-bold">
+                                    • Bal: ₹{(order.totalAmount - order.advancePaid).toLocaleString('en-IN')}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-4 px-6 font-semibold">
+                              <div className="flex flex-col">
+                                <span className="text-[#16132D]">{order.deliveryDate}</span>
+                                {order.priority === 'Rush' && <span className="text-[10px] text-[#F43F5E] font-bold mt-0.5 tracking-wider uppercase">Rush Order</span>}
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <select 
+                                value={order.status}
+                                onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border-none cursor-pointer focus:outline-none ${statusStyles[order.status] || statusStyles['Received']}`}
+                              >
+                                {Object.keys(statusStyles).map(status => (
+                                  <option key={status} value={status}>{status}</option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="py-4 px-6 text-right">
+                              <button 
+                                onClick={() => {
+                                  navigate('/orders/details', { state: { order } });
+                                }}
+                                className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                                title="View Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteOrder(order.id)}
+                                className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
+                                title="Delete Order"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
                       )}
                     </tbody>
                   </table>
                 </div>
               </div>
+            ) : isLoading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="col-span-full">
+                  <CardSkeleton />
+                </div>
+              </div>
+            ) : filteredOrders.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-sm font-semibold text-[#16132D]/35 bg-white rounded-2xl border border-[#16132D]/[0.06]">
+                No orders found.
+              </div>
             ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredOrders.map((order) => (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                {filteredOrders.map((order) => (
                 <div key={order.id} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-md transition flex flex-col relative h-full">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
@@ -460,9 +488,21 @@ const Orders: React.FC = () => {
 
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04]">
                     <div>
-                      <div className="font-bold text-[#16132D] text-lg">₹{order.totalAmount.toLocaleString('en-IN')}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="font-bold text-[#16132D] text-lg">₹{order.totalAmount.toLocaleString('en-IN')}</div>
+                        {order.advancePaid >= order.totalAmount ? (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#10B981]/15 text-[#10B981]">Paid</span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#F59E0B]/15 text-[#F59E0B]">Pending</span>
+                        )}
+                      </div>
                       <div className="text-[10px] font-semibold text-[#10B981] uppercase tracking-wide mt-0.5">
                         Adv: ₹{order.advancePaid.toLocaleString('en-IN')}
+                        {order.advancePaid < order.totalAmount && (
+                          <span className="text-[#F59E0B] ml-1 font-bold">
+                            • Bal: ₹{(order.totalAmount - order.advancePaid).toLocaleString('en-IN')}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">

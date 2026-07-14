@@ -3,6 +3,7 @@ import { Save, Shield, CheckCircle2, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../../../constants';
 import { fetchWithAuth } from '../../../api/client';
 import { toast } from 'react-hot-toast';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 type AccessLevel = 'Full' | 'Read' | 'None';
 
@@ -133,9 +134,7 @@ const PermissionsSettings: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-[#7209B7]" />
-          </div>
+          <TableSkeleton />
         ) : (
           <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
             {/* Legend */}

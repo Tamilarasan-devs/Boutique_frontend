@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { productionApi } from '../../../api/productionApi';
 import { deliveryApi } from '../../../api/deliveryApi';
 import { useConfirm } from '../../../context';
+import { CardSkeleton } from '../../../components/ui/Skeleton';
 
 interface ProductionItem {
   id: string; // Database ID
@@ -38,6 +39,7 @@ const Production: React.FC = () => {
   const [items, setItems] = useState<ProductionItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Form states
   const [orderId, setOrderId] = useState('');
@@ -71,6 +73,8 @@ const Production: React.FC = () => {
         setItems(formatted);
       } catch (error) {
         console.error('Error loading production:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -190,7 +194,11 @@ const Production: React.FC = () => {
 
         {/* Kanban Board */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-start">
-          {stages.map((stage) => {
+          {isLoading ? (
+            <div className="col-span-full">
+              <CardSkeleton />
+            </div>
+          ) : stages.map((stage) => {
             const config = stageConfig[stage];
             const StageIcon = config.icon;
             const stageItems = items.filter(item => item.stage === stage);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Phone, Mail, MapPin, Trash2, X, Star, Loader2, Edit2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
+import { CardSkeleton } from '../../../components/ui/Skeleton';
 
 interface Supplier {
   id: number;
@@ -112,7 +113,11 @@ const Suppliers: React.FC = () => {
 
         {/* Grid */}
         {loading ? (
-          <p className="text-center text-[#16132D]/50 font-semibold py-12">Loading suppliers...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="col-span-full">
+              <CardSkeleton />
+            </div>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-[#16132D]/40 font-semibold">No suppliers found.</p>

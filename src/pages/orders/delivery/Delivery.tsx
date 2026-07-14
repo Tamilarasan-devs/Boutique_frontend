@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Truck, Phone, CheckCircle, PackageCheck, Trash2, Eye, LayoutGrid, List, FileText, X } from 'lucide-react';
 import { deliveryApi } from '../../../api/deliveryApi';
 import { useToast, useConfirm } from '../../../context';
+import { TableSkeleton, CardSkeleton } from '../../../components/ui/Skeleton';
 
 interface DeliveryItem {
   id: string | number; // Database ID
@@ -19,6 +20,7 @@ const Delivery: React.FC = () => {
   const { confirm } = useConfirm();
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
   const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
     return (localStorage.getItem('deliveryViewMode') as 'table' | 'card') || 'table';
@@ -43,6 +45,8 @@ const Delivery: React.FC = () => {
       setDeliveries(formatted);
     } catch (err) {
       toast('Failed to load deliveries', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,7 +123,13 @@ const Delivery: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#16132D]/[0.04]">
-              {filtered.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="p-0">
+                    <TableSkeleton rows={3} />
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-[#16132D]/50 font-medium">
                     No deliveries match your search.
@@ -175,7 +185,11 @@ const Delivery: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="col-span-full">
+              <CardSkeleton />
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="col-span-full py-12 text-center text-[#16132D]/50 font-medium bg-white rounded-2xl border border-[#16132D]/[0.06]">
               No deliveries match your search.
             </div>

@@ -3,6 +3,7 @@ import { Plus, Shield, Edit2, Trash2, CheckCircle2, Save, X, Loader2 } from 'luc
 import { API_BASE_URL } from '../../../constants';
 import { useAuth } from '../../../context/AuthContext';
 import { fetchWithAuth } from '../../../api/client';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 interface Role {
   id: string;
@@ -178,9 +179,7 @@ const RolesSettings: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-[#7209B7]" />
-          </div>
+          <CardSkeleton />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             {/* Roles list */}

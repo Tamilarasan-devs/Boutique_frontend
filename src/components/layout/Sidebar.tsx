@@ -105,6 +105,13 @@ const menuItems: SidebarItem[] = [
     ]
   },
   {
+    title: 'Product Management', icon: <PackageSearch className="w-5 h-5" />,
+    children: [
+      { title: 'Product Upload', path: '/products/upload', icon: <PackageSearch className="w-4 h-4" /> },
+      { title: 'Product List', path: '/products/list', icon: <PackageSearch className="w-4 h-4" /> },
+    ]
+  },
+  {
     title: 'Admin',
     icon: <Settings className="w-5 h-5" />,
     children: [

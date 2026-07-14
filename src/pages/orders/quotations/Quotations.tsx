@@ -7,6 +7,7 @@ import { followupApi } from '../../../api/followupApi';
 import { customerApi } from '../../../api/customerApi';
 import { leadApi } from '../../../api/leadApi';
 import { useConfirm } from '../../../context';
+import { TableSkeleton, CardSkeleton } from '../../../components/ui/Skeleton';
 
 interface Quotation {
   id: string; // database ID
@@ -42,6 +43,7 @@ const Quotations: React.FC = () => {
   const [customers, setCustomers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
     return (localStorage.getItem('quotationsViewMode') as 'table' | 'card') || 'table';
   });
@@ -114,6 +116,8 @@ const Quotations: React.FC = () => {
         setQuotations(formatted);
       } catch (error) {
         console.error('Error loading quotations:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     const fetchCustomers = async () => {
@@ -311,21 +315,24 @@ const Quotations: React.FC = () => {
 
         {/* Content */}
         {viewMode === 'table' ? (
-        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-[#16132D]/75">
-              <thead>
-                <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-semibold text-xs tracking-wider uppercase">
-                  <th className="py-4 px-6">Quotation</th>
-                  <th className="py-4 px-6">Customer</th>
-                  <th className="py-4 px-6">Items</th>
-                  <th className="py-4 px-6 text-right">Amount</th>
-                  <th className="py-4 px-6">Valid Until</th>
-                  <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#16132D]/[0.04]">
+          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
+            <div className="overflow-x-auto">
+              {isLoading ? (
+                <TableSkeleton />
+              ) : (
+                <table className="w-full text-left text-sm text-[#16132D]/75">
+                  <thead>
+                    <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-semibold text-xs tracking-wider uppercase">
+                      <th className="py-4 px-6">Quotation</th>
+                      <th className="py-4 px-6">Customer</th>
+                      <th className="py-4 px-6">Items</th>
+                      <th className="py-4 px-6 text-right">Amount</th>
+                      <th className="py-4 px-6">Valid Until</th>
+                      <th className="py-4 px-6">Status</th>
+                      <th className="py-4 px-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#16132D]/[0.04]">
                 {filtered.map(q => (
                   <tr key={q.id} className="hover:bg-[#16132D]/[0.02] transition">
                     <td className="py-4 px-6">
@@ -390,9 +397,12 @@ const Quotations: React.FC = () => {
                   <tr><td colSpan={7} className="py-12 text-center text-sm font-semibold text-[#16132D]/35">No quotations found.</td></tr>
                 )}
               </tbody>
-            </table>
+              </table>
+              )}
+            </div>
           </div>
-        </div>
+        ) : isLoading ? (
+          <CardSkeleton />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map(q => (

@@ -6,6 +6,7 @@ import { FileText, Save, User, Plus, Trash2, Scissors, Edit, X, Eye, LayoutList,
 import { useLocation, useNavigate } from 'react-router-dom';
 import { orderApi } from '../../api/orderApi';
 import { productionApi } from '../../api/productionApi';
+import { TableSkeleton, CardSkeleton } from '../../components/ui/Skeleton';
 
 interface MeasurementField {
   name: string;
@@ -17,6 +18,7 @@ const Measurements: React.FC = () => {
   const { confirm } = useConfirm();
   const [history, setHistory] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
@@ -37,8 +39,9 @@ const Measurements: React.FC = () => {
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    fetchHistory();
-    fetchCustomers();
+    Promise.all([fetchHistory(), fetchCustomers()]).finally(() => {
+      setIsLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -285,7 +288,13 @@ const Measurements: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {history.length === 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={4} className="p-0">
+                      <TableSkeleton rows={3} />
+                    </td>
+                  </tr>
+                ) : history.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-12 text-center text-slate-600 text-base">
                       No measurement records found. Click "New Measurement" to add one.
@@ -346,8 +355,12 @@ const Measurements: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {history.length === 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            <div className="col-span-full">
+              <CardSkeleton />
+            </div>
+          ) : history.length === 0 ? (
             <div className="col-span-full py-12 text-center text-slate-600 text-base bg-white rounded-2xl shadow-sm border border-slate-200">
               No measurement records found. Click "New Measurement" to add one.
             </div>

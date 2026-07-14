@@ -225,7 +225,7 @@ const Dashboard = () => {
   const displayRecentOrders = orders.slice(0, 5).map((o: any) => {
     const style = STATUS_STYLES[o.status] ?? defaultStyle;
     return {
-      id: `ORD-${o.id}`,
+      id: o.display_id || `ORD-${o.id}`,
       customer: o.customer_name,
       items: o.category || '—',
       tailor: o.tailor || 'Unassigned',
@@ -251,10 +251,66 @@ const Dashboard = () => {
   // ─── Loading screen ───────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#F4F3F8]">
-        <div className="flex flex-col items-center gap-3 text-[#16132D]/50">
-          <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-[#7209B7]" />
-          <p className="text-sm font-semibold tracking-wider font-serif">Loading Dashboard...</p>
+      <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
+        <div className="flex flex-col h-full space-y-7 p-6 md:p-8 max-w-7xl mx-auto">
+          {/* Header Skeleton */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-4 border-b border-[#16132D]/[0.08]">
+            <div className="space-y-3">
+              <div className="h-3 w-32 bg-slate-200 rounded animate-pulse" />
+              <div className="h-8 w-48 bg-slate-200 rounded animate-pulse" />
+              <div className="h-3 w-40 bg-slate-200 rounded animate-pulse" />
+            </div>
+            <div className="flex gap-3">
+              <div className="h-10 w-24 bg-slate-200 rounded-xl animate-pulse" />
+              <div className="h-10 w-28 bg-slate-300 rounded-xl animate-pulse" />
+            </div>
+          </div>
+
+          {/* Tabs Skeleton */}
+          <div className="flex border-b border-[#16132D]/[0.08] gap-8">
+            <div className="h-6 w-20 bg-slate-200 rounded animate-pulse mb-3" />
+            <div className="h-6 w-32 bg-slate-200 rounded animate-pulse mb-3" />
+            <div className="h-6 w-32 bg-slate-200 rounded animate-pulse mb-3" />
+          </div>
+
+          {/* Stats Grid Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-sm flex items-center justify-between h-[120px] animate-pulse">
+                <div className="space-y-3 w-full">
+                  <div className="h-3 w-16 bg-slate-200 rounded" />
+                  <div className="h-6 w-24 bg-slate-200 rounded" />
+                  <div className="h-2 w-20 bg-slate-200 rounded" />
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-slate-100 flex-shrink-0" />
+              </div>
+            ))}
+          </div>
+
+          {/* Content Area Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-[#16132D]/[0.06] p-6 h-[400px] animate-pulse">
+              <div className="flex justify-between items-center mb-6">
+                <div className="h-6 w-48 bg-slate-200 rounded" />
+                <div className="h-4 w-20 bg-slate-200 rounded" />
+              </div>
+              <div className="h-72 w-full bg-slate-50 rounded-xl border border-slate-100" />
+            </div>
+            <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] p-6 h-[400px] animate-pulse">
+              <div className="h-6 w-32 bg-slate-200 rounded mb-6" />
+              <div className="space-y-5">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="h-10 w-10 rounded-full bg-slate-100" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-full bg-slate-200 rounded" />
+                      <div className="h-3 w-2/3 bg-slate-100 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -470,7 +526,7 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => navigate('/orders')}
+                  onClick={() => navigate('/orders/list')}
                   className="text-xs text-[#7209B7] hover:text-[#a3531f] font-bold flex items-center gap-0.5 transition cursor-pointer"
                 >
                   View All <ArrowUpRight className="w-3.5 h-3.5" />

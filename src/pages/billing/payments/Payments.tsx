@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText, Loader2, Eye, LayoutList, LayoutGrid } from 'lucide-react';
 import { billingApi, BILLING_EVENTS_URL, Payment, Invoice } from '../../../api/billingApi';
 import { useToast, useConfirm } from '../../../context';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 const methodIcons: Record<Payment['method'], React.ReactNode> = {
   'Cash': <Banknote className="w-3.5 h-3.5 text-emerald-600" />,
@@ -235,10 +236,8 @@ const Payments: React.FC = () => {
       {viewMode === 'list' ? (
         <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           {isLoading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : filtered.length === 0 ? (
+          <TableSkeleton />
+        ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
               <IndianRupee className="w-12 h-12 mb-3 text-slate-300" />
               <p className="text-sm">No payment records found</p>
@@ -298,10 +297,8 @@ const Payments: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {isLoading ? (
-            <div className="col-span-full flex justify-center items-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : filtered.length === 0 ? (
+          <CardSkeleton />
+        ) : filtered.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">
               <IndianRupee className="w-12 h-12 mb-3 text-slate-300" />
               <p className="text-sm">No payment records found</p>

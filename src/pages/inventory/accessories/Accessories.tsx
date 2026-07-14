@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, AlertCircle, Trash2, X, Edit2, Loader2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
+import { TableSkeleton } from '../../../components/ui/Skeleton';
 
 interface Accessory {
   id: number;
@@ -133,12 +134,9 @@ const Accessories: React.FC = () => {
         </div>
 
         {/* Table */}
-        {loading ? (
-          <p className="text-center text-[#16132D]/50 font-semibold py-12">Loading accessories...</p>
-        ) : (
-          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-[#16132D]/75">
+        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-[#16132D]/75">
                 <thead>
                   <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-bold text-xs tracking-wider uppercase">
                     <th className="py-4 px-6">Code</th>
@@ -151,7 +149,13 @@ const Accessories: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#16132D]/[0.04]">
-                  {filtered.length === 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="p-0">
+                        <TableSkeleton rows={5} />
+                      </td>
+                    </tr>
+                  ) : filtered.length === 0 ? (
                     <tr><td colSpan={7} className="py-12 text-center text-[#16132D]/35 font-semibold">No accessories found.</td></tr>
                   ) : filtered.map(a => {
                     const isLow = a.stock < a.min_stock;
@@ -180,7 +184,6 @@ const Accessories: React.FC = () => {
               </table>
             </div>
           </div>
-        )}
 
         {/* Modal */}
         {isModalOpen && (

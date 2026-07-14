@@ -57,12 +57,17 @@ const Tailors = lazy(() => import('../pages/staff/tailors/Tailors'));
 const Attendance = lazy(() => import('../pages/staff/attendance/Attendance'));
 
 // Marketing
-const Customers = lazy(() => import('../pages/marketing/customers/Customers'));
+const Customers = lazy(() => import('../pages/marketing/customers/Customers.tsx'));
 const Campaigns = lazy(() => import('../pages/marketing/campaigns/Campaigns'));
 const Whatsapp = lazy(() => import('../pages/marketing/whatsapp/Whatsapp'));
 const Email = lazy(() => import('../pages/marketing/email/Email'));
 const Sms = lazy(() => import('../pages/marketing/sms/Sms'));
 const Loyalty = lazy(() => import('../pages/marketing/loyalty/Loyalty'));
+
+// Products
+const ProductUpload = lazy(() => import('../pages/products/ProductUpload.tsx'));
+const ProductList = lazy(() => import('../pages/products/ProductList.tsx'));
+
 
 // Settings
 const CompanySettings = lazy(() => import('../pages/settings/company/CompanySettings'));
@@ -142,6 +147,10 @@ export const router = createBrowserRouter([
       { path: 'marketing/email', element: <Email /> },
       { path: 'marketing/sms', element: <Sms /> },
       { path: 'marketing/loyalty', element: <Loyalty /> },
+
+      // Products
+      { path: 'products/upload', element: <ProductUpload /> },
+      { path: 'products/list', element: <ProductList /> },
 
       // Profile
       { path: 'profile', element: <Profile /> },

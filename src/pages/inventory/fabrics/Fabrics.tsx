@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, AlertCircle, Trash2, X, Loader2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
+import { CardSkeleton } from '../../../components/ui/Skeleton';
 
 interface FabricItem {
   id: number;
@@ -104,7 +105,11 @@ const Fabrics: React.FC = () => {
 
         {/* Grid */}
         {loading ? (
-          <p className="text-center text-[#16132D]/50 font-semibold py-12">Loading fabrics...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="col-span-full">
+              <CardSkeleton />
+            </div>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-[#16132D]/40 font-semibold text-base">No fabrics found.</p>

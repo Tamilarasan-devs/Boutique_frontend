@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Mail, Phone, MapPin, Users, Loader2 } from 'lucide-react';
 import { customerApi } from '../../../api/customerApi';
 import { toast } from 'sonner';
+import { TableSkeleton } from '@/components/ui/Skeleton';
 
 interface Customer {
   id: string;
@@ -80,10 +81,8 @@ const Customers: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        </div>
-      ) : filteredCustomers.length === 0 ? (
+          <TableSkeleton />
+        ) : filteredCustomers.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
           <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-slate-900">No customers found</h3>

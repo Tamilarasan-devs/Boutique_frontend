@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { leadApi, Lead } from '../../../api/leadApi';
 import { customerApi } from '../../../api/customerApi';
 import { useConfirm } from '../../../context';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 // ────────────────────────────────────────────────────────────
 // Palette (matches Boutique Overview):
@@ -358,9 +359,7 @@ const Leads: React.FC = () => {
 
         {/* Kanban Board */}
         {isLoading ? (
-          <div className="flex items-center justify-center h-[500px]">
-            <Loader2 className="w-8 h-8 text-[#16132D]/40 animate-spin" />
-          </div>
+          <TableSkeleton />
         ) : viewMode === 'board' ? (
           <div className="flex-1 flex gap-5 overflow-x-auto pb-6 h-full min-h-[600px] snap-x snap-mandatory">
             {columns.map(column => {
