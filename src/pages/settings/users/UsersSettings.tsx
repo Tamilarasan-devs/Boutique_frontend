@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, X, Loader2, Shield, Crown } from 'lucide-react';
 import { authApi } from '../../../api/authApi';
+import { API_BASE_URL } from '../../../constants';
+import { fetchWithAuth } from '../../../api/client';
 
 interface StaffUser {
   id: string;
@@ -11,22 +13,16 @@ interface StaffUser {
   created_at: string;
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  manager: 'Manager',
-  sales_staff: 'Sales Staff',
-  tailor: 'Tailor',
-  receptionist: 'Receptionist',
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  manager: 'bg-[#7A5AA8]/10 text-[#5d4485] ring-[#7A5AA8]/20',
-  sales_staff: 'bg-[#10B981]/10 text-[#234638] ring-[#10B981]/20',
-  tailor: 'bg-[#8338EC]/10 text-[#6200EA] ring-[#8338EC]/20',
-  receptionist: 'bg-blue-50 text-blue-700 ring-blue-100',
-};
+interface Role {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+}
 
 const UsersSettings: React.FC = () => {
   const [users, setUsers] = useState<StaffUser[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null);
   const [selected, setSelected] = useState<StaffUser | null>(null);
@@ -41,7 +37,10 @@ const UsersSettings: React.FC = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('sales_staff');
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { 
+    fetchUsers(); 
+    fetchRoles();
+  }, []);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -52,6 +51,21 @@ const UsersSettings: React.FC = () => {
       console.error('Failed to fetch users:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE_URL}/settings/roles`);
+      if (res.ok) {
+        const data = await res.json();
+        setRoles(data);
+        if (data.length > 0) {
+          setRole(data[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch roles:', err);
     }
   };
 
@@ -144,9 +158,9 @@ const UsersSettings: React.FC = () => {
 
         {/* Role Legend */}
         <div className="flex flex-wrap gap-2">
-          {Object.entries(ROLE_LABELS).map(([key, label]) => (
-            <span key={key} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${ROLE_COLORS[key]}`}>
-              <Shield className="w-3 h-3" />{label}
+          {roles.map(role => (
+            <span key={role.id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${role.color}`}>
+              <Shield className="w-3 h-3" />{role.name}
             </span>
           ))}
         </div>
@@ -190,19 +204,23 @@ const UsersSettings: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-4 px-6">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${ROLE_COLORS[u.role] || 'bg-slate-100 text-slate-600 ring-slate-200'}`}>
-                          <Shield className="w-3 h-3" />
-                          {ROLE_LABELS[u.role] || u.role}
-                        </span>
+                        {(() => {
+                          const userRole = roles.find(r => r.id === u.role);
+                          return (
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${userRole?.color || 'bg-slate-100 text-slate-600 ring-slate-200'}`}>
+                              <Shield className="w-3 h-3" />
+                              {userRole?.name || u.role}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="py-4 px-6">
                         <button
                           onClick={() => handleToggleActive(u)}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 cursor-pointer transition ${
-                            u.is_active
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 cursor-pointer transition ${u.is_active
                               ? 'bg-[#10B981]/10 text-[#234638] ring-[#10B981]/20 hover:bg-[#F43F5E]/10 hover:text-[#F43F5E] hover:ring-[#F43F5E]/20'
                               : 'bg-[#F43F5E]/10 text-[#F43F5E] ring-[#F43F5E]/20 hover:bg-[#10B981]/10 hover:text-[#234638] hover:ring-[#10B981]/20'
-                          }`}
+                            }`}
                           title={u.is_active ? 'Click to deactivate' : 'Click to activate'}
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${u.is_active ? 'bg-[#10B981]' : 'bg-[#F43F5E]'}`} />
@@ -283,10 +301,9 @@ const UsersSettings: React.FC = () => {
                 <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Role *</label>
                 <select value={role} onChange={e => setRole(e.target.value)}
                   className="w-full px-4 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm bg-white cursor-pointer">
-                  <option value="manager">Manager — Full access except Admin</option>
-                  <option value="sales_staff">Sales Staff — CRM, Orders, Billing</option>
-                  <option value="tailor">Tailor — Production, Orders, Inventory</option>
-                  <option value="receptionist">Receptionist — CRM, Appointments, Quotations</option>
+                  {roles.map(r => (
+                    <option key={r.id} value={r.id}>{r.name} — {r.description}</option>
+                  ))}
                 </select>
               </div>
               <button type="submit" disabled={isSaving}

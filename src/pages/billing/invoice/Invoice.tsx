@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, FileText, Eye, X, Trash2, Printer, Loader2 } from 'lucide-react';
+import { Search, Plus, FileText, Eye, X, Trash2, Printer, Loader2, LayoutList, LayoutGrid } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { billingApi, BILLING_EVENTS_URL, Invoice as InvoiceType, InvoiceItemDetail } from '../../../api/billingApi';
 import { customerApi } from '../../../api/customerApi';
@@ -21,6 +21,7 @@ const Invoice: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [customerFilter, setCustomerFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
 
   // Modal States
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
@@ -276,17 +277,35 @@ const Invoice: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full space-y-5 p-6 bg-slate-50/50">
-      <div className="flex justify-between items-center pb-4 border-b border-slate-100 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 print:hidden">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Invoices</h1>
           <p className="text-sm text-slate-500 mt-1">Create and manage customer invoices.</p>
         </div>
-        <button
-          onClick={() => setIsNewModalOpen(true)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-1.5 transition shadow-sm"
-        >
-          <Plus className="w-4 h-4" /> New Invoice
-        </button>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <div className="bg-slate-200 p-1 rounded-lg flex items-center">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              title="List View"
+            >
+              <LayoutList className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('card')}
+              className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              title="Card View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            onClick={() => setIsNewModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-1.5 transition shadow-sm"
+          >
+            <Plus className="w-4 h-4" /> New Invoice
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -328,72 +347,138 @@ const Invoice: React.FC = () => {
         </select>
       </div>
 
-      {/* Main Invoices Table */}
-      <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden print:hidden">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        ) : filteredInvoices.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <FileText className="w-12 h-12 mb-3 text-slate-300" />
-            <p className="text-sm">No invoices found</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
-                  <th className="py-4 px-6">Invoice #</th>
-                  <th className="py-4 px-6">Customer</th>
-                  <th className="py-4 px-6">Date</th>
-                  <th className="py-4 px-6">Due Date</th>
-                  <th className="py-4 px-6">Items</th>
-                  <th className="py-4 px-6 text-right">Amount</th>
-                  <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filteredInvoices.map(inv => {
-                  const parsed = parseItems(inv.items);
-                  return (
-                    <tr key={inv.id} className="hover:bg-slate-50/40 transition">
-                      <td className="py-4 px-6 font-semibold text-slate-800 flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-slate-400" />
+      {/* Main Invoices Data */}
+      {viewMode === 'list' ? (
+        <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden print:hidden">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : filteredInvoices.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <FileText className="w-12 h-12 mb-3 text-slate-300" />
+              <p className="text-sm">No invoices found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
+                    <th className="py-4 px-6">Invoice #</th>
+                    <th className="py-4 px-6">Customer</th>
+                    <th className="py-4 px-6">Date</th>
+                    <th className="py-4 px-6">Due Date</th>
+                    <th className="py-4 px-6">Items</th>
+                    <th className="py-4 px-6 text-right">Amount</th>
+                    <th className="py-4 px-6">Status</th>
+                    <th className="py-4 px-6 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {filteredInvoices.map(inv => {
+                    const parsed = parseItems(inv.items);
+                    return (
+                      <tr key={inv.id} className="hover:bg-slate-50/40 transition">
+                        <td className="py-4 px-6 font-semibold text-slate-800 flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-slate-400" />
+                          {inv.invoice_number}
+                        </td>
+                        <td className="py-4 px-6 font-medium text-slate-700">{inv.customer_name}</td>
+                        <td className="py-4 px-6 text-slate-500">{new Date(inv.invoice_date).toLocaleDateString('en-IN')}</td>
+                        <td className="py-4 px-6 text-slate-500">{new Date(inv.due_date).toLocaleDateString('en-IN')}</td>
+                        <td className="py-4 px-6 text-slate-500">{parsed.length} items</td>
+                        <td className="py-4 px-6 text-right font-bold text-slate-800">
+                          ₹{parseFloat(inv.total_amount as any).toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${statusStyles[inv.status]}`}>
+                            {inv.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-center">
+                          <button
+                            onClick={() => {
+                              setSelectedInvoice(inv);
+                              setIsDetailModalOpen(true);
+                            }}
+                            className="text-slate-400 hover:text-blue-600 transition"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 print:hidden">
+          {isLoading ? (
+            <div className="col-span-full flex justify-center items-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : filteredInvoices.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">
+              <FileText className="w-12 h-12 mb-3 text-slate-300" />
+              <p className="text-sm">No invoices found</p>
+            </div>
+          ) : (
+            filteredInvoices.map(inv => {
+              const parsed = parseItems(inv.items);
+              return (
+                <div key={inv.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col group relative">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusStyles[inv.status]}`}>
+                        {inv.status}
+                      </span>
+                      <h3 className="text-sm font-bold text-slate-500 mt-2 flex items-center gap-1">
+                        <FileText className="w-3.5 h-3.5" />
                         {inv.invoice_number}
-                      </td>
-                      <td className="py-4 px-6 font-medium text-slate-700">{inv.customer_name}</td>
-                      <td className="py-4 px-6 text-slate-500">{new Date(inv.invoice_date).toLocaleDateString('en-IN')}</td>
-                      <td className="py-4 px-6 text-slate-500">{new Date(inv.due_date).toLocaleDateString('en-IN')}</td>
-                      <td className="py-4 px-6 text-slate-500">{parsed.length} items</td>
-                      <td className="py-4 px-6 text-right font-bold text-slate-800">
-                        ₹{parseFloat(inv.total_amount as any).toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${statusStyles[inv.status]}`}>
-                          {inv.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-center">
-                        <button
-                          onClick={() => {
-                            setSelectedInvoice(inv);
-                            setIsDetailModalOpen(true);
-                          }}
-                          className="text-slate-400 hover:text-blue-600 transition"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setSelectedInvoice(inv);
+                          setIsDetailModalOpen(true);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="View Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="text-lg font-bold text-slate-900 line-clamp-1" title={inv.customer_name}>
+                      {inv.customer_name}
+                    </p>
+                    <p className="text-sm font-medium text-slate-500 mt-0.5">{parsed.length} items</p>
+                  </div>
+                  
+                  <div className="mt-auto pt-4 border-t border-slate-50">
+                    <div className="flex justify-between items-end">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Due Date</span>
+                        <span className="text-sm font-medium text-slate-700">{new Date(inv.due_date).toLocaleDateString('en-IN')}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Amount</span>
+                        <span className="text-lg font-black text-slate-900">₹{parseFloat(inv.total_amount as any).toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* NEW INVOICE MODAL */}
       {isNewModalOpen && (

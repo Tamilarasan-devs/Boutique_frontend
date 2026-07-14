@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, FileText, Trash2, X, ArrowRight, Loader2, LayoutGrid, List, Eye } from 'lucide-react';
+import { Plus, Search, FileText, Trash2, X, ArrowRight, Loader2, LayoutGrid, List, Eye, Upload } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { quotationApi } from '../../../api/quotationApi';
 import { orderApi } from '../../../api/orderApi';
@@ -21,6 +21,7 @@ interface Quotation {
   validUntil: string;
   terms: string;
   status: 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Invoiced';
+  imageUrl?: string;
 }
 
 const statusStyles: Record<string, string> = {
@@ -62,6 +63,8 @@ const Quotations: React.FC = () => {
   const [totalAmount, setTotalAmount] = useState<number | ''>('');
   const [validUntil, setValidUntil] = useState('');
   const [terms, setTerms] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   const [followupId, setFollowupId] = useState<string | null>(null);
   const [leadId, setLeadId] = useState<string | null>(null);
@@ -106,6 +109,7 @@ const Quotations: React.FC = () => {
           validUntil: new Date(item.valid_until).toISOString().split('T')[0],
           terms: item.terms || '',
           status: item.status,
+          imageUrl: item.image_url,
         }));
         setQuotations(formatted);
       } catch (error) {
@@ -151,6 +155,16 @@ const Quotations: React.FC = () => {
         }
       }
 
+      let uploadedImageUrl = '';
+      if (imageFile) {
+        try {
+          const uploadRes = await quotationApi.uploadImage(imageFile);
+          uploadedImageUrl = uploadRes.image_url;
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+        }
+      }
+
       const response = await quotationApi.addQuotation({
         customer_name: customerName,
         customer_phone: customerPhone || '',
@@ -160,16 +174,17 @@ const Quotations: React.FC = () => {
         discount: 0, 
         valid_until: validUntil, 
         terms,
+        image_url: uploadedImageUrl || undefined
       });
       const q = response.quotation;
       const newQuotation: Quotation = {
         id: q.id.toString(), displayId: q.display_id || `QOT-${q.id}`, customerName: q.customer_name, customerPhone: q.customer_phone, customerEmail: q.customer_email, items: q.items,
         totalAmount: parseFloat(q.total_amount) || 0, discount: parseFloat(q.discount) || 0,
         date: new Date(q.date).toISOString().split('T')[0], validUntil: new Date(q.valid_until).toISOString().split('T')[0],
-        terms: q.terms || '', status: q.status
+        terms: q.terms || '', status: q.status, imageUrl: q.image_url
       };
       setQuotations([newQuotation, ...quotations]);
-      setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setValidUntil(''); setTerms('');
+      setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setValidUntil(''); setTerms(''); setImageFile(null); setImagePreview(null);
       setIsModalOpen(false);
 
       if (followupId) {
@@ -516,6 +531,27 @@ const Quotations: React.FC = () => {
                   <div>
                     <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Terms & Conditions</label>
                     <textarea value={terms} onChange={(e) => setTerms(e.target.value)} placeholder="e.g. 50% advance required. Balance on delivery." rows={2} className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition resize-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Reference Image</label>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center justify-center px-4 py-2 border border-[#16132D]/[0.1] rounded-xl cursor-pointer hover:bg-[#16132D]/[0.02] transition">
+                        <Upload className="w-4 h-4 mr-2 text-[#16132D]/60" />
+                        <span className="text-sm font-semibold text-[#16132D]/80">Choose File</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            setImageFile(e.target.files[0]);
+                            setImagePreview(URL.createObjectURL(e.target.files[0]));
+                          }
+                        }} />
+                      </label>
+                      {imagePreview && (
+                        <div className="relative">
+                          <img src={imagePreview} alt="Preview" className="h-12 w-12 object-cover rounded-lg border border-[#16132D]/10" />
+                          <button type="button" onClick={() => {setImageFile(null); setImagePreview(null);}} className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full p-0.5"><X className="w-3 h-3" /></button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </form>
               </div>

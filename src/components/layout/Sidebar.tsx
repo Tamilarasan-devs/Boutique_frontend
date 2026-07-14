@@ -68,16 +68,16 @@ const menuItems: SidebarItem[] = [
       { title: 'Delivery', path: '/orders/delivery', icon: <Truck className="w-4 h-4" /> },
     ]
   },
-  {
-    title: 'Inventory', icon: <PackageSearch className="w-5 h-5" />,
-    children: [
-      { title: 'Fabrics', path: '/inventory/fabrics', icon: <PackageSearch className="w-4 h-4" /> },
-      { title: 'Accessories', path: '/inventory/accessories', icon: <PackageSearch className="w-4 h-4" /> },
-      { title: 'Suppliers', path: '/inventory/suppliers', icon: <Truck className="w-4 h-4" /> },
-      { title: 'Purchases', path: '/inventory/purchases', icon: <PackageSearch className="w-4 h-4" /> },
-      // { title: 'Stock', path: '/inventory/stock', icon: <PackageSearch className="w-4 h-4" /> },
-    ]
-  },
+  // {
+  //   title: 'Inventory', icon: <PackageSearch className="w-5 h-5" />,
+  //   children: [
+  //     { title: 'Fabrics', path: '/inventory/fabrics', icon: <PackageSearch className="w-4 h-4" /> },
+  //     { title: 'Accessories', path: '/inventory/accessories', icon: <PackageSearch className="w-4 h-4" /> },
+  //     { title: 'Suppliers', path: '/inventory/suppliers', icon: <Truck className="w-4 h-4" /> },
+  //     { title: 'Purchases', path: '/inventory/purchases', icon: <PackageSearch className="w-4 h-4" /> },
+  //     // { title: 'Stock', path: '/inventory/stock', icon: <PackageSearch className="w-4 h-4" /> },
+  //   ]
+  // },
   {
     title: 'Billing', icon: <Receipt className="w-5 h-5" />,
     children: [
@@ -100,7 +100,7 @@ const menuItems: SidebarItem[] = [
       { title: 'Whatsapp', path: '/marketing/whatsapp', icon: <Megaphone className="w-4 h-4" /> },
       { title: 'Email', path: '/marketing/email', icon: <Megaphone className="w-4 h-4" /> },
       // { title: 'SMS', path: '/marketing/sms', icon: <Megaphone className="w-4 h-4" /> },
-      { title: 'Loyalty', path: '/marketing/loyalty', icon: <Megaphone className="w-4 h-4" /> },
+      // { title: 'Loyalty', path: '/marketing/loyalty', icon: <Megaphone className="w-4 h-4" /> },
     ]
   },
   {

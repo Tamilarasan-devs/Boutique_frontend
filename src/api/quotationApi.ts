@@ -33,4 +33,22 @@ export const quotationApi = {
     if (!response.ok) throw new Error('Failed to delete quotation');
     return await response.json();
   },
+
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    // We cannot use fetchWithAuth directly because we need to let the browser set the Content-Type boundary for FormData
+    const token = localStorage.getItem('boutique_token');
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) throw new Error('Failed to upload image');
+    return await response.json();
+  }
 };

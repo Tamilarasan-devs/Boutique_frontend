@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import React, { useState, useEffect, useCallback } from 'react';
+import { LayoutList, LayoutGrid } from 'lucide-react';
 import { employeeApi, Employee } from '../../../api/employeeApi';
 
 const ROLES = ['Tailor', 'Receptionist', 'Manager', 'Other'] as const;
@@ -26,6 +27,7 @@ const statusBadgeColor: Record<string, string> = {
 const Employees: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
   const [error, setError] = useState<string | null>(null);
 
   // Filters

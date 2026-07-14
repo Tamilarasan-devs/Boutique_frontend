@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast, useConfirm } from '../../context';
 import { measurementHistoryApi } from '../../api/measurementHistoryApi';
 import { customerApi } from '../../api/customerApi';
-import { FileText, Save, User, Plus, Trash2, Scissors, Edit, X, Eye } from 'lucide-react';
+import { FileText, Save, User, Plus, Trash2, Scissors, Edit, X, Eye, LayoutList, LayoutGrid } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { orderApi } from '../../api/orderApi';
 import { productionApi } from '../../api/productionApi';
@@ -17,7 +17,7 @@ const Measurements: React.FC = () => {
   const { confirm } = useConfirm();
   const [history, setHistory] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const [returnTo, setReturnTo] = useState<string | null>(null);
@@ -25,6 +25,7 @@ const Measurements: React.FC = () => {
   const [actionOnSuccess, setActionOnSuccess] = useState<any>(null);
   const [lastAutoFilledCustomer, setLastAutoFilledCustomer] = useState<string>('');
   const [viewingRecord, setViewingRecord] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ const Measurements: React.FC = () => {
   const openEditModal = (record: any) => {
     setEditingId(record.id);
     setSelectedCustomerId(String(record.customer_id));
-    
+
     // Parse notes to extract garment type if we saved it there
     let extractedGarment = '';
     let extractedNotes = record.notes || '';
@@ -143,7 +144,7 @@ const Measurements: React.FC = () => {
       value: String(value)
     }));
     setFields(fieldsArr.length > 0 ? fieldsArr : [{ name: '', value: '' }]);
-    
+
     setIsModalOpen(true);
   };
 
@@ -210,10 +211,10 @@ const Measurements: React.FC = () => {
         await measurementHistoryApi.createHistory(payload);
         toast('Measurement saved successfully', 'success');
       }
-      
+
       setIsModalOpen(false);
       fetchHistory(); // Refresh list
-      
+
       // Execute pending workflow action
       if (actionOnSuccess) {
         if (actionOnSuccess.type === 'convertQuotation') {
@@ -244,87 +245,177 @@ const Measurements: React.FC = () => {
             <span>Home</span> <span className="mx-2">/</span> <span className="text-blue-600 font-semibold">Measurements</span>
           </nav>
         </div>
-        <button 
-          onClick={openNewModal}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          New Measurement
-        </button>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Garment / Details</th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Recorded At</th>
-                <th className="px-6 py-4 text-right text-sm font-bold text-slate-700 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {history.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-600 text-base">
-                    No measurement records found. Click "New Measurement" to add one.
-                  </td>
-                </tr>
-              ) : (
-                history.map((record) => {
-                  let extractedGarment = 'Custom Garment';
-                  if (record.notes?.startsWith('Garment: ')) {
-                    extractedGarment = record.notes.split('\n')[0].replace('Garment: ', '').trim();
-                  }
-                  
-                  return (
-                    <tr key={record.id} className="hover:bg-slate-50 transition-colors group">
-                      <td className="px-6 py-4 whitespace-nowrap text-base font-bold text-slate-900">
-                        {record.customer_name || `Customer #${record.customer_id}`}
-                      </td>
-                      <td className="px-6 py-4 text-base text-slate-800">
-                        <span className="font-semibold text-slate-900">{extractedGarment}</span>
-                        <div className="text-sm text-slate-500 mt-1 font-medium">
-                          {Object.keys(record.measurements || {}).length} dimensions recorded
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-slate-700 font-medium">
-                        {new Date(record.created_at || record.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
-                        <div className="flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => setViewingRecord(record)}
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
-                            title="View Record"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => openEditModal(record)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                            title="Edit Record"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(record.id)} 
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                            title="Delete Record"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <div className="bg-slate-200 p-1 rounded-lg flex items-center">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              title="List View"
+            >
+              <LayoutList className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('card')}
+              className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              title="Card View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            onClick={openNewModal}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            New Measurement
+          </button>
         </div>
       </div>
+
+      {viewMode === 'list' ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Customer</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Garment / Details</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Recorded At</th>
+                  <th className="px-6 py-4 text-right text-sm font-bold text-slate-700 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {history.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-slate-600 text-base">
+                      No measurement records found. Click "New Measurement" to add one.
+                    </td>
+                  </tr>
+                ) : (
+                  history.map((record) => {
+                    let extractedGarment = 'Custom Garment';
+                    if (record.notes?.startsWith('Garment: ')) {
+                      extractedGarment = record.notes.split('\n')[0].replace('Garment: ', '').trim();
+                    }
+
+                    return (
+                      <tr key={record.id} className="hover:bg-slate-50 transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap text-base font-bold text-slate-900">
+                          {record.customer_name || `Customer #${record.customer_id}`}
+                        </td>
+                        <td className="px-6 py-4 text-base text-slate-800">
+                          <span className="font-semibold text-slate-900">{extractedGarment}</span>
+                          <div className="text-sm text-slate-500 mt-1 font-medium">
+                            {Object.keys(record.measurements || {}).length} dimensions recorded
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-slate-700 font-medium">
+                          {new Date(record.created_at || record.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setViewingRecord(record)}
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                              title="View Record"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => openEditModal(record)}
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                              title="Edit Record"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(record.id)}
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                              title="Delete Record"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {history.length === 0 ? (
+            <div className="col-span-full py-12 text-center text-slate-600 text-base bg-white rounded-2xl shadow-sm border border-slate-200">
+              No measurement records found. Click "New Measurement" to add one.
+            </div>
+          ) : (
+            history.map((record) => {
+              let extractedGarment = 'Custom Garment';
+              if (record.notes?.startsWith('Garment: ')) {
+                extractedGarment = record.notes.split('\n')[0].replace('Garment: ', '').trim();
+              }
+
+              return (
+                <div key={record.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex flex-col group">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-bold text-slate-900 line-clamp-1" title={record.customer_name || `Customer #${record.customer_id}`}>
+                      {record.customer_name || `Customer #${record.customer_id}`}
+                    </h3>
+                    <div className=" flex items-center gap-1 -mt-1 -mr-1">
+                      <button
+                        onClick={() => setViewingRecord(record)}
+                        className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                        title="View Record"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => openEditModal(record)}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="Edit Record"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(record.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        title="Delete Record"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <p className="text-sm font-semibold text-slate-800">{extractedGarment}</p>
+                    <p className="text-xs text-slate-500 mt-1 font-medium">{new Date(record.created_at || record.createdAt).toLocaleDateString()}</p>
+                  </div>
+
+                  <div className="mt-auto pt-4 border-t border-slate-100">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500 font-medium">Dimensions:</span>
+                      <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">{Object.keys(record.measurements || {}).length}</span>
+                    </div>
+                    {Object.keys(record.measurements || {}).length > 0 && (
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {Object.entries(record.measurements || {}).slice(0, 4).map(([key, value]) => (
+                          <div key={key} className="bg-slate-50 rounded-md p-2 flex flex-col items-center justify-center text-center border border-slate-100">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate w-full">{key}</span>
+                            <span className="text-sm font-bold text-slate-800">{String(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* Modal Overlay */}
       {isModalOpen && (
@@ -335,22 +426,22 @@ const Measurements: React.FC = () => {
                 <Scissors className="w-5 h-5 text-blue-600" />
                 {editingId ? 'Edit Measurement' : 'New Measurement'}
               </h3>
-              <button 
+              <button
                 onClick={handleCancelModal}
                 className="text-slate-500 hover:text-slate-800 hover:bg-slate-200 p-1.5 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-6 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <User className="w-4 h-4 text-slate-600" /> Customer *
                   </label>
-                  <select 
-                    value={selectedCustomerId} 
+                  <select
+                    value={selectedCustomerId}
                     onChange={e => setSelectedCustomerId(e.target.value)}
                     className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-base font-medium text-slate-800 transition-all"
                     required
@@ -364,9 +455,9 @@ const Measurements: React.FC = () => {
                   <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                     Garment Type *
                   </label>
-                  <input 
+                  <input
                     type="text"
-                    value={garmentType} 
+                    value={garmentType}
                     onChange={e => setGarmentType(e.target.value)}
                     placeholder="e.g. Bridal Lehenga, Men's Suit..."
                     className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-base font-medium text-slate-800 placeholder-slate-400 transition-all"
@@ -425,7 +516,7 @@ const Measurements: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Special Instructions / Notes
@@ -439,16 +530,16 @@ const Measurements: React.FC = () => {
                 />
               </div>
             </form>
-            
+
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button 
+              <button
                 type="button"
                 onClick={handleCancelModal}
                 className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-200 bg-slate-100 rounded-xl text-sm transition-colors"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleSave}
                 className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95"
               >
@@ -467,14 +558,14 @@ const Measurements: React.FC = () => {
                 <FileText className="w-5 h-5 text-emerald-600" />
                 View Measurement Details
               </h3>
-              <button 
+              <button
                 onClick={() => setViewingRecord(null)}
                 className="text-slate-500 hover:text-slate-800 hover:bg-slate-200 p-1.5 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 grid grid-cols-2 gap-4">
                 <div>
@@ -495,8 +586,8 @@ const Measurements: React.FC = () => {
                   <p className="text-base font-medium text-slate-800">{new Date(viewingRecord.created_at || viewingRecord.createdAt).toLocaleDateString()}</p>
                 </div>
                 <div className="col-span-2">
-                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Garment & Notes</p>
-                   <p className="text-sm text-slate-700 whitespace-pre-wrap font-medium">{viewingRecord.notes || 'N/A'}</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Garment & Notes</p>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap font-medium">{viewingRecord.notes || 'N/A'}</p>
                 </div>
               </div>
 
@@ -510,14 +601,14 @@ const Measurements: React.FC = () => {
                     </div>
                   ))}
                   {Object.keys(viewingRecord.measurements || {}).length === 0 && (
-                     <p className="text-sm text-slate-500 col-span-3">No dimensions recorded.</p>
+                    <p className="text-sm text-slate-500 col-span-3">No dimensions recorded.</p>
                   )}
                 </div>
               </div>
             </div>
-            
+
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-              <button 
+              <button
                 onClick={() => setViewingRecord(null)}
                 className="px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold shadow-md hover:bg-slate-900 transition-all"
               >

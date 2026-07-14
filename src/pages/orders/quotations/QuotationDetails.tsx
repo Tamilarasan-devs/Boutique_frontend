@@ -16,6 +16,7 @@ interface Quotation {
   validUntil: string;
   terms: string;
   status: 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Invoiced';
+  imageUrl?: string;
 }
 
 const statusStyles: Record<string, string> = {
@@ -151,6 +152,15 @@ const QuotationDetails: React.FC = () => {
                        <p className="text-[#16132D]/80 whitespace-pre-wrap leading-relaxed text-[15px]">{quotation.items}</p>
                     </div>
                   </div>
+                  
+                  {quotation.imageUrl && (
+                     <div>
+                       <span className="text-xs font-bold tracking-wider uppercase text-[#16132D]/40 block mb-2">REFERENCE IMAGE</span>
+                       <div className="bg-white border border-[#16132D]/[0.06] rounded-xl p-2 shadow-sm inline-block">
+                          <img src={quotation.imageUrl} alt="Reference" className="max-w-full rounded-lg max-h-64 object-contain" />
+                       </div>
+                     </div>
+                  )}
                   
                   {quotation.terms && (
                      <div>

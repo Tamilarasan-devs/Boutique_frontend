@@ -11,9 +11,8 @@ const navItems = [
   { to: '/settings/company', icon: Building2, label: 'Boutique Profile', desc: 'Business details, logo & branding' },
   { to: '/settings/users', icon: Users, label: 'Staff & Users', desc: 'Manage team members & accounts' },
   { to: '/settings/roles', icon: Shield, label: 'Roles & Access', desc: 'Define custom roles & limits' },
-  { to: '/settings/taxes', icon: Receipt, label: 'Taxes & GST', desc: 'Configure tax rates & billing' },
   { to: '/settings/permissions', icon: Globe, label: 'Permissions', desc: 'Global app security controls' },
-  { to: '/settings/loyalty', icon: Heart, label: 'Loyalty Program', desc: 'Rewards & point settings' },
+  // { to: '/settings/loyalty', icon: Heart, label: 'Loyalty Program', desc: 'Rewards & point settings' },
 ];
 
 const ROLE_LABELS: Record<string, string> = {

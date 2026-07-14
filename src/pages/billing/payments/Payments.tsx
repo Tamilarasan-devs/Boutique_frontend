@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText, Loader2, Eye } from 'lucide-react';
+import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calendar, FileText, Loader2, Eye, LayoutList, LayoutGrid } from 'lucide-react';
 import { billingApi, BILLING_EVENTS_URL, Payment, Invoice } from '../../../api/billingApi';
 import { useToast, useConfirm } from '../../../context';
 
@@ -17,6 +17,7 @@ const Payments: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
 
   // Modal States
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
@@ -166,17 +167,35 @@ const Payments: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full space-y-5 p-6 bg-slate-50/50">
-      <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Payments</h1>
           <p className="text-sm text-slate-500 mt-1">Record and track all customer payment transactions.</p>
         </div>
-        <button
-          onClick={() => setIsRecordModalOpen(true)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-1.5 transition shadow-sm"
-        >
-          <Plus className="w-4 h-4" /> Record Payment
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="bg-slate-200 p-1 rounded-lg flex items-center">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              title="List View"
+            >
+              <LayoutList className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('card')}
+              className={`p-1.5 rounded-md flex items-center justify-center transition-colors ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              title="Card View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            onClick={() => setIsRecordModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-1.5 transition shadow-sm"
+          >
+            <Plus className="w-4 h-4" /> Record Payment
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -213,68 +232,134 @@ const Payments: React.FC = () => {
       </div>
 
       {/* Payments Table */}
-      <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <IndianRupee className="w-12 h-12 mb-3 text-slate-300" />
-            <p className="text-sm">No payment records found</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
-                  <th className="py-4 px-6">Receipt #</th>
-                  <th className="py-4 px-6">Invoice</th>
-                  <th className="py-4 px-6">Customer</th>
-                  <th className="py-4 px-6 text-right">Amount</th>
-                  <th className="py-4 px-6">Method</th>
-                  <th className="py-4 px-6">Date</th>
-                  <th className="py-4 px-6">Note</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(p => {
-                  const linkedInv = invoices.find(inv => inv.id === p.invoice_id);
-                  return (
-                    <tr key={p.id} className="hover:bg-slate-50/40 transition">
-                      <td className="py-4 px-6 font-bold text-slate-800">{p.receipt_number}</td>
-                      <td className="py-4 px-6 text-slate-500">{linkedInv?.invoice_number || '—'}</td>
-                      <td className="py-4 px-6 font-medium text-slate-700">{p.customer_name}</td>
-                      <td className="py-4 px-6 text-right font-bold text-emerald-600">
-                        + ₹{parseFloat(p.amount as any).toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                          {methodIcons[p.method]} {p.method}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-slate-500">{new Date(p.payment_date).toLocaleDateString('en-IN')}</td>
-                      <td className="py-4 px-6 text-slate-500 max-w-[200px] truncate text-xs" title={p.note}>
-                        {p.note || '—'}
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => setViewingPayment(p)}
-                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="View Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {viewMode === 'list' ? (
+        <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <IndianRupee className="w-12 h-12 mb-3 text-slate-300" />
+              <p className="text-sm">No payment records found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
+                    <th className="py-4 px-6">Receipt #</th>
+                    <th className="py-4 px-6">Invoice</th>
+                    <th className="py-4 px-6">Customer</th>
+                    <th className="py-4 px-6 text-right">Amount</th>
+                    <th className="py-4 px-6">Method</th>
+                    <th className="py-4 px-6">Date</th>
+                    <th className="py-4 px-6">Note</th>
+                    <th className="py-4 px-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {filtered.map(p => {
+                    const linkedInv = invoices.find(inv => inv.id === p.invoice_id);
+                    return (
+                      <tr key={p.id} className="hover:bg-slate-50/40 transition">
+                        <td className="py-4 px-6 font-bold text-slate-800">{p.receipt_number}</td>
+                        <td className="py-4 px-6 text-slate-500">{linkedInv?.invoice_number || '—'}</td>
+                        <td className="py-4 px-6 font-medium text-slate-700">{p.customer_name}</td>
+                        <td className="py-4 px-6 text-right font-bold text-emerald-600">
+                          + ₹{parseFloat(p.amount as any).toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                            {methodIcons[p.method]} {p.method}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-slate-500">{new Date(p.payment_date).toLocaleDateString('en-IN')}</td>
+                        <td className="py-4 px-6 text-slate-500 max-w-[200px] truncate text-xs" title={p.note}>
+                          {p.note || '—'}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => setViewingPayment(p)}
+                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {isLoading ? (
+            <div className="col-span-full flex justify-center items-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">
+              <IndianRupee className="w-12 h-12 mb-3 text-slate-300" />
+              <p className="text-sm">No payment records found</p>
+            </div>
+          ) : (
+            filtered.map(p => {
+              const linkedInv = invoices.find(inv => inv.id === p.invoice_id);
+              return (
+                <div key={p.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col group relative">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-500">{p.receipt_number}</h3>
+                      {linkedInv && (
+                        <p className="text-[11px] font-semibold text-slate-400 mt-0.5">INV: {linkedInv.invoice_number}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setViewingPayment(p)}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="View Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="text-lg font-bold text-slate-900 line-clamp-1" title={p.customer_name}>
+                      {p.customer_name}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-slate-50 rounded-md border border-slate-100 text-xs font-semibold text-slate-600">
+                        {methodIcons[p.method]} {p.method}
+                      </span>
+                      <span className="text-xs font-medium text-slate-500">{new Date(p.payment_date).toLocaleDateString('en-IN')}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-auto pt-4 border-t border-slate-50">
+                    <div className="flex justify-between items-end">
+                      <div className="flex-1 pr-2">
+                        {p.note && (
+                          <p className="text-[11px] text-slate-400 line-clamp-2" title={p.note}>{p.note}</p>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end shrink-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Amount</span>
+                        <span className="text-lg font-black text-emerald-600">+ ₹{parseFloat(p.amount as any).toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* RECORD PAYMENT MODAL */}
       {isRecordModalOpen && (

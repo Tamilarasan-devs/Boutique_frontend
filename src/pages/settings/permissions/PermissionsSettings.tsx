@@ -8,26 +8,17 @@ type AccessLevel = 'Full' | 'Read' | 'None';
 
 interface ModulePermission {
   module: string;
-  owner: AccessLevel;
-  manager: AccessLevel;
-  salesStaff: AccessLevel;
-  tailor: AccessLevel;
-  receptionist: AccessLevel;
+  [roleId: string]: AccessLevel | string;
+}
+
+interface DynamicRole {
+  id: string;
+  name: string;
 }
 
 const MODULES = [
   'Dashboard', 'CRM', 'Orders', 'Production', 'Measurements', 
   'Inventory', 'Billing', 'Staff Management', 'Marketing', 'Admin Settings'
-];
-
-type RoleKey = 'owner' | 'manager' | 'salesStaff' | 'tailor' | 'receptionist';
-
-const roles: { key: RoleKey; label: string; apiRole: string }[] = [
-  { key: 'owner', label: 'Owner', apiRole: 'owner' },
-  { key: 'manager', label: 'Manager', apiRole: 'manager' },
-  { key: 'salesStaff', label: 'Sales Staff', apiRole: 'sales_staff' },
-  { key: 'tailor', label: 'Tailor', apiRole: 'tailor' },
-  { key: 'receptionist', label: 'Receptionist', apiRole: 'receptionist' },
 ];
 
 const levelColor: Record<AccessLevel, string> = {
@@ -37,6 +28,7 @@ const levelColor: Record<AccessLevel, string> = {
 };
 
 const PermissionsSettings: React.FC = () => {
+  const [roles, setRoles] = useState<DynamicRole[]>([]);
   const [permissions, setPermissions] = useState<ModulePermission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -53,12 +45,15 @@ const PermissionsSettings: React.FC = () => {
       if (!res.ok) throw new Error('Failed to fetch roles');
       const data = await res.json();
       
+      const dynamicRoles = data.map((r: any) => ({ id: r.id, name: r.name }));
+      setRoles(dynamicRoles);
+
       const newPermissions: ModulePermission[] = MODULES.map(module => {
-        const row: any = { module };
-        roles.forEach(r => {
-          row[r.key] = data[r.apiRole]?.[module] || 'None';
+        const row: ModulePermission = { module };
+        data.forEach((r: any) => {
+          row[r.id] = r.permissions?.[module] || 'None';
         });
-        return row as ModulePermission;
+        return row;
       });
       setPermissions(newPermissions);
     } catch (err) {
@@ -75,28 +70,28 @@ const PermissionsSettings: React.FC = () => {
     return 'Full';
   };
 
-  const toggle = (index: number, role: RoleKey) => {
-    if (role === 'owner') return; // Owner is always Full
-    setPermissions(perms => perms.map((p, i) => i === index ? { ...p, [role]: cycle(p[role]) } : p));
+  const toggle = (index: number, roleId: string) => {
+    if (roleId === 'owner') return; // Owner is always Full
+    setPermissions(perms => perms.map((p, i) => i === index ? { ...p, [roleId]: cycle(p[roleId] as AccessLevel) } : p));
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       // We need to update each role individually except owner
-      const promises = roles.filter(r => r.key !== 'owner').map(r => {
+      const promises = roles.filter(r => r.id !== 'owner').map(r => {
         // Build the permission object for this role
         const rolePerms: Record<string, AccessLevel> = {};
         permissions.forEach(p => {
-          rolePerms[p.module] = p[r.key];
+          rolePerms[p.module] = p[r.id] as AccessLevel;
         });
         
-        return fetchWithAuth(`${API_BASE_URL}/settings/roles/${r.apiRole}`, {
+        return fetchWithAuth(`${API_BASE_URL}/settings/roles/${r.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ permissions: rolePerms })
         }).then(res => {
-          if (!res.ok) throw new Error(`Failed for role ${r.apiRole}`);
+          if (!res.ok) throw new Error(`Failed for role ${r.id}`);
         });
       });
       
@@ -160,7 +155,7 @@ const PermissionsSettings: React.FC = () => {
                   <tr className="border-b border-[#16132D]/[0.08] bg-[#F4F3F8]/70 text-[#16132D]/40 font-semibold text-xs uppercase tracking-wide">
                     <th className="py-4 px-6 min-w-[160px]">Module</th>
                     {roles.map(r => (
-                      <th key={r.key} className="py-4 px-4 text-center min-w-[110px]">{r.label}</th>
+                      <th key={r.id} className="py-4 px-4 text-center min-w-[110px]">{r.name}</th>
                     ))}
                   </tr>
                 </thead>
@@ -169,16 +164,16 @@ const PermissionsSettings: React.FC = () => {
                     <tr key={p.module} className="hover:bg-[#F4F3F8]/60 transition">
                       <td className="py-4 px-6 font-semibold text-[#16132D]">{p.module}</td>
                       {roles.map(r => {
-                        const level = p[r.key];
-                        const isOwner = r.key === 'owner';
+                        const level = p[r.id] as AccessLevel;
+                        const isOwner = r.id === 'owner';
                         return (
-                          <td key={r.key} className="py-4 px-4 text-center">
+                          <td key={r.id} className="py-4 px-4 text-center">
                             <button
-                              onClick={() => toggle(i, r.key)}
+                              onClick={() => toggle(i, r.id)}
                               disabled={isOwner}
-                              className={`px-3 py-1 rounded-full text-[10px] font-bold ring-1 transition ${levelColor[level]} ${isOwner ? 'cursor-not-allowed opacity-80' : 'hover:opacity-80 active:scale-95 cursor-pointer'}`}
+                              className={`px-3 py-1 rounded-full text-[10px] font-bold ring-1 transition ${levelColor[level] || levelColor['None']} ${isOwner ? 'cursor-not-allowed opacity-80' : 'hover:opacity-80 active:scale-95 cursor-pointer'}`}
                             >
-                              {level}
+                              {level || 'None'}
                             </button>
                           </td>
                         );
