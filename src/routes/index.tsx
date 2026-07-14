@@ -57,6 +57,7 @@ const Tailors = lazy(() => import('../pages/staff/tailors/Tailors'));
 const Attendance = lazy(() => import('../pages/staff/attendance/Attendance'));
 
 // Marketing
+const Customers = lazy(() => import('../pages/marketing/customers/Customers'));
 const Campaigns = lazy(() => import('../pages/marketing/campaigns/Campaigns'));
 const Whatsapp = lazy(() => import('../pages/marketing/whatsapp/Whatsapp'));
 const Email = lazy(() => import('../pages/marketing/email/Email'));
@@ -135,6 +136,7 @@ export const router = createBrowserRouter([
       { path: 'staff/attendance', element: P(<Attendance />) },
 
       // Marketing
+      { path: 'marketing/customers', element: <Customers /> },
       { path: 'marketing/campaigns', element: <Campaigns /> },
       { path: 'marketing/whatsapp', element: <Whatsapp /> },
       { path: 'marketing/email', element: <Email /> },
