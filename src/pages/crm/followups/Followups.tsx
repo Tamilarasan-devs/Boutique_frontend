@@ -666,22 +666,22 @@ const Followups: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
+                        <div className="flex items-center justify-end gap-1.5 sm:gap-2 w-full sm:w-auto">
                           {fol.status !== 'Completed' && fol.status !== 'Rejected' && (
                             <>
-                              <button onClick={(e) => handleConvert(fol, e)} className="flex-1 sm:flex-none py-2 px-3 bg-emerald-50 text-emerald-600 rounded-lg transition flex justify-center items-center gap-1.5" title="Convert to Quotation">
-                                <ArrowRight className="w-4 h-4" />
-                                <span className="text-xs font-bold">Convert</span>
+                              <button onClick={(e) => handleConvert(fol, e)} className="flex-1 sm:flex-none py-2 px-2 sm:px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition flex justify-center items-center gap-1.5 cursor-pointer" title="Convert to Quotation">
+                                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <span className="text-[11px] sm:text-xs font-bold">Convert</span>
                               </button>
-                              <button onClick={(e) => handleMarkRejected(fol.id, e)} className="flex-1 sm:flex-none py-2 px-3 bg-rose-50 text-rose-600 rounded-lg transition flex justify-center items-center gap-1.5" title="Reject Follow-up">
-                                <X className="w-4 h-4" />
-                                <span className="text-xs font-bold">Reject</span>
+                              <button onClick={(e) => handleMarkRejected(fol.id, e)} className="flex-1 sm:flex-none py-2 px-2 sm:px-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition flex justify-center items-center gap-1.5 cursor-pointer" title="Reject Follow-up">
+                                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <span className="text-[11px] sm:text-xs font-bold">Reject</span>
                               </button>
                             </>
                           )}
-                          <button onClick={(e) => handleDelete(fol, e)} className="flex-1 sm:flex-none py-2 px-3 bg-[#16132D]/5 text-[#16132D]/60 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition flex justify-center items-center gap-1.5" title="Delete Follow-up">
+                          <button onClick={(e) => handleDelete(fol, e)} className="p-2 sm:py-2 sm:px-3 bg-[#16132D]/5 text-[#16132D]/60 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition flex justify-center items-center gap-1.5 cursor-pointer" title="Delete Follow-up">
                             <Trash2 className="w-4 h-4" />
-                            <span className="text-xs font-bold">Delete</span>
+                            {/* <span className="text-xs font-bold hidden sm:block">Delete</span> */}
                           </button>
                         </div>
                       </div>

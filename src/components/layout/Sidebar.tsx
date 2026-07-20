@@ -18,7 +18,8 @@ import {
   X,
   LogOut,
   ChevronDown,
-  LayoutTemplate
+  LayoutTemplate,
+  Menu
 } from 'lucide-react';
 import { useAuth, MODULE_ROUTES } from '../../context/AuthContext';
 import { useUIStore } from '../../store';
@@ -106,10 +107,13 @@ export interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { navMode, toggleNavMode } = useUIStore();
+  const { navMode, toggleNavMode, sidebarCollapsed, toggleSidebar } = useUIStore();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
   const toggleMenu = (title: string) => {
+    if (sidebarCollapsed) {
+      toggleSidebar();
+    }
     setExpandedMenus(prev => ({ ...prev, [title]: !prev[title] }));
   };
 
@@ -153,46 +157,60 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
       {/* Sidebar Drawer */}
       <aside 
         className={clsx(
-          "fixed top-0 left-0 z-50 h-full w-72 bg-white border-r border-[#16132D]/[0.08] shadow-2xl transition-transform duration-300 flex flex-col",
+          "fixed top-0 left-0 z-50 h-full bg-white border-r border-[#16132D]/[0.08] shadow-2xl transition-all duration-300 flex flex-col overflow-hidden",
+          sidebarCollapsed ? "w-20" : "w-72",
           navMode === 'sidebar' ? "md:static md:translate-x-0" : "md:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#16132D]/[0.06]">
-          <h2 className="text-xl font-serif font-bold text-[#16132D]">Atelier</h2>
-          <button onClick={onMobileClose} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500">
-            <X className="w-5 h-5" />
-          </button>
+        <div className={clsx("flex items-center py-5 border-b border-[#16132D]/[0.06]", sidebarCollapsed ? "justify-center px-0" : "justify-between px-6")}>
+          {!sidebarCollapsed && <h2 className="text-xl font-serif font-bold text-[#16132D] whitespace-nowrap">Atelier</h2>}
+          <div className="flex items-center gap-2">
+            <button onClick={onMobileClose} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 md:hidden">
+              <X className="w-5 h-5" />
+            </button>
+            <button onClick={toggleSidebar} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 hidden md:block">
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3 space-y-1">
           {allowedItems.map((item, idx) => (
             <div key={idx}>
               {item.path ? (
                 <NavLink
                   to={item.path}
                   onClick={onMobileClose}
+                  title={sidebarCollapsed ? item.title : undefined}
                   className={({ isActive }) => clsx(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer font-medium",
-                    isActive ? "bg-[#7209B7]/10 text-[#7209B7]" : "text-[#16132D]/70 hover:bg-[#F4F3F8]"
+                    "flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer font-medium",
+                    isActive ? "bg-[#7209B7]/10 text-[#7209B7]" : "text-[#16132D]/70 hover:bg-[#F4F3F8]",
+                    sidebarCollapsed && "justify-center"
                   )}
                 >
-                  {item.icon}
-                  <span>{item.title}</span>
+                  <div className="shrink-0">{item.icon}</div>
+                  {!sidebarCollapsed && <span className="whitespace-nowrap truncate">{item.title}</span>}
                 </NavLink>
               ) : (
                 <>
                   <button
                     onClick={() => toggleMenu(item.title)}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-[#16132D]/70 hover:bg-[#F4F3F8] transition-all font-medium"
+                    title={sidebarCollapsed ? item.title : undefined}
+                    className={clsx(
+                      "w-full flex items-center px-3 py-3 rounded-xl text-[#16132D]/70 hover:bg-[#F4F3F8] transition-all font-medium",
+                      sidebarCollapsed ? "justify-center" : "justify-between"
+                    )}
                   >
                     <div className="flex items-center gap-3">
-                      {item.icon}
-                      <span>{item.title}</span>
+                      <div className="shrink-0">{item.icon}</div>
+                      {!sidebarCollapsed && <span className="whitespace-nowrap truncate">{item.title}</span>}
                     </div>
-                    <ChevronDown className={clsx("w-4 h-4 transition-transform", expandedMenus[item.title] && "rotate-180")} />
+                    {!sidebarCollapsed && (
+                      <ChevronDown className={clsx("w-4 h-4 shrink-0 transition-transform", expandedMenus[item.title] && "rotate-180")} />
+                    )}
                   </button>
-                  {expandedMenus[item.title] && item.children && (
+                  {expandedMenus[item.title] && item.children && !sidebarCollapsed && (
                     <div className="ml-11 mt-1 space-y-1 border-l-2 border-slate-100 pl-4 py-1">
                       {item.children.map(child => (
                         <NavLink
@@ -204,7 +222,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
                             isActive ? "text-[#7209B7] font-semibold bg-[#7209B7]/5" : "text-[#16132D]/60 hover:text-[#16132D]"
                           )}
                         >
-                          {child.title}
+                          <span className="whitespace-nowrap truncate">{child.title}</span>
                         </NavLink>
                       ))}
                     </div>
@@ -215,20 +233,28 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
           ))}
         </div>
 
-        <div className="p-4 border-t border-[#16132D]/[0.06] space-y-2">
+        <div className={clsx("p-3 border-t border-[#16132D]/[0.06] space-y-2", sidebarCollapsed ? "flex flex-col items-center" : "")}>
           <button
             onClick={toggleNavMode}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/5 transition-colors font-medium hidden md:flex"
+            title={sidebarCollapsed ? "Switch to Bottom Bar" : undefined}
+            className={clsx(
+              "w-full flex items-center rounded-xl text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/5 transition-colors font-medium hidden md:flex",
+              sidebarCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3"
+            )}
           >
-            <LayoutTemplate className="w-5 h-5" />
-            <span>Switch to Bottom Bar</span>
+            <LayoutTemplate className="w-5 h-5 shrink-0" />
+            {!sidebarCollapsed && <span className="whitespace-nowrap truncate">Switch to Bottom Bar</span>}
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500/80 hover:text-red-500 hover:bg-red-50 transition-colors font-medium"
+            title={sidebarCollapsed ? "Logout" : undefined}
+            className={clsx(
+              "w-full flex items-center rounded-xl text-red-500/80 hover:text-red-500 hover:bg-red-50 transition-colors font-medium",
+              sidebarCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3"
+            )}
           >
-            <LogOut className="w-5 h-5" />
-            <span>Logout</span>
+            <LogOut className="w-5 h-5 shrink-0" />
+            {!sidebarCollapsed && <span>Logout</span>}
           </button>
         </div>
       </aside>
