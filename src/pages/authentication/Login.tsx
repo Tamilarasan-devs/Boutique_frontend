@@ -143,7 +143,7 @@ const Login: React.FC = () => {
         </div>
 
         <p className="text-center text-xs text-[#16132D]/35 mt-6 font-medium">
-          Boutique Atelier CRM · All rights reserved
+          Boutique Aadai Plus CRM · All rights reserved
         </p>
       </div>
     </div>

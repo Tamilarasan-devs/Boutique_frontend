@@ -157,19 +157,19 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
       {/* Sidebar Drawer */}
       <aside 
         className={clsx(
-          "fixed top-0 left-0 z-50 h-full bg-white border-r border-[#16132D]/[0.08] shadow-2xl transition-all duration-300 flex flex-col overflow-hidden",
+          "fixed top-0 left-0 z-50 h-full bg-[#16132D] border-r border-white/[0.08] shadow-2xl transition-all duration-300 flex flex-col overflow-hidden text-white",
           sidebarCollapsed ? "w-20" : "w-72",
           navMode === 'sidebar' ? "md:static md:translate-x-0" : "md:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className={clsx("flex items-center py-5 border-b border-[#16132D]/[0.06]", sidebarCollapsed ? "justify-center px-0" : "justify-between px-6")}>
-          {!sidebarCollapsed && <h2 className="text-xl font-serif font-bold text-[#16132D] whitespace-nowrap">Atelier</h2>}
+        <div className={clsx("flex items-center py-5 border-b border-white/[0.06]", sidebarCollapsed ? "justify-center px-0" : "justify-between px-6")}>
+          {!sidebarCollapsed && <h2 className="text-xl font-serif font-bold text-white whitespace-nowrap tracking-wide">Aadai Plus</h2>}
           <div className="flex items-center gap-2">
-            <button onClick={onMobileClose} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 md:hidden">
+            <button onClick={onMobileClose} className="p-1.5 rounded-full hover:bg-white/10 text-white/60 hover:text-white md:hidden transition-colors">
               <X className="w-5 h-5" />
             </button>
-            <button onClick={toggleSidebar} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 hidden md:block">
+            <button onClick={toggleSidebar} className="p-1.5 rounded-full hover:bg-white/10 text-white/60 hover:text-white hidden md:block transition-colors">
               <Menu className="w-5 h-5" />
             </button>
           </div>
@@ -185,11 +185,11 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
                   title={sidebarCollapsed ? item.title : undefined}
                   className={({ isActive }) => clsx(
                     "flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer font-medium",
-                    isActive ? "bg-[#7209B7]/10 text-[#7209B7]" : "text-[#16132D]/70 hover:bg-[#F4F3F8]",
+                    isActive ? "bg-[#7209B7] text-white shadow-lg shadow-[#7209B7]/30" : "text-white/60 hover:text-white hover:bg-white/10",
                     sidebarCollapsed && "justify-center"
                   )}
                 >
-                  <div className="shrink-0">{item.icon}</div>
+                  <div className={clsx("shrink-0", "transition-transform duration-200")}>{item.icon}</div>
                   {!sidebarCollapsed && <span className="whitespace-nowrap truncate">{item.title}</span>}
                 </NavLink>
               ) : (
@@ -198,7 +198,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
                     onClick={() => toggleMenu(item.title)}
                     title={sidebarCollapsed ? item.title : undefined}
                     className={clsx(
-                      "w-full flex items-center px-3 py-3 rounded-xl text-[#16132D]/70 hover:bg-[#F4F3F8] transition-all font-medium",
+                      "w-full flex items-center px-3 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all font-medium",
                       sidebarCollapsed ? "justify-center" : "justify-between"
                     )}
                   >
@@ -207,11 +207,11 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
                       {!sidebarCollapsed && <span className="whitespace-nowrap truncate">{item.title}</span>}
                     </div>
                     {!sidebarCollapsed && (
-                      <ChevronDown className={clsx("w-4 h-4 shrink-0 transition-transform", expandedMenus[item.title] && "rotate-180")} />
+                      <ChevronDown className={clsx("w-4 h-4 shrink-0 transition-transform text-white/40 group-hover:text-white/80", expandedMenus[item.title] && "rotate-180")} />
                     )}
                   </button>
                   {expandedMenus[item.title] && item.children && !sidebarCollapsed && (
-                    <div className="ml-11 mt-1 space-y-1 border-l-2 border-slate-100 pl-4 py-1">
+                    <div className="ml-11 mt-1 space-y-1 border-l-2 border-white/10 pl-4 py-1">
                       {item.children.map(child => (
                         <NavLink
                           key={child.path}
@@ -219,7 +219,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
                           onClick={onMobileClose}
                           className={({ isActive }) => clsx(
                             "flex items-center gap-3 py-2 px-3 rounded-lg transition-colors text-sm",
-                            isActive ? "text-[#7209B7] font-semibold bg-[#7209B7]/5" : "text-[#16132D]/60 hover:text-[#16132D]"
+                            isActive ? "text-white font-bold bg-white/10" : "text-white/50 hover:text-white hover:bg-white/5"
                           )}
                         >
                           <span className="whitespace-nowrap truncate">{child.title}</span>
@@ -233,12 +233,12 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
           ))}
         </div>
 
-        <div className={clsx("p-3 border-t border-[#16132D]/[0.06] space-y-2", sidebarCollapsed ? "flex flex-col items-center" : "")}>
+        <div className={clsx("p-3 border-t border-white/[0.06] space-y-2", sidebarCollapsed ? "flex flex-col items-center" : "")}>
           <button
             onClick={toggleNavMode}
             title={sidebarCollapsed ? "Switch to Bottom Bar" : undefined}
             className={clsx(
-              "w-full flex items-center rounded-xl text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/5 transition-colors font-medium hidden md:flex",
+              "w-full flex items-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors font-medium hidden md:flex",
               sidebarCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3"
             )}
           >
@@ -249,7 +249,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) => {
             onClick={handleLogout}
             title={sidebarCollapsed ? "Logout" : undefined}
             className={clsx(
-              "w-full flex items-center rounded-xl text-red-500/80 hover:text-red-500 hover:bg-red-50 transition-colors font-medium",
+              "w-full flex items-center rounded-xl text-rose-400 hover:text-white hover:bg-rose-500/80 transition-colors font-medium",
               sidebarCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3"
             )}
           >
