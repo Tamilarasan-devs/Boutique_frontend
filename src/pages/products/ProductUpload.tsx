@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PackageSearch, UploadCloud, Plus, X, Image as ImageIcon, Loader2, Tag, Edit, Trash2 } from 'lucide-react';
+import { PackageSearch, UploadCloud, Plus, X, Image as ImageIcon, Loader2, Tag, Edit, Trash2, Barcode } from 'lucide-react';
 import { productApi, Product } from '../../api/productApi';
 import { fetchWithAuth } from '../../api/client';
 import { API_BASE_URL } from '@/constants';
@@ -16,6 +16,7 @@ const ProductUpload: React.FC = () => {
   const [price, setPrice] = useState('');
   const [stockQuantity, setStockQuantity] = useState('');
   const [category, setCategory] = useState('');
+  const [barcode, setBarcode] = useState(() => Math.random().toString().slice(2, 14));
   
   // Image Upload State
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -114,6 +115,7 @@ const ProductUpload: React.FC = () => {
         price,
         stock_quantity: parseInt(stockQuantity) || 0,
         category,
+        barcode,
         image_url: uploadedImageUrls[0] || null, // Keep for backward compatibility
         image_urls: uploadedImageUrls
       });
@@ -126,6 +128,7 @@ const ProductUpload: React.FC = () => {
       setPrice('');
       setStockQuantity('');
       setCategory('');
+      setBarcode(Math.random().toString().slice(2, 14));
       setImageFiles([]);
       setImagePreviews([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -225,6 +228,16 @@ const ProductUpload: React.FC = () => {
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Category</label>
               <input type="text" value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Dresses, Tops, Accessories" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Barcode</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Barcode className="w-5 h-5 text-slate-400" />
+                </div>
+                <input type="text" value={barcode} onChange={e => setBarcode(e.target.value)} placeholder="Product barcode" className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" />
+              </div>
             </div>
 
             <div>

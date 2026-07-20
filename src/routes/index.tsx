@@ -49,6 +49,8 @@ const Stock = lazy(() => import('../pages/inventory/stock/Stock'));
 // Billing
 const Invoice = lazy(() => import('../pages/billing/invoice/Invoice'));
 const Payments = lazy(() => import('../pages/billing/payments/Payments'));
+const ProductBilling = lazy(() => import('../pages/billing/ProductBilling'));
+const ProductBillList = lazy(() => import('../pages/billing/ProductBillList'));
 
 
 // Staff
@@ -134,6 +136,8 @@ export const router = createBrowserRouter([
       // Billing
       { path: 'billing/invoice', element: <Invoice /> },
       { path: 'billing/payments', element: <Payments /> },
+      { path: 'billing/pos', element: <ProductBilling /> },
+      { path: 'billing/product-bills', element: <ProductBillList /> },
 
       // Staff (owner/manager only)
       { path: 'staff/employees', element: P(<Employees />) },

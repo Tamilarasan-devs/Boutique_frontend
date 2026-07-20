@@ -10,27 +10,21 @@ const req = async (url: string, options: RequestInit = {}) => {
 
 export const inventoryApi = {
   // --- Items (Fabrics + Accessories) ---
-  getItems: () => req(`${API_BASE}/items`),
-  getFabrics: async () => {
-    const items = await req(`${API_BASE}/items`);
-    return items.filter((i: any) => i.type === 'Fabric');
-  },
-  getAccessories: async () => {
-    const items = await req(`${API_BASE}/items`);
-    return items.filter((i: any) => i.type === 'Accessory');
-  },
+  getItems: (page?: number, limit?: number) => req(`${API_BASE}/items?page=${page || 1}&limit=${limit || 20}`),
+  getFabrics: (page?: number, limit?: number) => req(`${API_BASE}/items?type=Fabric&page=${page || 1}&limit=${limit || 20}`),
+  getAccessories: (page?: number, limit?: number) => req(`${API_BASE}/items?type=Accessory&page=${page || 1}&limit=${limit || 20}`),
   addItem: (data: any) => req(`${API_BASE}/items`, { method: 'POST', body: JSON.stringify(data) }),
   updateItem: (id: number, data: any) => req(`${API_BASE}/items/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteItem: (id: number) => req(`${API_BASE}/items/${id}`, { method: 'DELETE' }),
 
   // --- Suppliers ---
-  getSuppliers: () => req(`${API_BASE}/suppliers`),
+  getSuppliers: (page?: number, limit?: number) => req(`${API_BASE}/suppliers?page=${page || 1}&limit=${limit || 20}`),
   addSupplier: (data: any) => req(`${API_BASE}/suppliers`, { method: 'POST', body: JSON.stringify(data) }),
   updateSupplier: (id: number, data: any) => req(`${API_BASE}/suppliers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteSupplier: (id: number) => req(`${API_BASE}/suppliers/${id}`, { method: 'DELETE' }),
 
-  // --- Purchases ---
-  getPurchases: () => req(`${API_BASE}/purchases`),
+  // --- Purchases (Purchase Orders) ---
+  getPurchases: (page?: number, limit?: number) => req(`${API_BASE}/purchases?page=${page || 1}&limit=${limit || 20}`),
   addPurchase: (data: any) => req(`${API_BASE}/purchases`, { method: 'POST', body: JSON.stringify(data) }),
   updatePurchase: (id: number, data: any) => req(`${API_BASE}/purchases/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deletePurchase: (id: number) => req(`${API_BASE}/purchases/${id}`, { method: 'DELETE' }),
@@ -38,6 +32,6 @@ export const inventoryApi = {
     req(`${API_BASE}/purchases/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
 
   // --- Stock Ledger ---
-  getStockLedger: () => req(`${API_BASE}/stock-ledger`),
+  getStockLedger: (page?: number, limit?: number) => req(`${API_BASE}/stock-ledger?page=${page || 1}&limit=${limit || 20}`),
   addStockLog: (data: any) => req(`${API_BASE}/stock-ledger`, { method: 'POST', body: JSON.stringify(data) }),
 };

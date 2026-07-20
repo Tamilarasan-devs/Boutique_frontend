@@ -3,6 +3,7 @@ import { Search, Plus, IndianRupee, CreditCard, Banknote, Smartphone, X, Calenda
 import { billingApi, BILLING_EVENTS_URL, Payment, Invoice } from '../../../api/billingApi';
 import { useToast, useConfirm } from '../../../context';
 import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import Pagination from '@/components/ui/Pagination';
 
 const methodIcons: Record<Payment['method'], React.ReactNode> = {
   'Cash': <Banknote className="w-3.5 h-3.5 text-emerald-600" />,
@@ -19,6 +20,8 @@ const Payments: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   // Modal States
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
@@ -36,9 +39,9 @@ const Payments: React.FC = () => {
   const fetchData = async () => {
     try {
       const paymentsData = await billingApi.getPayments();
-      const invoicesData = await billingApi.getInvoices();
-      setPayments(paymentsData);
-      setInvoices(invoicesData);
+      const invoicesData = await billingApi.fetchInvoicesData();
+      setPayments(Array.isArray(paymentsData) ? paymentsData : (paymentsData.data || []));
+      setInvoices(Array.isArray(invoicesData) ? invoicesData : (invoicesData.data || []));
     } catch (err) {
       toast('Failed to load payments data', 'error');
     } finally {
@@ -84,6 +87,13 @@ const Payments: React.FC = () => {
     p.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.receipt_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedPayments = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Stat metrics
   const totalCollected = payments.reduce((sum, p) => sum + parseFloat(p.amount as any), 0);
@@ -155,10 +165,10 @@ const Payments: React.FC = () => {
       setPaymentDate(new Date().toISOString().split('T')[0]);
       setPaymentNote('');
       setIsRecordModalOpen(false);
-      
+
       // Update invoices to reflect new status
-      const updatedInvoices = await billingApi.getInvoices();
-      setInvoices(updatedInvoices);
+      const updatedInvoices = await billingApi.fetchInvoicesData();
+      setInvoices(Array.isArray(updatedInvoices) ? updatedInvoices : (updatedInvoices.data || []));
     } catch (err) {
       toast('Error recording payment', 'error');
     } finally {
@@ -167,7 +177,7 @@ const Payments: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-5 p-6 bg-slate-50/50">
+    <div className="flex flex-col h-full space-y-5 p-4 sm:p-6 bg-slate-50/50 overflow-y-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Payments</h1>
@@ -234,10 +244,10 @@ const Payments: React.FC = () => {
 
       {/* Payments Table */}
       {viewMode === 'list' ? (
-        <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
           {isLoading ? (
-          <TableSkeleton />
-        ) : filtered.length === 0 ? (
+            <TableSkeleton />
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
               <IndianRupee className="w-12 h-12 mb-3 text-slate-300" />
               <p className="text-sm">No payment records found</p>
@@ -258,7 +268,7 @@ const Payments: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {filtered.map(p => {
+                  {paginatedPayments.map(p => {
                     const linkedInv = invoices.find(inv => inv.id === p.invoice_id);
                     return (
                       <tr key={p.id} className="hover:bg-slate-50/40 transition">
@@ -293,18 +303,28 @@ const Payments: React.FC = () => {
               </table>
             </div>
           )}
+          {totalPages > 0 && (
+            <div className="mt-auto border-t border-slate-100 p-4 mb-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="flex flex-col flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {isLoading ? (
-          <CardSkeleton />
-        ) : filtered.length === 0 ? (
+            <CardSkeleton />
+          ) : filtered.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">
               <IndianRupee className="w-12 h-12 mb-3 text-slate-300" />
               <p className="text-sm">No payment records found</p>
             </div>
           ) : (
-            filtered.map(p => {
+            paginatedPayments.map(p => {
               const linkedInv = invoices.find(inv => inv.id === p.invoice_id);
               return (
                 <div key={p.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col group relative">
@@ -325,7 +345,7 @@ const Payments: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="mb-4">
                     <p className="text-lg font-bold text-slate-900 line-clamp-1" title={p.customer_name}>
                       {p.customer_name}
@@ -337,7 +357,7 @@ const Payments: React.FC = () => {
                       <span className="text-xs font-medium text-slate-500">{new Date(p.payment_date).toLocaleDateString('en-IN')}</span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-auto pt-4 border-t border-slate-50">
                     <div className="flex justify-between items-end">
                       <div className="flex-1 pr-2">
@@ -354,6 +374,16 @@ const Payments: React.FC = () => {
                 </div>
               );
             })
+          )}
+          </div>
+          {totalPages > 0 && (
+            <div className="mt-auto pt-4 mb-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
           )}
         </div>
       )}

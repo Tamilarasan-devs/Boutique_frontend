@@ -1,1 +1,10 @@
-export { default as Sidebar } from './Sidebar';\nexport { default as Navbar } from './Navbar';\nexport { default as Header } from './Header';\nexport { default as Footer } from './Footer';\nexport { default as Topbar } from './Topbar';\nexport { default as PageContainer } from './PageContainer';\nexport { default as ContentWrapper } from './ContentWrapper';\nexport { default as Breadcrumb } from './Breadcrumb';\nexport { default as NotificationPanel } from './NotificationPanel';\nexport { default as ProfileMenu } from './ProfileMenu';\n
+export { default as BottomBar } from './BottomBar';
+export { default as Navbar } from './Navbar';
+export { default as Header } from './Header';
+export { default as Footer } from './Footer';
+export { default as Topbar } from './Topbar';
+export { default as PageContainer } from './PageContainer';
+export { default as ContentWrapper } from './ContentWrapper';
+export { default as Breadcrumb } from './Breadcrumb';
+export { default as NotificationPanel } from './NotificationPanel';
+export { default as ProfileMenu } from './ProfileMenu';

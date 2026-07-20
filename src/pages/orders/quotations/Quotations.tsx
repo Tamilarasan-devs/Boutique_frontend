@@ -8,6 +8,7 @@ import { customerApi } from '../../../api/customerApi';
 import { leadApi } from '../../../api/leadApi';
 import { useConfirm } from '../../../context';
 import { TableSkeleton, CardSkeleton } from '../../../components/ui/Skeleton';
+import Pagination from '../../../components/ui/Pagination';
 
 interface Quotation {
   id: string; // database ID
@@ -44,6 +45,8 @@ const Quotations: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
     return (localStorage.getItem('quotationsViewMode') as 'table' | 'card') || 'table';
   });
@@ -97,8 +100,9 @@ const Quotations: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await quotationApi.getQuotations();
-        const formatted = data.map((item: any) => ({
+        setIsLoading(true);
+        const data = await quotationApi.getQuotations(page, 20);
+        const formatted = (data.data || data).map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `QOT-${item.id}`,
           customerName: item.customer_name,
@@ -114,12 +118,19 @@ const Quotations: React.FC = () => {
           imageUrl: item.image_url,
         }));
         setQuotations(formatted);
+        if (data.pagination) {
+          setTotalPages(data.pagination.totalPages);
+        }
       } catch (error) {
         console.error('Error loading quotations:', error);
       } finally {
         setIsLoading(false);
       }
     };
+    fetchData();
+  }, [page]);
+
+  useEffect(() => {
     const fetchCustomers = async () => {
       try {
         const data = await customerApi.getCustomers().catch(() => []);
@@ -128,7 +139,6 @@ const Quotations: React.FC = () => {
         console.error('Error loading customers:', err);
       }
     };
-    fetchData();
     fetchCustomers();
   }, []);
 
@@ -178,7 +188,8 @@ const Quotations: React.FC = () => {
         discount: 0, 
         valid_until: validUntil, 
         terms,
-        image_url: uploadedImageUrl || undefined
+        image_url: uploadedImageUrl || undefined,
+        lead_id: leadId || undefined
       });
       const q = response.quotation;
       const newQuotation: Quotation = {
@@ -263,11 +274,11 @@ const Quotations: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
-      <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+    <div className="flex h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+      <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08] shrink-0">
           <div>
             <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Estimates</p>
             <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#16132D]">Quotations</h1>
@@ -315,8 +326,8 @@ const Quotations: React.FC = () => {
 
         {/* Content */}
         {viewMode === 'table' ? (
-          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col min-h-[400px] flex-1">
+            <div className="overflow-x-auto flex-1">
               {isLoading ? (
                 <TableSkeleton />
               ) : (
@@ -400,6 +411,15 @@ const Quotations: React.FC = () => {
               </table>
               )}
             </div>
+            {totalPages > 0 && (
+              <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 shrink-0">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={(p) => setPage(p)}
+                />
+              </div>
+            )}
           </div>
         ) : isLoading ? (
           <CardSkeleton />
@@ -407,7 +427,7 @@ const Quotations: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map(q => (
               <div key={q.id} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-md transition flex flex-col h-full">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-4 gap-3">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-[#16132D]/[0.03] flex items-center justify-center">
                       <FileText className="w-4 h-4 text-[#16132D]/60" />
@@ -447,7 +467,7 @@ const Quotations: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04] gap-3">
                   <div className="flex flex-col">
                      <span className="text-xs text-[#16132D]/50 font-bold uppercase tracking-wider mb-0.5">Amount</span>
                      <div className="flex items-center gap-2">
@@ -483,6 +503,15 @@ const Quotations: React.FC = () => {
             {filtered.length === 0 && (
               <div className="col-span-full py-12 text-center text-sm font-semibold text-[#16132D]/35 bg-white rounded-2xl border border-[#16132D]/[0.06]">
                 No quotations found.
+              </div>
+            )}
+            {totalPages > 0 && (
+              <div className="col-span-full mt-2 bg-white rounded-2xl shadow-[0_1px_3px_rgba(28,36,48,0.04)] border border-[#16132D]/[0.06] overflow-hidden">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={(p) => setPage(p)}
+                />
               </div>
             )}
           </div>

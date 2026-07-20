@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { PackageSearch, Search, Edit2, Trash2, Loader2, Image as ImageIcon, Tag, X } from 'lucide-react';
 import { productApi, Product } from '../../api/productApi';
 import { fetchWithAuth } from '../../api/client';
@@ -10,6 +11,10 @@ const ProductList: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 12;
   
   // Edit State
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -42,6 +47,13 @@ const ProductList: React.FC = () => {
       setFilteredProducts(products);
     }
   }, [searchTerm, products]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -190,7 +202,7 @@ const ProductList: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 p-6 flex flex-col overflow-auto">
         {isLoading ? (
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
@@ -242,7 +254,7 @@ const ProductList: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200">
@@ -255,7 +267,7 @@ const ProductList: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredProducts.map((product) => {
+                  {paginatedProducts.map((product) => {
                     const firstImage = product.image_urls?.[0] || product.image_url;
                     return (
                       <tr key={product.id} className="hover:bg-slate-50/50 transition-colors">
@@ -319,6 +331,11 @@ const ProductList: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            {totalPages > 0 && (
+              <div className="mt-auto border-t border-slate-200 p-4 mb-4">
+                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              </div>
+            )}
           </div>
         )}
       </div>

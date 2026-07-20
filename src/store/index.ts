@@ -30,9 +30,11 @@ export const useAuthStore = create<AuthStore>()(
 interface UIStore {
   sidebarCollapsed: boolean;
   darkMode: boolean;
+  navMode: 'bottom' | 'sidebar';
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleDarkMode: () => void;
+  toggleNavMode: () => void;
 }
 
 export const useUIStore = create<UIStore>()(
@@ -40,12 +42,15 @@ export const useUIStore = create<UIStore>()(
     (set) => ({
       sidebarCollapsed: false,
       darkMode: false,
+      navMode: 'bottom',
       toggleSidebar: () =>
         set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (collapsed) =>
         set({ sidebarCollapsed: collapsed }),
       toggleDarkMode: () =>
         set((s) => ({ darkMode: !s.darkMode })),
+      toggleNavMode: () =>
+        set((s) => ({ navMode: s.navMode === 'bottom' ? 'sidebar' : 'bottom' })),
     }),
     { name: 'boutique-ui' }
   )

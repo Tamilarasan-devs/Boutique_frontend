@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Plus, Search, Calendar as CalendarIcon, Clock, Eye, Trash2, X, Scissors, Info, ArrowRight, Edit3, Loader2, List, LayoutGrid } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { orderApi } from '../../../api/orderApi';
@@ -48,6 +49,8 @@ const Orders: React.FC = () => {
   const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
     return (localStorage.getItem('ordersViewMode') as 'table' | 'card') || 'table';
   });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     localStorage.setItem('ordersViewMode', viewMode);
@@ -73,8 +76,12 @@ const Orders: React.FC = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const data = await orderApi.getOrders();
-        const formatted = data.map((item: any) => ({
+        const res = await orderApi.getOrders(page, 20);
+        const ordersData = res.data || res;
+        if (res.pagination) {
+          setTotalPages(res.pagination.totalPages);
+        }
+        const formatted = ordersData.map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `ORD-${item.id}`,
           customerName: item.customer_name,
@@ -99,8 +106,8 @@ const Orders: React.FC = () => {
 
     const fetchTailors = async () => {
       try {
-        const data = await employeeApi.getEmployees({ role: 'Tailor', status: 'Active' });
-        setTailors(Array.isArray(data) ? data : (data as any).employees || []);
+        const res = await employeeApi.getEmployees({ role: 'Tailor', status: 'Active' });
+        setTailors(res.data || []);
       } catch (err) {
         console.error('Error fetching tailors:', err);
       }
@@ -122,7 +129,7 @@ const Orders: React.FC = () => {
       setIsModalOpen(true);
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, []);
+  }, [page]);
 
   const filteredOrders = orders.filter(ord => 
     ord.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -283,11 +290,11 @@ const Orders: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
-      <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+    <div className="flex h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+      <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08] shrink-0">
           <div>
             <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">
               Production
@@ -340,13 +347,13 @@ const Orders: React.FC = () => {
         </div>
 
         {/* Main Content (Table & Detail Sidebar side-by-side) */}
-        <div className="flex gap-6 items-start flex-col lg:flex-row">
+        <div className="flex gap-6 items-start flex-col lg:flex-row flex-1 min-h-0">
           
           {/* Orders List Area */}
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full h-full flex flex-col">
             {viewMode === 'table' ? (
-              <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-                <div className="overflow-x-auto">
+              <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col flex-1">
+                <div className="overflow-x-auto flex-1">
                   <table className="w-full text-left text-sm text-[#16132D]/75">
                     <thead>
                       <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-semibold text-xs tracking-wider uppercase">
@@ -443,6 +450,15 @@ const Orders: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+                {totalPages > 0 && (
+                  <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 shrink-0">
+                    <Pagination
+                      currentPage={page}
+                      totalPages={totalPages}
+                      onPageChange={setPage}
+                    />
+                  </div>
+                )}
               </div>
             ) : isLoading ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -455,17 +471,18 @@ const Orders: React.FC = () => {
                 No orders found.
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filteredOrders.map((order) => (
+              <div className="flex flex-col flex-1 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 flex-1 content-start">
+                  {filteredOrders.map((order) => (
                 <div key={order.id} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-md transition flex flex-col relative h-full">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
                       <div className={`p-2.5 rounded-xl ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
                         <Scissors className="w-5 h-5" />
                       </div>
-                      <div>
-                        <div className="font-serif font-bold text-[#16132D] text-lg">{order.category}</div>
-                        <div className="text-sm text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.id})</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-serif font-bold text-[#16132D] text-lg truncate" title={order.category}>{order.category}</div>
+                        <div className="text-sm text-[#16132D]/55 font-medium mt-0.5 truncate" title={`For ${order.customerName} (${order.id})`}>For {order.customerName} ({order.id})</div>
                       </div>
                     </div>
                   </div>
@@ -486,7 +503,7 @@ const Orders: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04] gap-3">
                     <div>
                       <div className="flex items-center gap-2">
                         <div className="font-bold text-[#16132D] text-lg">₹{order.totalAmount.toLocaleString('en-IN')}</div>
@@ -539,13 +556,19 @@ const Orders: React.FC = () => {
                 </div>
               )}
             </div>
+            {totalPages > 0 && (
+              <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 rounded-xl shrink-0">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
+            </div>
           )}
         </div>
-
-
-
-        </div>
-
+      </div>
         {/* Create Order Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">

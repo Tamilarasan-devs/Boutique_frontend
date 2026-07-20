@@ -39,7 +39,12 @@ export const authApi = {
     const response = await fetchWithAuth(`${API_BASE_URL}/auth/me`, {
       headers: { 'Content-Type': 'application/json' },
     });
-    if (!response.ok) throw new Error('Failed to fetch profile');
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Unauthorized');
+      }
+      throw new Error('Failed to fetch profile');
+    }
     return response.json();
   },
 

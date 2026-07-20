@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Scissors, Sparkles, CheckCircle2, ChevronRight, User, Plus, X, Trash2, Calendar as CalendarIcon, Truck, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { productionApi } from '../../../api/productionApi';
@@ -36,6 +37,8 @@ const priorityStyles: Record<string, string> = {
 const Production: React.FC = () => {
   const navigate = useNavigate();
   const { confirm } = useConfirm();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [items, setItems] = useState<ProductionItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,8 +59,8 @@ const Production: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await productionApi.getProduction();
-        const formatted = data.map((item: any) => ({
+        const data = await productionApi.getProduction(page, 20);
+        const formatted = (data.data || data).map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `PRD-${item.id}`,
           orderId: item.order_id || '',
@@ -78,7 +81,7 @@ const Production: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [page]);
 
   const promoteStage = async (id: string, currentStage: ProductionItem['stage']) => {
     const currentIndex = stages.indexOf(currentStage);

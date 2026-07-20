@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Plus, Search, Calendar as CalendarIcon, Clock, User, MessageSquare, Check, X, Phone, UserCheck, Trash2, Loader2 } from 'lucide-react';
 import { appointmentApi } from '../../../api/appointmentApi';
 
@@ -39,6 +40,8 @@ const statusStyles: Record<Appointment['status'], string> = {
 };
 
 const Appointments: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,8 +59,8 @@ const Appointments: React.FC = () => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const data = await appointmentApi.getAppointments();
-        const formatted = data.map((item: any) => ({
+        const data = await appointmentApi.getAppointments(page, 20);
+        const formatted = (data.data || data).map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `APT-${item.id}`,
           customerName: item.customer_name,
@@ -75,7 +78,7 @@ const Appointments: React.FC = () => {
       }
     };
     fetchAppointments();
-  }, []);
+  }, [page]);
 
   const filteredAppointments = appointments.filter(apt => 
     apt.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||

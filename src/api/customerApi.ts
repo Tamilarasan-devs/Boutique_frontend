@@ -2,13 +2,14 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const customerApi = {
-  getCustomers: async () => {
+  getCustomers: async (page?: number, limit?: number) => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/customers`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/customers?page=${page || 1}&limit=${limit || 20}`);
       if (!response.ok) {
         throw new Error('Failed to fetch customers');
       }
-      return await response.json();
+      const result = await response.json();
+      return Array.isArray(result) ? result : (result.data || result.customers || []);
     } catch (error) {
       console.error('Error fetching customers:', error);
       throw error;

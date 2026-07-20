@@ -59,9 +59,9 @@ const Employees: React.FC = () => {
         status: statusFilter || undefined,
         page,
         limit: ITEMS_PER_PAGE,
-      }) as { employees: Employee[]; meta: { total: number } };
-      setEmployees(res.employees || []);
-      setTotal(res.meta?.total || 0);
+      });
+      setEmployees(res.data || []);
+      setTotal(res.pagination?.total || 0);
     } catch (e: any) {
       setError('Failed to load employees. Please try again.');
     } finally {
@@ -405,9 +405,9 @@ const Employees: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Salary (₹)</label>
-                  <input type="number" value={form.salary || 0} onChange={e => setForm(f => ({ ...f, salary: Number(e.target.value) }))}
+                  <input type="number" value={form.salary || ''} onChange={e => setForm(f => ({ ...f, salary: e.target.value ? Number(e.target.value) : 0 }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="0" min="0" />
+                    placeholder="0"  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Join Date</label>

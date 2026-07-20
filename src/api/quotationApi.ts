@@ -2,8 +2,8 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const quotationApi = {
-  getQuotations: async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/quotations`);
+  getQuotations: async (page?: number, limit?: number) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/quotations?page=${page || 1}&limit=${limit || 20}`);
     if (!response.ok) throw new Error('Failed to fetch quotations');
     return await response.json();
   },

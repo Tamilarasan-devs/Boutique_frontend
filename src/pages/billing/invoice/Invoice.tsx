@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Search, Plus, FileText, Eye, X, Trash2, Printer, Loader2, LayoutList, LayoutGrid } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { billingApi, BILLING_EVENTS_URL, Invoice as InvoiceType, InvoiceItemDetail } from '../../../api/billingApi';
@@ -22,6 +23,8 @@ const Invoice: React.FC = () => {
   const [customerFilter, setCustomerFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Modal States
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
@@ -47,14 +50,22 @@ const Invoice: React.FC = () => {
   // Fetch invoices and customers
   const fetchInvoices = async () => {
     try {
-      const data = await billingApi.getInvoices();
-      setInvoices(data);
+      setIsLoading(true);
+      const data = await billingApi.fetchInvoicesData(page, 20);
+      if ((data as any).pagination) {
+        setTotalPages((data as any).pagination.totalPages);
+      }
+      setInvoices((data as any).data || data);
     } catch (err) {
       toast('Failed to load invoices', 'error');
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [page]);
 
   const fetchCustomers = async () => {
     try {
@@ -69,8 +80,9 @@ const Invoice: React.FC = () => {
     try {
       const { quotationApi } = await import('../../../api/quotationApi');
       const data = await quotationApi.getQuotations();
+      const quotationsArray = Array.isArray(data) ? data : (data.quotations || data.data || []);
       // Only keep 'Accepted' quotations for generating invoices
-      const acceptedQuotations = data.filter((q: any) => q.status === 'Accepted');
+      const acceptedQuotations = quotationsArray.filter((q: any) => q.status === 'Accepted');
       setQuotations(acceptedQuotations);
     } catch (err) {
       console.error(err);
@@ -81,14 +93,14 @@ const Invoice: React.FC = () => {
     try {
       const { orderApi } = await import('../../../api/orderApi');
       const data = await orderApi.getOrders();
-      setOrders(data);
+      const ordersArray = Array.isArray(data) ? data : (data.orders || data.data || []);
+      setOrders(ordersArray);
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchInvoices();
     fetchCustomers();
     fetchQuotations();
     fetchOrders();
@@ -99,6 +111,103 @@ const Invoice: React.FC = () => {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, []);
+
+  // Handle automatic opening of invoice when navigated from other pages (like Delivery)
+  useEffect(() => {
+    const processState = async () => {
+      const state = location.state as any;
+      if (state?.orderId || state?.customerName) {
+        // First check if an invoice for this order already exists to prevent duplicates
+        if (state.orderId) {
+          try {
+            const { billingApi } = await import('../../../api/billingApi');
+            const invData = await billingApi.fetchInvoicesData(1, 100);
+            const allInvs = Array.isArray(invData) ? invData : (invData.data || []);
+            const existingInvoice = allInvs.find(inv => String(inv.order_id) === String(state.orderId) || String(inv.order_id) === String(state.orderId).replace('ORD-', ''));
+            
+            if (existingInvoice) {
+              setSelectedInvoice(existingInvoice);
+              setIsDetailModalOpen(true);
+              navigate(location.pathname, { replace: true, state: {} });
+              return;
+            }
+          } catch(e) {}
+        }
+
+        setCustomerName(state.customerName || '');
+        
+        let currentQuotations = quotations;
+        let currentOrders = orders;
+
+        if (currentQuotations.length === 0) {
+          try {
+            const { quotationApi } = await import('../../../api/quotationApi');
+            const data = await quotationApi.getQuotations();
+            const quotationsArray = Array.isArray(data) ? data : (data.quotations || data.data || []);
+            currentQuotations = quotationsArray.filter((q: any) => q.status === 'Accepted');
+            setQuotations(currentQuotations);
+          } catch(e) {}
+        }
+        
+        if (currentOrders.length === 0) {
+          try {
+            const { orderApi } = await import('../../../api/orderApi');
+            const data = await orderApi.getOrders();
+            currentOrders = Array.isArray(data) ? data : (data.orders || data.data || []);
+            setOrders(currentOrders);
+          } catch(e) {}
+        }
+        
+        let quotationMatched = false;
+        if (state.customerName && currentQuotations.length > 0) {
+          const mq = currentQuotations.find(q => q.customer_name === state.customerName || q.customerName === state.customerName);
+          if (mq) {
+            setCreationMode('FromQuotation');
+            setSelectedQuotationId(String(mq.id));
+            if (mq.valid_until) {
+              setDueDate(new Date(mq.valid_until).toISOString().split('T')[0]);
+            }
+            
+            let parsed: any[] = [];
+            try { parsed = typeof mq.items === 'string' ? JSON.parse(mq.items) : mq.items; } catch(e) {}
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setItems(parsed.map((i: any) => ({
+                description: i.description || i.item || '',
+                quantity: i.quantity || 1,
+                price: i.price || i.rate || 0
+              })));
+            } else {
+              setItems([{ 
+                description: typeof mq.items === 'string' ? mq.items : '', 
+                quantity: 1, 
+                price: parseFloat(mq.total_amount) || 0 
+              }]);
+            }
+            quotationMatched = true;
+          }
+        }
+
+        if (state.orderId && currentOrders.length > 0) {
+          const matchedOrder = currentOrders.find(o => String(o.id) === String(state.orderId) || String(o.id) === String(state.orderId).replace('ORD-', ''));
+          if (matchedOrder) {
+            if (!quotationMatched) {
+              setItems([{
+                description: matchedOrder.category || 'Garment Stitching',
+                quantity: 1,
+                price: parseFloat(matchedOrder.total_amount) || 0
+              }]);
+            }
+            setAdvancePaid(parseFloat(matchedOrder.advance_paid) || 0);
+          }
+        }
+
+        setIsNewModalOpen(true);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    };
+    
+    processState();
+  }, [location.state, navigate, location.pathname]);
 
   // SSE Subscription for real-time synchronization
   useEffect(() => {
@@ -191,6 +300,9 @@ const Invoice: React.FC = () => {
     const quotation = quotations.find(q => q.id.toString() === qId);
     if (quotation) {
       setCustomerName(quotation.customer_name);
+      if (quotation.valid_until) {
+        setDueDate(new Date(quotation.valid_until).toISOString().split('T')[0]);
+      }
       const parsedItems = parseItems(quotation.items);
       
       if (parsedItems.length > 0) {
@@ -249,13 +361,17 @@ const Invoice: React.FC = () => {
     setIsSubmitting(true);
     try {
       const response = await billingApi.createInvoice({
-        order_id: null,
+        order_id: (creationMode === 'FromQuotation' || customerName) 
+          ? (orders.find(o => o.customer_name === customerName)?.id 
+            ? parseInt(orders.find(o => o.customer_name === customerName)!.id) 
+            : null) 
+          : null,
         quotation_id: creationMode === 'FromQuotation' && selectedQuotationId ? parseInt(selectedQuotationId) : null,
         customer_name: customerName,
         invoice_date: invoiceDate,
         due_date: dueDate,
         total_amount: totalAmount,
-        status: 'Pending',
+        status: totalAmount <= 0 ? 'Paid' : 'Pending',
         items: finalItems
       });
 
@@ -307,8 +423,9 @@ const Invoice: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-5 p-6 bg-slate-50/50">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 print:hidden">
+    <div className="flex flex-col h-full bg-slate-50/50 p-4 sm:p-6 relative overflow-y-auto">
+      <div className="flex flex-col flex-1 space-y-5 w-full max-w-[1500px] mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 print:hidden shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Invoices</h1>
           <p className="text-sm text-slate-500 mt-1">Create and manage customer invoices.</p>
@@ -340,7 +457,7 @@ const Invoice: React.FC = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden shrink-0">
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition hover:shadow">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Invoices</span>
           <h3 className="text-2xl font-black text-slate-900 mt-1">{invoices.length}</h3>
@@ -355,7 +472,7 @@ const Invoice: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-3 print:hidden">
+      <div className="flex flex-col md:flex-row gap-3 print:hidden shrink-0">
         <div className="flex items-center bg-white border border-slate-200 rounded-xl px-4 py-2.5 w-full md:w-96 shadow-sm">
           <Search className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
           <input
@@ -379,9 +496,10 @@ const Invoice: React.FC = () => {
       </div>
 
       {/* Main Invoices Data */}
-      {viewMode === 'list' ? (
-        <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden print:hidden">
-          {isLoading ? (
+      <div className="flex flex-col flex-1 min-h-0">
+        {viewMode === 'list' ? (
+          <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-0 print:hidden">
+            {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
@@ -391,7 +509,7 @@ const Invoice: React.FC = () => {
               <p className="text-sm">No invoices found</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1">
               <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
@@ -446,7 +564,7 @@ const Invoice: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 print:hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pb-4 print:hidden">
           {isLoading ? (
             <div className="col-span-full flex justify-center items-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -510,6 +628,19 @@ const Invoice: React.FC = () => {
           )}
         </div>
       )}
+
+      {totalPages > 0 && (
+        <div className="mt-auto pt-4 shrink-0">
+          <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        </div>
+      )}
+      </div>
 
       {/* NEW INVOICE MODAL */}
       {isNewModalOpen && (
@@ -632,8 +763,8 @@ const Invoice: React.FC = () => {
 
                 <div className="space-y-2">
                   {items.map((item, index) => (
-                    <div key={index} className="flex gap-2 items-center">
-                      <div className="flex-1">
+                    <div key={index} className="flex flex-col sm:flex-row gap-2 sm:items-center bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-lg border border-slate-100 sm:border-transparent">
+                      <div className="flex-1 w-full">
                         <input
                           type="text"
                           value={item.description}
@@ -643,39 +774,41 @@ const Invoice: React.FC = () => {
                           required
                         />
                       </div>
-                      <div className="w-20">
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                          min="1"
-                          placeholder="Qty"
-                          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
+                      <div className="flex items-center gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
+                        <div className="w-20">
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                            min="1"
+                            placeholder="Qty"
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                        <div className="flex-1 sm:w-32">
+                          <input
+                            type="number"
+                            value={item.price}
+                            onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                            min="0"
+                            placeholder="Price"
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                        <div className="w-24 sm:w-28 text-right font-medium text-slate-700 pr-2 text-sm">
+                          ₹{(item.quantity * item.price).toLocaleString('en-IN')}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItemRow(index)}
+                          disabled={items.length === 1}
+                          className="p-2 text-slate-400 hover:text-red-500 disabled:opacity-30 rounded-lg transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div className="w-32">
-                        <input
-                          type="number"
-                          value={item.price}
-                          onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                          min="0"
-                          placeholder="Price"
-                          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      <div className="w-28 text-right font-medium text-slate-700 pr-2 text-sm">
-                        ₹{(item.quantity * item.price).toLocaleString('en-IN')}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItemRow(index)}
-                        disabled={items.length === 1}
-                        className="p-2 text-slate-400 hover:text-red-500 disabled:opacity-30 rounded-lg transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
                     </div>
                   ))}
                 </div>
@@ -784,8 +917,8 @@ const Invoice: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <table className="w-full text-left text-sm text-slate-600">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-600 min-w-[450px]">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50/50 text-slate-500 font-bold">
                       <th className="py-2.5 px-4">Item Description</th>
@@ -842,6 +975,7 @@ const Invoice: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

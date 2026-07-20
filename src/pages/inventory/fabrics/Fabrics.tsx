@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Plus, Search, AlertCircle, Trash2, X, Loader2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
@@ -22,6 +23,8 @@ const Fabrics: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
@@ -34,13 +37,16 @@ const Fabrics: React.FC = () => {
   const fetch = async () => {
     try {
       setLoading(true);
-      const data = await inventoryApi.getFabrics();
-      setFabrics(data.map((f: any) => ({ ...f, stock: parseFloat(f.stock), min_stock: parseFloat(f.min_stock), price: parseFloat(f.price) })));
+      const data = await inventoryApi.getFabrics(page, 20);
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+      }
+      setFabrics((data.data || data).map((f: any) => ({ ...f, stock: parseFloat(f.stock), min_stock: parseFloat(f.min_stock), price: parseFloat(f.price) })));
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetch(); }, [page]);
 
   const filtered = fabrics.filter(f =>
     f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,8 +81,8 @@ const Fabrics: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
-      <div className="flex flex-col space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+    <div className="flex flex-col h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+      <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full min-h-0">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
@@ -98,12 +104,13 @@ const Fabrics: React.FC = () => {
         </div>
 
         {/* Search */}
-        <div className="flex items-center bg-white border border-[#16132D]/[0.1] rounded-xl px-4 py-3 w-full sm:w-96 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition">
+        <div className="flex items-center bg-white border border-[#16132D]/[0.1] rounded-xl px-4 py-3 w-full sm:w-96 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition shrink-0">
           <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
           <input type="text" placeholder="Search by fabric name or code..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[#16132D] placeholder-[#16132D]/35 w-full" />
         </div>
 
         {/* Grid */}
+        <div className="flex flex-col flex-1 min-h-0">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             <div className="col-span-full">
@@ -159,6 +166,17 @@ const Fabrics: React.FC = () => {
             })}
           </div>
         )}
+
+        {totalPages > 0 && (
+          <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 rounded-xl shrink-0">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
+        </div>
 
         {/* Modal */}
         {isModalOpen && (

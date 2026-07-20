@@ -41,7 +41,7 @@ const Trial: React.FC = () => {
     const fetchData = async () => {
       try {
         const data = await trialApi.getTrials();
-        const formatted = data.map((item: any) => ({
+        const formatted = (data.data || data).map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `TRL-${item.id}`,
           orderId: item.order_id || '',

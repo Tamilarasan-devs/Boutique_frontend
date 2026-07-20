@@ -2,9 +2,9 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const appointmentApi = {
-  getAppointments: async () => {
+  getAppointments: async (page?: number, limit?: number) => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/appointments`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/appointments?page=${page || 1}&limit=${limit || 20}`);
       if (!response.ok) {
         throw new Error('Failed to fetch appointments');
       }

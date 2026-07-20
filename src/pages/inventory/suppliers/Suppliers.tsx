@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Plus, Search, Phone, Mail, MapPin, Trash2, X, Star, Loader2, Edit2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
@@ -23,6 +24,8 @@ const Suppliers: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
@@ -35,13 +38,16 @@ const Suppliers: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await inventoryApi.getSuppliers();
-      setSuppliers(data);
+      const data = await inventoryApi.getSuppliers(page, 20);
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+      }
+      setSuppliers(data.data || data);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [page]);
 
   const filtered = suppliers.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,8 +96,8 @@ const Suppliers: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
-      <div className="flex flex-col space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+    <div className="flex flex-col h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+      <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full min-h-0">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
@@ -106,12 +112,13 @@ const Suppliers: React.FC = () => {
         </div>
 
         {/* Search */}
-        <div className="flex items-center bg-white border border-[#16132D]/[0.1] rounded-xl px-4 py-3 w-full sm:w-96 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition">
+        <div className="flex items-center bg-white border border-[#16132D]/[0.1] rounded-xl px-4 py-3 w-full sm:w-96 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition shrink-0">
           <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
           <input type="text" placeholder="Search by name or category..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[#16132D] placeholder-[#16132D]/35 w-full" />
         </div>
 
         {/* Grid */}
+        <div className="flex flex-col flex-1 min-h-0">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             <div className="col-span-full">
@@ -153,6 +160,17 @@ const Suppliers: React.FC = () => {
             ))}
           </div>
         )}
+        
+        {totalPages > 0 && (
+          <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 rounded-xl shrink-0">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
+        </div>
 
         {/* Modal */}
         {isModalOpen && (

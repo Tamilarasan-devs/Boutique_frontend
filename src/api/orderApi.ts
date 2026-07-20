@@ -2,9 +2,9 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const orderApi = {
-  getOrders: async () => {
+  getOrders: async (page?: number, limit?: number) => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/orders`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders?page=${page || 1}&limit=${limit || 20}`);
       if (!response.ok) {
         throw new Error('Failed to fetch orders');
       }
@@ -63,7 +63,8 @@ export const orderApi = {
         body: JSON.stringify({ status }),
       });
       if (!response.ok) {
-        throw new Error('Failed to update order status');
+        const body = await response.json().catch(() => ({}));
+        throw new Error(`Failed to update order status (${response.status}): ${body?.error || response.statusText}`);
       }
       return await response.json();
     } catch (error) {

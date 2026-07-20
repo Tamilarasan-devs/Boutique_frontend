@@ -2,10 +2,11 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const productionApi = {
-  getProduction: async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/production`);
+  getProduction: async (page?: number, limit?: number) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/production?page=${page || 1}&limit=${limit || 20}`);
     if (!response.ok) throw new Error('Failed to fetch production');
-    return await response.json();
+    const result = await response.json();
+    return Array.isArray(result) ? result : (result.data || result.production || []);
   },
 
   addProduction: async (data: any) => {

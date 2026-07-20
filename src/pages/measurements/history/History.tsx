@@ -4,6 +4,7 @@ import { measurementHistoryApi } from '../../../api/measurementHistoryApi';
 import { measurementTemplateApi } from '../../../api/measurementTemplateApi';
 import { customerApi } from '../../../api/customerApi';
 import { Search, Plus, Trash2, X, FileText, CheckCircle, User, Loader2 } from 'lucide-react';
+import Pagination from '../../../components/ui/Pagination';
 
 interface HistoryRecord {
   id: string | number;
@@ -29,19 +30,22 @@ const History: React.FC = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [measurements, setMeasurements] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page]);
 
   const fetchData = async () => {
     try {
       const [histData, tplData, custData] = await Promise.all([
-        measurementHistoryApi.getHistory(),
+        measurementHistoryApi.getHistory(page, 20),
         measurementTemplateApi.getTemplates(),
-        customerApi.getCustomers().catch(() => []) // Fallback if no customers endpoint
+        customerApi.getCustomers().catch(() => [])
       ]);
-      setHistory(histData);
+      setHistory(histData.data || histData);
+      if (histData.pagination) setTotalPages(histData.pagination.totalPages);
       setTemplates(tplData);
       setCustomers(custData);
     } catch (err) {
@@ -159,6 +163,15 @@ const History: React.FC = () => {
               ))}
             </tbody>
           </table>
+          {totalPages > 0 && (
+            <div className="border-t border-gray-200 bg-white p-2">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[400px]">

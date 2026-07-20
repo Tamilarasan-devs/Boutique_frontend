@@ -46,7 +46,7 @@ const PermissionsSettings: React.FC = () => {
       if (!res.ok) throw new Error('Failed to fetch roles');
       const data = await res.json();
       
-      const dynamicRoles = data.map((r: any) => ({ id: r.id, name: r.name }));
+      const dynamicRoles = (data.data || data).map((r: any) => ({ id: r.id, name: r.name }));
       setRoles(dynamicRoles);
 
       const newPermissions: ModulePermission[] = MODULES.map(module => {

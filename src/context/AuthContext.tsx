@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { authApi } from '../api/authApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-export type UserRole = 'owner' | 'manager' | 'sales_staff' | 'tailor' | 'receptionist';
+export type UserRole = 'super_admin' | 'owner' | 'manager' | 'sales_staff' | 'tailor' | 'receptionist';
 
 export interface AuthUser {
   id: string;
@@ -52,10 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(JSON.parse(stored));
           // Verify token is still valid
           await authApi.getMe();
-        } catch {
-          localStorage.removeItem('boutique_token');
-          localStorage.removeItem('boutique_user');
-          setUser(null);
+        } catch (error: any) {
+          if (error.message === 'Unauthorized') {
+            localStorage.removeItem('boutique_token');
+            localStorage.removeItem('boutique_user');
+            setUser(null);
+          }
         }
       }
       setIsLoading(false);

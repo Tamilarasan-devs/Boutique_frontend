@@ -65,7 +65,7 @@ const OverviewTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-[#16132D] text-[#F4F3F8] px-3.5 py-2.5 rounded-lg shadow-xl text-xs">
         <p className="text-[10px] font-semibold tracking-wide uppercase text-[#F4F3F8]/55 mb-0.5">{label}</p>
-        <p className="text-sm font-serif font-semibold text-[#7209B7]">
+        <p className="text-sm font-semibold text-[#7209B7]">
           ₹{Number(payload[0].value).toLocaleString('en-IN')}
         </p>
       </div>
@@ -79,7 +79,7 @@ const SalesTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-[#16132D] text-[#F4F3F8] px-3.5 py-2.5 rounded-lg shadow-xl text-xs">
         <p className="text-[10px] font-semibold tracking-wide uppercase text-[#F4F3F8]/55 mb-0.5">{label}</p>
-        <p className="text-sm font-serif font-semibold text-[#7209B7]">
+        <p className="text-sm font-semibold text-[#7209B7]">
           ₹{Number(payload[0].value).toLocaleString('en-IN')}
         </p>
       </div>
@@ -100,15 +100,15 @@ const FinanceTooltip = ({ active, payload, label }: any) => {
         <div className="space-y-1">
           <div className="flex justify-between gap-6">
             <span className="text-[#F4F3F8]/55">Revenue:</span>
-            <span className="font-bold text-[#F4F3F8] font-mono">₹{rev.toLocaleString('en-IN')}</span>
+            <span className="font-bold text-[#F4F3F8]">₹{rev.toLocaleString('en-IN')}</span>
           </div>
           <div className="flex justify-between gap-6">
             <span className="text-[#F4F3F8]/55">Expenses:</span>
-            <span className="font-bold text-[#F43F5E] font-mono">₹{exp.toLocaleString('en-IN')}</span>
+            <span className="font-bold text-[#F43F5E]">₹{exp.toLocaleString('en-IN')}</span>
           </div>
           <div className="flex justify-between gap-6 border-t border-[#F4F3F8]/10 pt-1 mt-1">
             <span className="text-[#F4F3F8]/55">Net Profit:</span>
-            <span className={`font-bold font-mono ${profit >= 0 ? 'text-[#10B981]' : 'text-[#F43F5E]'}`}>
+            <span className={`font-bold ${profit >= 0 ? 'text-[#10B981]' : 'text-[#F43F5E]'}`}>
               ₹{profit.toLocaleString('en-IN')} ({profitMargin}%)
             </span>
           </div>
@@ -345,8 +345,8 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-4 border-b border-[#16132D]/[0.08]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Atelier Dashboard</p>
-            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#16132D]">
+            {/* <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Atelier Dashboard</p> */}
+            <h1 className="text-3xl md:text-[2rem] font-semibold tracking-tight text-[#16132D]">
               Boutique Overview
             </h1>
             <p className="text-xs text-[#16132D]/40 mt-1.5 flex items-center gap-1.5">
@@ -379,12 +379,12 @@ const Dashboard = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#16132D]/[0.08] gap-8 text-sm font-semibold font-serif">
+        <div className="flex border-b border-[#16132D]/[0.08] gap-8 text-sm font-semibold">
           {(['overview', 'sales', 'finance'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3.5 relative transition cursor-pointer font-serif text-base tracking-wide capitalize ${
+              className={`pb-3.5 relative transition cursor-pointer text-base tracking-wide capitalize ${
                 activeTab === tab ? 'text-[#7209B7] font-bold' : 'text-[#16132D]/50 hover:text-[#16132D]/80'
               }`}
             >
@@ -409,7 +409,7 @@ const Dashboard = () => {
                   >
                     <div className="space-y-1.5">
                       <span className="text-xs font-semibold tracking-wide uppercase text-[#16132D]/45">{stat.label}</span>
-                      <h3 className="text-2xl font-serif font-semibold text-[#16132D]">{stat.value}</h3>
+                      <h3 className="text-2xl font-semibold text-[#16132D]">{stat.value}</h3>
                       <span className="text-xs font-medium text-[#16132D]/50">{stat.sub}</span>
                     </div>
                     <div className={`p-3 rounded-xl ${stat.tint} ring-1 ${stat.ring}`}>
@@ -440,9 +440,9 @@ const Dashboard = () => {
               <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] space-y-4 hover:shadow-md transition duration-300">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-lg font-serif font-semibold text-[#16132D]">Weekly Revenue</h2>
+                    <h2 className="text-lg font-semibold text-[#16132D]">Weekly Revenue</h2>
                     <div className="flex items-baseline gap-2.5 mt-1.5">
-                      <span className="text-2xl font-serif font-semibold text-[#16132D]">
+                      <span className="text-2xl font-semibold text-[#16132D]">
                         ₹{totalRevenue.toLocaleString('en-IN')}
                       </span>
                       {salesData && salesData.totalOrders > 0 && (
@@ -482,7 +482,7 @@ const Dashboard = () => {
 
               {/* Quick Actions */}
               <div className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] space-y-4 hover:shadow-md transition duration-300">
-                <h2 className="text-lg font-serif font-semibold text-[#16132D]">Quick Actions</h2>
+                <h2 className="text-lg font-semibold text-[#16132D]">Quick Actions</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {quickActions.map((action, i) => {
                     const Icon = action.icon;
@@ -520,7 +520,7 @@ const Dashboard = () => {
             <div className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] space-y-4 hover:shadow-md transition duration-300">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-lg font-serif font-semibold text-[#16132D]">Recent Orders</h2>
+                  <h2 className="text-lg font-semibold text-[#16132D]">Recent Orders</h2>
                   <p className="text-xs text-[#16132D]/45 mt-0.5">
                     {orders.length > 0 ? `Showing ${Math.min(5, orders.length)} of ${orders.length} orders` : 'No orders yet'}
                   </p>
@@ -561,7 +561,7 @@ const Dashboard = () => {
                             </span>
                           </td>
                           <td className="py-3.5 text-xs text-[#16132D]/55 font-medium">{order.delivery}</td>
-                          <td className="py-3.5 text-right pr-2 font-bold font-serif text-[#16132D]">{order.amount}</td>
+                          <td className="py-3.5 text-right pr-2 font-bold text-[#16132D]">{order.amount}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -584,7 +584,7 @@ const Dashboard = () => {
                   <div className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-sm flex items-center justify-between hover:shadow-md transition duration-300">
                     <div>
                       <span className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider">Total Revenue</span>
-                      <h3 className="text-3xl font-serif font-black text-[#16132D] mt-1">
+                      <h3 className="text-3xl font-black text-[#16132D] mt-1">
                         ₹{salesData.totalRevenue.toLocaleString('en-IN')}
                       </h3>
                       <span className="inline-flex items-center text-xs text-[#16132D]/50 bg-[#16132D]/[0.04] px-2.5 py-0.5 rounded-full font-bold mt-2">
@@ -598,7 +598,7 @@ const Dashboard = () => {
                   <div className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-sm flex items-center justify-between hover:shadow-md transition duration-300">
                     <div>
                       <span className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider">Total Orders</span>
-                      <h3 className="text-3xl font-serif font-black text-[#16132D] mt-1">{salesData.totalOrders}</h3>
+                      <h3 className="text-3xl font-black text-[#16132D] mt-1">{salesData.totalOrders}</h3>
                       <span className="inline-flex items-center text-xs text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full font-bold mt-2">
                         Payments received
                       </span>
@@ -610,7 +610,7 @@ const Dashboard = () => {
                   <div className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-sm flex items-center justify-between hover:shadow-md transition duration-300">
                     <div>
                       <span className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider">Avg. Order Value</span>
-                      <h3 className="text-3xl font-serif font-black text-[#16132D] mt-1">
+                      <h3 className="text-3xl font-black text-[#16132D] mt-1">
                         ₹{salesData.averageOrderValue.toLocaleString('en-IN')}
                       </h3>
                       <span className="inline-flex items-center text-xs text-[#16132D]/50 bg-[#16132D]/[0.04] px-2.5 py-0.5 rounded-full font-bold mt-2">
@@ -627,7 +627,7 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-sm space-y-4 hover:shadow-md transition duration-300">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-serif font-bold text-[#16132D]">Revenue by Day</h2>
+                      <h2 className="text-lg font-bold text-[#16132D]">Revenue by Day</h2>
                       <div className="text-xs font-semibold text-[#16132D]/40">Daily boutique earnings</div>
                     </div>
                     {salesData.chartData.length > 0 ? (
@@ -655,7 +655,7 @@ const Dashboard = () => {
 
                   <div className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-sm space-y-4 hover:shadow-md transition duration-300">
                     <div>
-                      <h2 className="text-lg font-serif font-bold text-[#16132D]">Top Customers</h2>
+                      <h2 className="text-lg font-bold text-[#16132D]">Top Customers</h2>
                       <p className="text-xs text-[#16132D]/45 mt-0.5">Ranked by total spend</p>
                     </div>
                     {salesData.topCustomers.length > 0 ? (
@@ -671,7 +671,7 @@ const Dashboard = () => {
                                 <p className="text-[10px] font-semibold text-[#16132D]/45 uppercase tracking-wider">{c.orders} orders</p>
                               </div>
                             </div>
-                            <span className="text-sm font-bold font-serif text-[#16132D]">₹{c.spend.toLocaleString('en-IN')}</span>
+                            <span className="text-sm font-bold text-[#16132D]">₹{c.spend.toLocaleString('en-IN')}</span>
                           </div>
                         ))}
                       </div>
@@ -709,7 +709,7 @@ const Dashboard = () => {
                             <Icon className="w-4 h-4" />
                           </div>
                         </div>
-                        <h3 className="text-xl font-serif font-black text-[#16132D]" style={{ color: i === 2 ? '#10B981' : i === 3 ? '#8338EC' : '#16132D' }}>
+                        <h3 className="text-xl font-black text-[#16132D]" style={{ color: i === 2 ? '#10B981' : i === 3 ? '#8338EC' : '#16132D' }}>
                           ₹{card.value.toLocaleString('en-IN')}
                         </h3>
                       </div>
@@ -721,7 +721,7 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-sm space-y-4 hover:shadow-md transition duration-300">
                   <div className="flex justify-between items-center pb-2">
                     <div>
-                      <h2 className="text-lg font-serif font-bold text-[#16132D]">Monthly Revenue vs Expenses</h2>
+                      <h2 className="text-lg font-bold text-[#16132D]">Monthly Revenue vs Expenses</h2>
                       <p className="text-xs text-[#16132D]/40 mt-0.5">Last 6 months comparison</p>
                     </div>
                     <div className="flex items-center gap-4 text-xs font-bold">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Plus, Search, AlertCircle, Trash2, X, Edit2, Loader2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
@@ -24,6 +25,8 @@ const Accessories: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,13 +42,16 @@ const Accessories: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await inventoryApi.getAccessories();
-      setItems(data.map((a: any) => ({ ...a, stock: parseFloat(a.stock), min_stock: parseFloat(a.min_stock), price: parseFloat(a.price) })));
+      const data = await inventoryApi.getAccessories(page, 20);
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+      }
+      setItems((data.data || data).map((a: any) => ({ ...a, stock: parseFloat(a.stock), min_stock: parseFloat(a.min_stock), price: parseFloat(a.price) })));
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [page]);
 
   const filtered = items.filter(a => {
     const matchSearch = a.name.toLowerCase().includes(searchTerm.toLowerCase()) || a.code.toLowerCase().includes(searchTerm.toLowerCase());
@@ -98,8 +104,8 @@ const Accessories: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
-      <div className="flex flex-col space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+    <div className="flex flex-col h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+      <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full min-h-0">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
@@ -126,7 +132,7 @@ const Accessories: React.FC = () => {
             <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
             <input type="text" placeholder="Search accessories..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[#16132D] placeholder-[#16132D]/35 w-full" />
           </div>
-          <div className="flex gap-1.5 bg-[#16132D]/[0.04] p-1 rounded-xl overflow-x-auto">
+          <div className="flex gap-1.5 bg-[#16132D]/[0.04] p-1 rounded-xl overflow-x-auto shrink-0">
             {TYPES.map(t => (
               <button key={t} onClick={() => setTypeFilter(t)} className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${typeFilter === t ? 'bg-white shadow-sm text-[#16132D]' : 'text-[#16132D]/50 hover:text-[#16132D]'}`}>{t}</button>
             ))}
@@ -134,7 +140,7 @@ const Accessories: React.FC = () => {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-[#16132D]/75">
                 <thead>
@@ -183,6 +189,16 @@ const Accessories: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            
+            {totalPages > 0 && (
+              <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 shrink-0">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
           </div>
 
         {/* Modal */}

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Pagination from '@/components/ui/Pagination';
 import { Search, Truck, Phone, CheckCircle, PackageCheck, Trash2, Eye, LayoutGrid, List, FileText, X } from 'lucide-react';
 import { deliveryApi } from '../../../api/deliveryApi';
 import { useToast, useConfirm } from '../../../context';
@@ -16,6 +18,7 @@ interface DeliveryItem {
 }
 
 const Delivery: React.FC = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { confirm } = useConfirm();
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
@@ -25,6 +28,8 @@ const Delivery: React.FC = () => {
   const [viewMode, setViewMode] = useState<'table' | 'card'>(() => {
     return (localStorage.getItem('deliveryViewMode') as 'table' | 'card') || 'table';
   });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [viewingDelivery, setViewingDelivery] = useState<DeliveryItem | null>(null);
 
   useEffect(() => {
@@ -33,12 +38,15 @@ const Delivery: React.FC = () => {
 
   useEffect(() => {
     fetchDeliveries();
-  }, []);
+  }, [page]);
 
   const fetchDeliveries = async () => {
     try {
-      const data = await deliveryApi.getDeliveries();
-      const formatted = data.map((item: any) => ({
+      const data = await deliveryApi.getDeliveries(page, 20);
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+      }
+      const formatted = (data.data || data).map((item: any) => ({
         ...item,
         displayId: item.display_id || `DEL-${item.id}`,
       }));
@@ -65,6 +73,25 @@ const Delivery: React.FC = () => {
     }
   };
 
+  const handleDispatch = async (id: string | number) => {
+    try {
+      await deliveryApi.updateStatus(String(id), 'Out for Delivery');
+      toast('Delivery dispatched successfully', 'success');
+      
+      // Find the specific delivery item to pass its order_id
+      const deliveryItem = deliveries.find(d => d.id === id);
+      
+      navigate('/billing/invoice', { 
+        state: { 
+          orderId: deliveryItem?.order_id,
+          customerName: deliveryItem?.customer_name 
+        } 
+      });
+    } catch (err) {
+      toast('Failed to dispatch', 'error');
+    }
+  };
+
   const handleDelete = async (id: string | number) => {
     const isConfirmed = await confirm('Are you sure you want to delete this delivery record?', {
       title: 'Delete Delivery',
@@ -84,8 +111,8 @@ const Delivery: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-5 p-6 bg-[#F4F3F8]">
-      <div className="pb-5 border-b border-[#16132D]/[0.08]">
+    <div className="flex flex-col h-full space-y-5 p-6 bg-[#F4F3F8] relative overflow-hidden">
+      <div className="pb-5 border-b border-[#16132D]/[0.08] shrink-0">
         <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Dispatch</p>
         <h1 className="text-3xl md:text-[2rem] font-serif font-bold tracking-tight text-[#16132D] flex items-center gap-2">
           <Truck className="w-8 h-8 text-[#7209B7]" />
@@ -110,10 +137,12 @@ const Delivery: React.FC = () => {
       </div>
 
       {viewMode === 'table' ? (
-        <div className="flex-1 bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-          <table className="w-full text-left text-sm text-[#16132D]">
+        <div className="flex-1 bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col min-h-0">
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left text-sm text-[#16132D]">
             <thead>
               <tr className="border-b border-[#16132D]/[0.06] bg-[#F4F3F8]/50 text-[#16132D]/60 font-bold uppercase tracking-wider text-xs">
+                <th className="py-4 px-6">Delivery ID</th>
                 <th className="py-4 px-6">Order</th>
                 <th className="py-4 px-6">Customer</th>
                 <th className="py-4 px-6">Garment</th>
@@ -125,26 +154,26 @@ const Delivery: React.FC = () => {
             <tbody className="divide-y divide-[#16132D]/[0.04]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="p-0">
+                  <td colSpan={7} className="p-0">
                     <TableSkeleton rows={3} />
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[#16132D]/50 font-medium">
+                  <td colSpan={7} className="px-6 py-12 text-center text-[#16132D]/50 font-medium">
                     No deliveries match your search.
                   </td>
                 </tr>
               ) : (
                 filtered.map(d => (
                   <tr key={d.id} className="hover:bg-[#F4F3F8]/50 transition-colors group">
+                    <td className="py-4 px-6 text-[#16132D]/70 font-semibold">{d.displayId}</td>
                     <td className="py-4 px-6 font-bold text-[#16132D]">{d.order_id || 'N/A'}</td>
                     <td className="py-4 px-6">
                       <div className="font-bold text-[#16132D] text-base">{d.customer_name}</div>
                       <div className="text-xs text-[#16132D]/60 font-medium flex items-center gap-1 mt-0.5"><Phone className="w-3 h-3" /> {d.phone || 'N/A'}</div>
                     </td>
                     <td className="py-4 px-6 font-semibold text-[#16132D]/80">{d.garment}</td>
-                    <td className="py-4 px-6 text-[#16132D]/70 font-semibold">{d.displayId}</td>
                     <td className="py-4 px-6 text-[#16132D]/70 font-medium">
                       {d.ready_date ? new Date(d.ready_date).toLocaleDateString() : 'N/A'}
                     </td>
@@ -158,7 +187,7 @@ const Delivery: React.FC = () => {
                     <td className="py-4 px-6 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {d.status === 'Ready for Pickup' && (
-                          <button onClick={() => updateStatus(d.id, 'Out for Delivery')} className="px-3 py-1.5 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold rounded-lg transition flex items-center gap-1"><Truck className="w-3.5 h-3.5" /> Dispatch</button>
+                          <button onClick={() => handleDispatch(d.id)} className="px-3 py-1.5 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold rounded-lg transition flex items-center gap-1"><Truck className="w-3.5 h-3.5" /> Dispatch</button>
                         )}
                         {d.status === 'Out for Delivery' && (
                           <button onClick={() => updateStatus(d.id, 'Delivered')} className="px-3 py-1.5 bg-[#10B981]/10 hover:bg-[#10B981]/20 text-[#10B981] text-xs font-bold rounded-lg transition flex items-center gap-1"><PackageCheck className="w-3.5 h-3.5" /> Delivered</button>
@@ -182,10 +211,21 @@ const Delivery: React.FC = () => {
               )}
             </tbody>
           </table>
+          </div>
+          {totalPages > 0 && (
+            <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 shrink-0">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {isLoading ? (
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 flex-1 content-start overflow-y-auto pr-2">
+            {isLoading ? (
             <div className="col-span-full">
               <CardSkeleton />
             </div>
@@ -232,7 +272,7 @@ const Delivery: React.FC = () => {
                   
                   <div>
                     {d.status === 'Ready for Pickup' && (
-                      <button onClick={() => updateStatus(d.id, 'Out for Delivery')} className="px-4 py-2 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold rounded-xl transition flex items-center gap-1.5"><Truck className="w-4 h-4" /> Dispatch</button>
+                      <button onClick={() => handleDispatch(d.id)} className="px-4 py-2 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold rounded-xl transition flex items-center gap-1.5"><Truck className="w-4 h-4" /> Dispatch</button>
                     )}
                     {d.status === 'Out for Delivery' && (
                       <button onClick={() => updateStatus(d.id, 'Delivered')} className="px-4 py-2 bg-[#10B981]/10 hover:bg-[#10B981]/20 text-[#10B981] text-xs font-bold rounded-xl transition flex items-center gap-1.5"><PackageCheck className="w-4 h-4" /> Delivered</button>
@@ -244,6 +284,16 @@ const Delivery: React.FC = () => {
                 </div>
               </div>
             ))
+          )}
+          </div>
+          {totalPages > 0 && (
+            <div className="mt-4 border-t border-[#16132D]/[0.06] bg-white p-2 rounded-xl shrink-0">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </div>
           )}
         </div>
       )}

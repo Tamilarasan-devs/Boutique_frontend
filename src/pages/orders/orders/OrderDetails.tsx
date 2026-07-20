@@ -53,8 +53,8 @@ const OrderDetails: React.FC = () => {
 
     const fetchTailors = async () => {
       try {
-        const data = await employeeApi.getEmployees({ role: 'Tailor', status: 'Active' });
-        setTailors(Array.isArray(data) ? data : (data as any).employees || []);
+        const res = await employeeApi.getEmployees({ role: 'Tailor', status: 'Active' });
+        setTailors(res.data || []);
       } catch (err) {
         console.error('Error fetching tailors:', err);
       }
@@ -130,9 +130,19 @@ const OrderDetails: React.FC = () => {
     try {
       if (assignedTailor !== order.tailor) {
         try {
+          // Map camelCase frontend fields to snake_case expected by the backend
           await orderApi.updateOrder(order.id, {
-            ...order,
-            tailor: assignedTailor
+            customer_name: order.customerName,
+            category: order.category,
+            stitching_cost: order.stitchingCost,
+            total_amount: order.totalAmount,
+            advance_paid: order.advancePaid,
+            delivery_date: order.deliveryDate,
+            order_date: order.orderDate,
+            tailor: assignedTailor,
+            fabric_details: order.fabricDetails,
+            priority: order.priority,
+            status: order.status,
           });
         } catch (e) {
           console.warn("Failed to update order tailor, but proceeding to production", e);
@@ -148,10 +158,19 @@ const OrderDetails: React.FC = () => {
         expected_end_date: order.deliveryDate,
         notes: order.fabricDetails || '',
       });
-      await orderApi.updateOrderStatus(order.id, 'Cutting');
+
+      // Update order status — non-blocking: production item already created above
+      try {
+        await orderApi.updateOrderStatus(order.id, 'Cutting');
+      } catch (statusErr) {
+        console.warn('Production added but order status update failed:', statusErr);
+      }
+
       setOrder({ ...order, status: 'Cutting', tailor: assignedTailor });
+      navigate('/orders/production');
     } catch (err) {
       console.error('Error sending directly to production:', err);
+      alert('Failed to send to production. Please try again.');
     }
   };
 

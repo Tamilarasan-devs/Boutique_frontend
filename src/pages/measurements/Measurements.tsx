@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { orderApi } from '../../api/orderApi';
 import { productionApi } from '../../api/productionApi';
 import { TableSkeleton, CardSkeleton } from '../../components/ui/Skeleton';
+import Pagination from '../../components/ui/Pagination';
 
 interface MeasurementField {
   name: string;
@@ -28,6 +29,8 @@ const Measurements: React.FC = () => {
   const [lastAutoFilledCustomer, setLastAutoFilledCustomer] = useState<string>('');
   const [viewingRecord, setViewingRecord] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,9 +42,11 @@ const Measurements: React.FC = () => {
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    Promise.all([fetchHistory(), fetchCustomers()]).finally(() => {
-      setIsLoading(false);
-    });
+    fetchHistory();
+  }, [page]);
+
+  useEffect(() => {
+    fetchCustomers();
   }, []);
 
   useEffect(() => {
@@ -91,10 +96,14 @@ const Measurements: React.FC = () => {
 
   const fetchHistory = async () => {
     try {
-      const data = await measurementHistoryApi.getHistory();
-      setHistory(data);
+      setIsLoading(true);
+      const data = await measurementHistoryApi.getHistory(page, 20);
+      setHistory(data.data || data);
+      if (data.pagination) setTotalPages(data.pagination.totalPages);
     } catch (err) {
       toast('Failed to load measurement records', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -237,8 +246,8 @@ const Measurements: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4 p-4 sm:p-6 bg-slate-50 min-w-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+    <div className="flex flex-col h-full space-y-4 p-4 sm:p-6 bg-slate-50 min-w-0 w-full relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 shrink-0">
         <div>
           <h1 className="text-3xl font-bold font-serif text-slate-900 flex items-center gap-2">
             <Scissors className="w-7 h-7 text-blue-600" />
@@ -276,8 +285,8 @@ const Measurements: React.FC = () => {
       </div>
 
       {viewMode === 'list' ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[400px] flex-1">
+          <div className="overflow-x-auto flex-1">
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
@@ -353,6 +362,15 @@ const Measurements: React.FC = () => {
               </tbody>
             </table>
           </div>
+          {totalPages > 0 && (
+            <div className="mt-auto border-t border-slate-200 bg-white p-2 shrink-0">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -427,6 +445,15 @@ const Measurements: React.FC = () => {
               );
             })
           )}
+        </div>
+      )}
+      {viewMode === 'card' && totalPages > 0 && (
+        <div className="mt-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+          />
         </div>
       )}
 

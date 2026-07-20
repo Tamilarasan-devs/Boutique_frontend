@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import React, { useState, useEffect, useCallback } from 'react';
 import { attendanceApi, AttendanceRecord, AttendanceSummary } from '../../../api/attendanceApi';
 import { TableSkeleton } from '../../../components/ui/Skeleton';
+import Pagination from '../../../components/ui/Pagination';
 import { 
   CalendarDays, Search, CheckCircle2, XCircle, Clock, 
   FileEdit, RefreshCw, BarChart3, Users, Calendar, Eye, X
@@ -40,6 +41,11 @@ const Attendance: React.FC = () => {
   const [bulkMarking, setBulkMarking] = useState(false);
   const [markingId, setMarkingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'daily' | 'summary'>('daily');
+
+  // Pagination states
+  const [dailyPage, setDailyPage] = useState(1);
+  const [summaryPage, setSummaryPage] = useState(1);
+  const itemsPerPage = 12;
 
   const [notesModal, setNotesModal] = useState<{ record: AttendanceRecord; notes: string } | null>(null);
   const [savingNotes, setSavingNotes] = useState(false);
@@ -172,6 +178,16 @@ const Attendance: React.FC = () => {
   const filteredRecords = records.filter(r =>
     !search || r.employee_name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  useEffect(() => {
+    setDailyPage(1);
+  }, [search, selectedDate]);
+
+  const totalDailyPages = Math.ceil(filteredRecords.length / itemsPerPage);
+  const paginatedDaily = filteredRecords.slice((dailyPage - 1) * itemsPerPage, dailyPage * itemsPerPage);
+
+  const totalSummaryPages = Math.ceil(summary.length / itemsPerPage);
+  const paginatedSummary = summary.slice((summaryPage - 1) * itemsPerPage, summaryPage * itemsPerPage);
 
   const presentCount = records.filter(r => r.status === 'Login').length;
   const absentCount = records.filter(r => r.status === 'Absent').length;
@@ -331,7 +347,7 @@ const Attendance: React.FC = () => {
                           <TableSkeleton rows={5} />
                         </td>
                       </tr>
-                    ) : filteredRecords.map(record => {
+                    ) : paginatedDaily.map(record => {
                       const isMarking = markingId === record.employee_id;
                       const cfg = record.status ? statusConfig[record.status as AttendanceStatus] : null;
                       const checkInVal = record.check_in ? record.check_in.substring(0, 5) : '';
@@ -443,6 +459,15 @@ const Attendance: React.FC = () => {
                 </table>
               </div>
             )}
+            {totalDailyPages > 0 && (
+              <div className="mt-auto border-t border-[#16132D]/[0.08] p-4 bg-white mb-4">
+                <Pagination
+                  currentPage={dailyPage}
+                  totalPages={totalDailyPages}
+                  onPageChange={setDailyPage}
+                />
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -509,7 +534,7 @@ const Attendance: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {summary.map((s, i) => {
+                  {paginatedSummary.map((s, i) => {
                     const pct = s.total_marked > 0 ? Math.round((Number(s.present_days) / Number(s.total_marked)) * 100) : 0;
                     const isLast = i === summary.length - 1;
                     
@@ -569,6 +594,15 @@ const Attendance: React.FC = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+          {totalSummaryPages > 0 && (
+            <div className="mt-auto border-t border-[#16132D]/[0.08] p-4 bg-white mb-4">
+              <Pagination
+                currentPage={summaryPage}
+                totalPages={totalSummaryPages}
+                onPageChange={setSummaryPage}
+              />
             </div>
           )}
         </div>

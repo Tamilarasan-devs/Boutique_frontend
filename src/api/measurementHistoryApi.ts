@@ -2,8 +2,8 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const measurementHistoryApi = {
-  getHistory: async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/measurement-history`);
+  getHistory: async (page?: number, limit?: number) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/measurement-history?page=${page || 1}&limit=${limit || 20}`);
     if (!response.ok) throw new Error('Failed to fetch history');
     return await response.json();
   },

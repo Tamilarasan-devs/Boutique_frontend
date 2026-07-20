@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { Plus, Search, FileText, X, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { inventoryApi } from '../../../api/inventoryApi';
 import { useConfirm } from '../../../context';
@@ -27,6 +28,8 @@ const Purchases: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -40,13 +43,16 @@ const Purchases: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await inventoryApi.getPurchases();
-      setPurchases(data.map((p: any) => ({ ...p, total_amount: parseFloat(p.total_amount) })));
+      const data = await inventoryApi.getPurchases(page, 20);
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+      }
+      setPurchases((data.data || data).map((p: any) => ({ ...p, total_amount: parseFloat(p.total_amount) })));
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [page]);
 
   const filtered = purchases.filter(p => {
     const match = p.po_number.toLowerCase().includes(searchTerm.toLowerCase()) || p.supplier.toLowerCase().includes(searchTerm.toLowerCase());
@@ -101,8 +107,8 @@ const Purchases: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
-      <div className="flex flex-col space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto">
+    <div className="flex flex-col h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+      <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full min-h-0">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
@@ -117,7 +123,7 @@ const Purchases: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 shrink-0">
           <div className="flex items-center bg-white border border-[#16132D]/[0.1] rounded-xl px-4 py-3 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition">
             <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
             <input type="text" placeholder="Search by PO number or supplier..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[#16132D] placeholder-[#16132D]/35 w-full" />
@@ -132,7 +138,7 @@ const Purchases: React.FC = () => {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-[#16132D]/75">
               <thead>
@@ -188,6 +194,16 @@ const Purchases: React.FC = () => {
                 </tbody>
             </table>
           </div>
+          
+          {totalPages > 0 && (
+            <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 shrink-0">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </div>
 
         {/* Modal */}

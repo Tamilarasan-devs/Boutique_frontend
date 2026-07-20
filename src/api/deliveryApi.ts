@@ -2,8 +2,8 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const deliveryApi = {
-  getDeliveries: async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/deliveries`);
+  getDeliveries: async (page?: number, limit?: number) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/deliveries?page=${page || 1}&limit=${limit || 20}`);
     if (!response.ok) throw new Error('Failed to fetch deliveries');
     return await response.json();
   },

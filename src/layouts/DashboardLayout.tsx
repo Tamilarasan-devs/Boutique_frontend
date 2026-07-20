@@ -1,27 +1,30 @@
 import React, { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import clsx from 'clsx';
 import Sidebar from '../components/layout/Sidebar';
+import BottomBar from '../components/layout/BottomBar';
 import Header from '../components/layout/Header';
+import { useUIStore } from '../store';
 
 const DashboardLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { navMode } = useUIStore();
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900">
-      {/* Sidebar */}
-      <Sidebar
-        collapsed={!sidebarOpen}
-        onCollapseToggle={(collapsed) => setSidebarOpen(!collapsed)}
-        mobileOpen={mobileSidebarOpen}
-        onMobileClose={() => setMobileSidebarOpen(false)}
+      <Sidebar 
+        mobileOpen={mobileSidebarOpen} 
+        onMobileClose={() => setMobileSidebarOpen(false)} 
       />
-
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
+      
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative w-full">
         <Header sidebarOpen={mobileSidebarOpen} setSidebarOpen={setMobileSidebarOpen} />
 
         {/* Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+        <main className={clsx(
+          "flex-1 overflow-x-hidden overflow-y-auto pb-6",
+          navMode === 'bottom' && "md:pb-24"
+        )}>
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center min-h-[60vh]">
@@ -36,6 +39,7 @@ const DashboardLayout: React.FC = () => {
           </Suspense>
         </main>
       </div>
+      <BottomBar />
     </div>
   );
 };

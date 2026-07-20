@@ -1,4 +1,4 @@
-import { fetchWithAuth } from './client';
+import { fetchWithAuth, PaginatedResponse } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export interface Employee {
@@ -33,7 +33,7 @@ export interface EmployeeFilters {
 }
 
 export const employeeApi = {
-  getEmployees: async (filters: EmployeeFilters = {}): Promise<Employee[] | { employees: Employee[]; meta: EmployeeMeta }> => {
+  getEmployees: async (filters: EmployeeFilters = {}, page?: number, limit?: number): Promise<PaginatedResponse<Employee[]>> => {
     const params = new URLSearchParams();
     if (filters.search) params.append('search', filters.search);
     if (filters.role) params.append('role', filters.role);
@@ -41,7 +41,7 @@ export const employeeApi = {
     if (filters.page) params.append('page', String(filters.page));
     if (filters.limit) params.append('limit', String(filters.limit));
 
-    const response = await fetchWithAuth(`${API_BASE_URL}/employees?${params.toString()}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/employees?${params.toString()}&page=${page || 1}&limit=${limit || 20}`);
     if (!response.ok) throw new Error('Failed to fetch employees');
     return await response.json();
   },

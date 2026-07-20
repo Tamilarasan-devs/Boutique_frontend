@@ -11,3 +11,14 @@ export const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit
   }
   return fetch(input, { ...init, headers });
 };
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+export interface PaginatedResponse<T> {
+  data: T;
+  pagination: PaginationMeta;
+}

@@ -4,9 +4,9 @@ import { API_BASE_URL } from '@/constants';
 export const FOLLOWUP_EVENTS_URL = `${API_BASE_URL}/followups/events`;
 
 export const followupApi = {
-  getFollowups: async () => {
+  getFollowups: async (page?: number, limit?: number) => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/followups`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/followups?page=${page || 1}&limit=${limit || 20}`);
       if (!response.ok) {
         throw new Error('Failed to fetch followups');
       }

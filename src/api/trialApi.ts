@@ -2,8 +2,8 @@ import { fetchWithAuth } from './client';
 import { API_BASE_URL } from '@/constants';
 
 export const trialApi = {
-  getTrials: async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/trials`);
+  getTrials: async (page?: number, limit?: number) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/trials?page=${page || 1}&limit=${limit || 20}`);
     if (!response.ok) throw new Error('Failed to fetch trials');
     return await response.json();
   },

@@ -1,4 +1,4 @@
-import { fetchWithAuth } from './client';
+import { fetchWithAuth, PaginatedResponse } from './client';
 import { API_BASE_URL as BASE } from '@/constants';
 const API_BASE_URL = `${BASE}/billing`;
 
@@ -17,11 +17,13 @@ export interface Invoice {
   order_id: number | null;
   quotation_id?: number | null;
   customer_name: string;
+  customer_phone?: string;
   invoice_date: string;
   due_date: string;
   total_amount: number;
   status: 'Paid' | 'Pending' | 'Overdue' | 'Draft';
   items: string | InvoiceItemDetail[];
+  invoice_type?: string;
   created_at: string;
 }
 
@@ -38,13 +40,17 @@ export interface Payment {
 }
 
 export const billingApi = {
-  getInvoices: async (): Promise<Invoice[]> => {
+  fetchInvoicesData: async (page?: number, limit?: number, type?: string): Promise<{data: Invoice[], pagination: any} | Invoice[]> => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/invoices`);
+      let url = `${API_BASE_URL}/invoices?page=${page || 1}&limit=${limit || 20}`;
+      if (type) url += `&type=${type}`;
+      const response = await fetchWithAuth(url);
       if (!response.ok) {
         throw new Error('Failed to fetch invoices');
       }
-      return await response.json();
+      const result = await response.json();
+      // Handle both paginated response ({ data: [] }) and direct array response
+      return Array.isArray(result) ? result : (result.data || []);
     } catch (error) {
       console.error('Error fetching invoices:', error);
       throw error;
@@ -118,9 +124,9 @@ export const billingApi = {
     }
   },
 
-  getPayments: async (): Promise<Payment[]> => {
+  getPayments: async (page?: number, limit?: number): Promise<PaginatedResponse<Payment[]>> => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/payments`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/payments?page=${page || 1}&limit=${limit || 20}`);
       if (!response.ok) {
         throw new Error('Failed to fetch payments');
       }
