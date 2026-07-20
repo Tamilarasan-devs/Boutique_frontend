@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { emailLogApi, EmailLog, EmailStats } from '../../../api/emailApi';
+import { useAuth } from '../../../context/AuthContext';
 
 // ── EmailJS credentials ──────────────────────────────────────────────────────
 const EMAILJS_SERVICE_ID = 'service_spekqpp';
@@ -125,12 +126,14 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 const Email: React.FC = () => {
+  const { user } = useAuth();
+  const boutiqueName = user?.boutique_name || 'Creative Boutique';
   const [activeTab, setActiveTab] = useState<'compose' | 'history'>('compose');
   const [selectedTemplate, setSelectedTemplate] = useState<Template>(TEMPLATES[0]);
   const [toEmail, setToEmail] = useState('');
   const [toName, setToName] = useState('');
-  const [subject, setSubject] = useState(TEMPLATES[0].subject);
-  const [body, setBody] = useState(TEMPLATES[0].body);
+  const [subject, setSubject] = useState(TEMPLATES[0].subject.replace(/Creative Boutique/gi, boutiqueName));
+  const [body, setBody] = useState(TEMPLATES[0].body.replace(/Creative Boutique/gi, boutiqueName));
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
@@ -164,8 +167,8 @@ const Email: React.FC = () => {
 
   const handleTemplateSelect = (t: Template) => {
     setSelectedTemplate(t);
-    setSubject(t.subject);
-    setBody(t.body);
+    setSubject(t.subject.replace(/Creative Boutique/gi, boutiqueName));
+    setBody(t.body.replace(/Creative Boutique/gi, boutiqueName));
     setSendResult(null);
   };
 
@@ -189,7 +192,7 @@ const Email: React.FC = () => {
       message: body.trim(),
       subject: subject.trim(),
       to_email: toEmail.trim(),
-      from_name: 'Creative Boutique',
+      from_name: boutiqueName,
     };
 
     try {

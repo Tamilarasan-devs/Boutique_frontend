@@ -81,8 +81,8 @@ const Invoice: React.FC = () => {
       const { quotationApi } = await import('../../../api/quotationApi');
       const data = await quotationApi.getQuotations();
       const quotationsArray = Array.isArray(data) ? data : (data.quotations || data.data || []);
-      // Only keep 'Accepted' quotations for generating invoices
-      const acceptedQuotations = quotationsArray.filter((q: any) => q.status === 'Accepted');
+      // Allow 'Accepted', 'Sent', and 'Draft' quotations for generating invoices
+      const acceptedQuotations = quotationsArray.filter((q: any) => ['Accepted', 'Sent', 'Draft'].includes(q.status));
       setQuotations(acceptedQuotations);
     } catch (err) {
       console.error(err);
@@ -117,23 +117,7 @@ const Invoice: React.FC = () => {
     const processState = async () => {
       const state = location.state as any;
       if (state?.orderId || state?.customerName) {
-        // First check if an invoice for this order already exists to prevent duplicates
-        if (state.orderId) {
-          try {
-            const { billingApi } = await import('../../../api/billingApi');
-            const invData = await billingApi.fetchInvoicesData(1, 100);
-            const allInvs = Array.isArray(invData) ? invData : (invData.data || []);
-            const existingInvoice = allInvs.find(inv => String(inv.order_id) === String(state.orderId) || String(inv.order_id) === String(state.orderId).replace('ORD-', ''));
-            
-            if (existingInvoice) {
-              setSelectedInvoice(existingInvoice);
-              setIsDetailModalOpen(true);
-              navigate(location.pathname, { replace: true, state: {} });
-              return;
-            }
-          } catch(e) {}
-        }
-
+        // Always open new invoice form when navigating from Delivery/Orders
         setCustomerName(state.customerName || '');
         
         let currentQuotations = quotations;
@@ -144,7 +128,7 @@ const Invoice: React.FC = () => {
             const { quotationApi } = await import('../../../api/quotationApi');
             const data = await quotationApi.getQuotations();
             const quotationsArray = Array.isArray(data) ? data : (data.quotations || data.data || []);
-            currentQuotations = quotationsArray.filter((q: any) => q.status === 'Accepted');
+            currentQuotations = quotationsArray.filter((q: any) => ['Accepted', 'Sent', 'Draft'].includes(q.status));
             setQuotations(currentQuotations);
           } catch(e) {}
         }

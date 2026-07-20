@@ -253,8 +253,8 @@ const Payments: React.FC = () => {
               <p className="text-sm">No payment records found</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
+            <div className="overflow-x-auto flex-1">
+              <table className="w-full text-left text-sm text-slate-600 min-w-[800px] whitespace-nowrap">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold">
                     <th className="py-4 px-6">Receipt #</th>
