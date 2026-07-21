@@ -25,6 +25,7 @@ export interface Invoice {
   items: string | InvoiceItemDetail[];
   invoice_type?: string;
   created_at: string;
+  common_id?: string;
 }
 
 export interface Payment {

@@ -193,6 +193,8 @@ const Email: React.FC = () => {
       subject: subject.trim(),
       to_email: toEmail.trim(),
       from_name: boutiqueName,
+      from_email: user?.email,
+      reply_to: user?.email,
     };
 
     try {
@@ -489,7 +491,7 @@ const Email: React.FC = () => {
                 <table className="min-w-full divide-y divide-slate-100">
                   <thead className="bg-slate-50">
                     <tr>
-                      {['Recipient', 'Subject', 'Template', 'Status', 'Sent At', 'Actions'].map(h => (
+                      {['Sender', 'Recipient', 'Subject', 'Template', 'Status', 'Sent At', 'Actions'].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
                       ))}
                     </tr>
@@ -497,6 +499,7 @@ const Email: React.FC = () => {
                   <tbody className="divide-y divide-slate-50">
                     {filteredLogs.map(log => (
                       <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="px-4 py-3 text-sm text-slate-700 font-medium">{log.sender_email || 'System'}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">

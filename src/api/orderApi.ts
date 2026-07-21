@@ -73,6 +73,20 @@ export const orderApi = {
     }
   },
 
+  
+  trackOrder: async (commonId: string): Promise<any> => {
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}/orders/track/${commonId}`);
+      if (!response.ok) {
+        throw new Error('Order not found or tracking failed');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error tracking order:', error);
+      throw error;
+    }
+  },
+
   deleteOrder: async (id: string) => {
     try {
       const response = await fetchWithAuth(`${API_BASE_URL}/orders/${id}`, {

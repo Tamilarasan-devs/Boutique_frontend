@@ -48,6 +48,7 @@ const menuItems: SidebarItem[] = [
       { title: 'Orders', path: '/orders/list', icon: <ShoppingCart className="w-4 h-4" /> },
       { title: 'Production', path: '/orders/production', icon: <Factory className="w-4 h-4" /> },
       { title: 'Delivery', path: '/orders/delivery', icon: <Truck className="w-4 h-4" /> },
+      { title: 'Order Tracking', path: '/orders/track', icon: <PackageSearch className="w-4 h-4" /> },
     ]
   },
   {

@@ -25,7 +25,7 @@ interface AuthContextValue {
 export const MODULE_ROUTES: Record<string, string[]> = {
   'Dashboard': ['/'],
   'CRM': ['/crm'],
-  'Orders': ['/orders/quotations', '/orders/list', '/orders/trial', '/orders/delivery'],
+  'Orders': ['/orders/quotations', '/orders/list', '/orders/trial', '/orders/delivery', '/orders/track'],
   'Production': ['/orders/production'], // Specific sub-route of orders
   'Measurements': ['/measurements'],
   'Inventory': ['/inventory'],

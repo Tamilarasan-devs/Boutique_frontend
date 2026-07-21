@@ -31,6 +31,7 @@ const OrderDetails = lazy(() => import('../pages/orders/orders/OrderDetails'));
 const Production = lazy(() => import('../pages/orders/production/Production'));
 const Trial = lazy(() => import('../pages/orders/trial/Trial'));
 const Delivery = lazy(() => import('../pages/orders/delivery/Delivery'));
+const OrderTracking = lazy(() => import('../pages/orders/tracking/OrderTracking'));
 
 // Measurements
 const Measurements = lazy(() => import('../pages/measurements/Measurements'));
@@ -118,6 +119,7 @@ export const router = createBrowserRouter([
       { path: 'orders/production', element: <Production /> },
       { path: 'orders/trial', element: <Trial /> },
       { path: 'orders/delivery', element: <Delivery /> },
+      { path: 'orders/track', element: <OrderTracking /> },
 
       // Measurements
       { path: 'measurements', element: <Measurements /> },

@@ -12,6 +12,7 @@ import { TableSkeleton, CardSkeleton } from '../../../components/ui/Skeleton';
 interface Order {
   id: string; // The database ID used for API calls
   displayId: string; // The formatted sequence ID for UI
+  commonId?: string;
   customerName: string;
   category: string;
   stitchingCost: number;
@@ -84,6 +85,7 @@ const Orders: React.FC = () => {
         const formatted = ordersData.map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `ORD-${item.id}`,
+          commonId: item.common_id,
           customerName: item.customer_name,
           category: item.category,
           stitchingCost: parseFloat(item.stitching_cost) || 0,
@@ -175,6 +177,7 @@ const Orders: React.FC = () => {
         const updatedOrder: Order = {
           id: editingOrderId,
           displayId: response.order.display_id || `ORD-${response.order.id}`,
+          commonId: response.order.common_id,
           customerName: response.order.customer_name,
           category: response.order.category,
           stitchingCost: parseFloat(response.order.stitching_cost) || 0,
@@ -208,6 +211,7 @@ const Orders: React.FC = () => {
         const newOrder: Order = {
           id: response.order.id.toString(),
           displayId: response.order.display_id || `ORD-${response.order.id}`,
+          commonId: response.order.common_id,
           customerName: response.order.customer_name,
           category: response.order.category,
           stitchingCost: parseFloat(response.order.stitching_cost) || 0,
@@ -388,6 +392,7 @@ const Orders: React.FC = () => {
                                 <div>
                                   <div className="font-serif font-bold text-[#16132D] text-base">{order.category}</div>
                                   <div className="text-xs text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.displayId})</div>
+                                  {order.commonId && <div className="text-[10px] font-bold text-[#7209B7] tracking-widest mt-0.5 uppercase">{order.commonId}</div>}
                                 </div>
                               </div>
                             </td>
@@ -483,6 +488,7 @@ const Orders: React.FC = () => {
                       <div className="min-w-0 flex-1">
                         <div className="font-serif font-bold text-[#16132D] text-lg truncate" title={order.category}>{order.category}</div>
                         <div className="text-sm text-[#16132D]/55 font-medium mt-0.5 truncate" title={`For ${order.customerName} (${order.id})`}>For {order.customerName} ({order.id})</div>
+                        {order.commonId && <div className="text-[10px] font-bold text-[#7209B7] tracking-widest mt-0.5 uppercase truncate">{order.commonId}</div>}
                       </div>
                     </div>
                   </div>

@@ -13,6 +13,7 @@ import Pagination from '../../../components/ui/Pagination';
 interface Quotation {
   id: string; // database ID
   displayId: string; // UI display ID
+  commonId?: string;
   customerName: string;
   customerPhone?: string;
   customerEmail?: string;
@@ -73,6 +74,7 @@ const Quotations: React.FC = () => {
   
   const [followupId, setFollowupId] = useState<string | null>(null);
   const [leadId, setLeadId] = useState<string | null>(null);
+  const [commonId, setCommonId] = useState<string | null>(null);
 
   // If navigated from a converted lead, auto-open the modal with pre-filled data
   useEffect(() => {
@@ -84,6 +86,7 @@ const Quotations: React.FC = () => {
       setItems(state.items || '');
       setFollowupId(state.followupId || null);
       setLeadId(state.leadId || null);
+      setCommonId(state.commonId || null);
       const numericValue = parseFloat(String(state.totalAmount).replace(/[^0-9.]/g, ''));
       setTotalAmount(isNaN(numericValue) ? '' : numericValue);
       setIsModalOpen(true);
@@ -105,6 +108,7 @@ const Quotations: React.FC = () => {
         const formatted = (data.data || data).map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `QOT-${item.id}`,
+          commonId: item.common_id,
           customerName: item.customer_name,
           customerPhone: item.customer_phone,
           customerEmail: item.customer_email,
@@ -189,17 +193,18 @@ const Quotations: React.FC = () => {
         valid_until: validUntil, 
         terms,
         image_url: uploadedImageUrl || undefined,
-        lead_id: leadId || undefined
+        lead_id: leadId || undefined,
+        common_id: commonId || undefined
       });
       const q = response.quotation;
       const newQuotation: Quotation = {
-        id: q.id.toString(), displayId: q.display_id || `QOT-${q.id}`, customerName: q.customer_name, customerPhone: q.customer_phone, customerEmail: q.customer_email, items: q.items,
+        id: q.id.toString(), displayId: q.display_id || `QOT-${q.id}`, commonId: q.common_id, customerName: q.customer_name, customerPhone: q.customer_phone, customerEmail: q.customer_email, items: q.items,
         totalAmount: parseFloat(q.total_amount) || 0, discount: parseFloat(q.discount) || 0,
         date: new Date(q.date).toISOString().split('T')[0], validUntil: new Date(q.valid_until).toISOString().split('T')[0],
         terms: q.terms || '', status: q.status, imageUrl: q.image_url
       };
       setQuotations([newQuotation, ...quotations]);
-      setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setValidUntil(''); setTerms(''); setImageFile(null); setImagePreview(null);
+      setCustomerName(''); setCustomerPhone(''); setCustomerEmail(''); setItems(''); setTotalAmount(''); setValidUntil(''); setTerms(''); setImageFile(null); setImagePreview(null); setCommonId(null);
       setIsModalOpen(false);
 
       if (followupId) {
@@ -349,7 +354,10 @@ const Quotations: React.FC = () => {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-[#16132D]/35" />
-                        <span className="font-serif font-bold text-[#16132D]">{q.displayId}</span>
+                        <div className="flex flex-col">
+                          <span className="font-serif font-bold text-[#16132D]">{q.displayId}</span>
+                          {q.commonId && <span className="text-[10px] text-[#7209B7] tracking-widest font-bold uppercase mt-0.5">{q.commonId}</span>}
+                        </div>
                       </div>
                     </td>
                     <td className="py-4 px-6">
@@ -432,7 +440,10 @@ const Quotations: React.FC = () => {
                     <div className="w-8 h-8 rounded-full bg-[#16132D]/[0.03] flex items-center justify-center">
                       <FileText className="w-4 h-4 text-[#16132D]/60" />
                     </div>
-                    <span className="font-serif font-bold text-[#16132D] text-lg">{q.displayId}</span>
+                    <div className="flex flex-col">
+                      <span className="font-serif font-bold text-[#16132D] text-lg leading-tight">{q.displayId}</span>
+                      {q.commonId && <span className="text-[10px] text-[#7209B7] tracking-widest mt-0.5 font-bold uppercase">{q.commonId}</span>}
+                    </div>
                   </div>
                   <select
                     value={q.status}

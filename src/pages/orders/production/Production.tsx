@@ -10,6 +10,7 @@ import { CardSkeleton } from '../../../components/ui/Skeleton';
 interface ProductionItem {
   id: string; // Database ID
   displayId: string; // UI display ID
+  commonId?: string;
   orderId: string;
   customerName: string;
   garment: string;
@@ -20,6 +21,7 @@ interface ProductionItem {
   expectedEndDate: string;
   notes: string;
 }
+
 
 const stageConfig: Record<string, { icon: any; color: string; bgColor: string }> = {
   'Cutting': { icon: Scissors, color: 'text-[#8338EC]', bgColor: 'bg-[#8338EC]/10' },
@@ -63,6 +65,7 @@ const Production: React.FC = () => {
         const formatted = (data.data || data).map((item: any) => ({
           id: item.id.toString(),
           displayId: item.display_id || `PRD-${item.id}`,
+          commonId: item.common_id,
           orderId: item.order_id || '',
           customerName: item.customer_name,
           garment: item.garment,
@@ -162,7 +165,7 @@ const Production: React.FC = () => {
       });
       const p = response.production;
       const newItem: ProductionItem = {
-        id: p.id.toString(), displayId: p.display_id || `PRD-${p.id}`, orderId: p.order_id || '', customerName: p.customer_name,
+        id: p.id.toString(), displayId: p.display_id || `PRD-${p.id}`, commonId: p.common_id, orderId: p.order_id || '', customerName: p.customer_name,
         garment: p.garment, tailor: p.tailor || '', stage: p.stage, priority: p.priority,
         startDate: p.start_date ? new Date(p.start_date).toISOString().split('T')[0] : '',
         expectedEndDate: p.expected_end_date ? new Date(p.expected_end_date).toISOString().split('T')[0] : '',
@@ -182,7 +185,7 @@ const Production: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
       <div className="flex flex-col h-full space-y-5 p-6 md:p-8 max-w-[1600px] mx-auto">
-        
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
           <div>
@@ -205,10 +208,10 @@ const Production: React.FC = () => {
             const config = stageConfig[stage];
             const StageIcon = config.icon;
             const stageItems = items.filter(item => item.stage === stage);
-            
+
             return (
-              <div 
-                key={stage} 
+              <div
+                key={stage}
                 className={`${config.bgColor} p-4 rounded-2xl flex flex-col min-h-[400px] border-2 border-transparent hover:border-[#16132D]/10 transition-all`}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, stage)}
@@ -225,14 +228,21 @@ const Production: React.FC = () => {
 
                 <div className="space-y-3 flex-1 overflow-y-auto">
                   {stageItems.map((item) => (
-                    <div 
-                      key={item.id} 
+                    <div
+                      key={item.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, item.id)}
                       className="bg-white p-4 rounded-xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-[0_4px_12px_rgba(28,36,48,0.08)] cursor-grab active:cursor-grabbing transition-all duration-200 space-y-3"
                     >
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider">{item.displayId}</span>
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-[#16132D]/45 tracking-wider">{item.displayId}</span>
+                          {item.commonId && (
+                            <span className="text-[9px] font-bold text-[#7209B7] tracking-widest uppercase mt-0.5">
+                              {item.commonId}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-1.5">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${priorityStyles[item.priority] || priorityStyles['Medium']}`}>
                             {item.priority}
@@ -262,7 +272,7 @@ const Production: React.FC = () => {
                       )}
 
                       {stage !== 'Ready' && (
-                        <button 
+                        <button
                           onClick={() => promoteStage(item.id, item.stage)}
                           className="w-full py-2 bg-[#16132D]/[0.04] hover:bg-[#7209B7]/10 text-[#7209B7] rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition"
                         >

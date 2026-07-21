@@ -235,6 +235,7 @@ const Leads: React.FC = () => {
       state: {
         fromLead: true,
         leadId: lead.id,
+        commonId: lead.common_id,
         customerName: lead.name,
         customerPhone: lead.phone || '',
         customerEmail: '',
@@ -249,6 +250,7 @@ const Leads: React.FC = () => {
       state: {
         fromLead: true,
         leadId: lead.id,
+        commonId: lead.common_id,
         customerName: lead.name,
         customerPhone: lead.phone || '',
         customerEmail: '',
@@ -407,7 +409,12 @@ const Leads: React.FC = () => {
                         className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.05] shadow-[0_2px_10px_-4px_rgba(22,19,45,0.05)] hover:shadow-[0_8px_24px_-8px_rgba(22,19,45,0.08)] hover:border-[#16132D]/[0.1] hover:-translate-y-0.5 transition-all duration-300 flex flex-col gap-4 group cursor-grab active:cursor-grabbing"
                       >
                         <div className="flex justify-between items-start">
-                          <span className="text-[10px] font-bold tracking-widest text-[#16132D]/35 uppercase">{lead.lead_id}</span>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-bold tracking-widest text-[#16132D]/35 uppercase">{lead.lead_id}</span>
+                            {lead.common_id && (
+                              <span className="text-[9px] font-bold tracking-widest text-[#7209B7] uppercase mt-0.5" title="Common Order Tracking ID">{lead.common_id}</span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2">
                             <span className={`text-[10px] px-2.5 py-1 rounded-full border font-bold tracking-wide ${
                               lead.source === 'WhatsApp' ? 'text-[#10B981] border-[#10B981]/20 bg-[#10B981]/5' :
@@ -519,7 +526,10 @@ const Leads: React.FC = () => {
                 <tbody className="divide-y divide-[#16132D]/[0.03]">
                   {filteredLeads.map(lead => (
                     <tr key={lead.id} className="hover:bg-[#F8F8FB]/50 transition-colors group">
-                      <td className="px-6 py-4 text-[12px] font-bold text-[#16132D]/40">{lead.lead_id}</td>
+                      <td className="px-6 py-4 text-[12px] font-bold text-[#16132D]/40">
+                        {lead.lead_id}
+                        {lead.common_id && <div className="text-[10px] text-[#7209B7] mt-0.5">{lead.common_id}</div>}
+                      </td>
                       <td className="px-6 py-4 font-bold text-[#16132D] text-[14px]">{lead.name}</td>
                       <td className="px-6 py-4 text-[#16132D]/70 font-medium">{lead.phone}</td>
                       <td className="px-6 py-4">

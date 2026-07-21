@@ -14,6 +14,21 @@ interface MeasurementField {
   value: string;
 }
 
+const DEFAULT_FIELDS = [
+  'F. Length',
+  'Shoulder',
+  'Body',
+  'Breast',
+  'Hip',
+  'Sint',
+  'H. Height',
+  'AM',
+  'FN.',
+  'B.N.',
+  'L. Loose'
+];
+
+
 const Measurements: React.FC = () => {
   const { toast } = useToast();
   const { confirm } = useConfirm();
@@ -38,7 +53,14 @@ const Measurements: React.FC = () => {
   // Form State
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [garmentType, setGarmentType] = useState<string>('');
-  const [fields, setFields] = useState<MeasurementField[]>([{ name: '', value: '' }]);
+  const [standardFields, setStandardFields] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    DEFAULT_FIELDS.forEach(f => {
+      initial[f] = '';
+    });
+    return initial;
+  });
+  const [customFields, setCustomFields] = useState<MeasurementField[]>([]);
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -78,17 +100,27 @@ const Measurements: React.FC = () => {
     if (!editingId && selectedCustomerId && selectedCustomerId !== lastAutoFilledCustomer && history.length > 0) {
       const lastMeasurement = history.find(h => String(h.customer_id) === selectedCustomerId);
       if (lastMeasurement && lastMeasurement.measurements) {
-        const fieldsArr = Object.entries(lastMeasurement.measurements).map(([name, value]) => ({
-          name,
-          value: String(value)
-        }));
-        if (fieldsArr.length > 0) {
-          setFields(fieldsArr);
-        } else {
-          setFields([{ name: '', value: '' }]);
-        }
+        const recordMeasurements = lastMeasurement.measurements || {};
+        const std: Record<string, string> = {};
+        DEFAULT_FIELDS.forEach(f => {
+          std[f] = recordMeasurements[f] !== undefined ? String(recordMeasurements[f]) : '';
+        });
+        setStandardFields(std);
+
+        const cust: MeasurementField[] = [];
+        Object.entries(recordMeasurements).forEach(([name, value]) => {
+          if (!DEFAULT_FIELDS.includes(name)) {
+            cust.push({ name, value: String(value) });
+          }
+        });
+        setCustomFields(cust);
       } else {
-        setFields([{ name: '', value: '' }]);
+        const std: Record<string, string> = {};
+        DEFAULT_FIELDS.forEach(f => {
+          std[f] = '';
+        });
+        setStandardFields(std);
+        setCustomFields([]);
       }
       setLastAutoFilledCustomer(selectedCustomerId);
     }
@@ -120,7 +152,12 @@ const Measurements: React.FC = () => {
     setEditingId(null);
     setSelectedCustomerId('');
     setGarmentType('');
-    setFields([{ name: '', value: '' }]);
+    const std: Record<string, string> = {};
+    DEFAULT_FIELDS.forEach(f => {
+      std[f] = '';
+    });
+    setStandardFields(std);
+    setCustomFields([]);
     setNotes('');
     setLastAutoFilledCustomer('');
     setIsModalOpen(true);
@@ -150,12 +187,20 @@ const Measurements: React.FC = () => {
     setGarmentType(extractedGarment);
     setNotes(extractedNotes);
 
-    // Convert measurements object to array
-    const fieldsArr = Object.entries(record.measurements || {}).map(([name, value]) => ({
-      name,
-      value: String(value)
-    }));
-    setFields(fieldsArr.length > 0 ? fieldsArr : [{ name: '', value: '' }]);
+    const recordMeasurements = record.measurements || {};
+    const std: Record<string, string> = {};
+    DEFAULT_FIELDS.forEach(f => {
+      std[f] = recordMeasurements[f] !== undefined ? String(recordMeasurements[f]) : '';
+    });
+    setStandardFields(std);
+
+    const cust: MeasurementField[] = [];
+    Object.entries(recordMeasurements).forEach(([name, value]) => {
+      if (!DEFAULT_FIELDS.includes(name)) {
+        cust.push({ name, value: String(value) });
+      }
+    });
+    setCustomFields(cust);
 
     setIsModalOpen(true);
   };
@@ -176,18 +221,25 @@ const Measurements: React.FC = () => {
     }
   };
 
-  const handleAddField = () => {
-    setFields([...fields, { name: '', value: '' }]);
+  const handleStandardFieldChange = (name: string, value: string) => {
+    setStandardFields(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleRemoveField = (index: number) => {
-    setFields(fields.filter((_, i) => i !== index));
+  const handleAddCustomField = () => {
+    setCustomFields([...customFields, { name: '', value: '' }]);
   };
 
-  const handleFieldChange = (index: number, key: 'name' | 'value', val: string) => {
-    const updated = [...fields];
+  const handleRemoveCustomField = (index: number) => {
+    setCustomFields(customFields.filter((_, i) => i !== index));
+  };
+
+  const handleCustomFieldChange = (index: number, key: 'name' | 'value', val: string) => {
+    const updated = [...customFields];
     updated[index][key] = val;
-    setFields(updated);
+    setCustomFields(updated);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -197,16 +249,26 @@ const Measurements: React.FC = () => {
       return;
     }
 
-    const validFields = fields.filter(f => f.name.trim() !== '');
-    if (validFields.length === 0) {
+    const measurementsObj: Record<string, string> = {};
+    
+    // Add standard fields with values
+    Object.entries(standardFields).forEach(([name, value]) => {
+      if (value.trim() !== '') {
+        measurementsObj[name.trim()] = value.trim();
+      }
+    });
+
+    // Add custom fields with name and value
+    customFields.forEach(f => {
+      if (f.name.trim() !== '' && f.value.trim() !== '') {
+        measurementsObj[f.name.trim()] = f.value.trim();
+      }
+    });
+
+    if (Object.keys(measurementsObj).length === 0) {
       toast('Please add at least one measurement dimension', 'error');
       return;
     }
-
-    const measurementsObj: Record<string, string> = {};
-    validFields.forEach(f => {
-      measurementsObj[f.name.trim()] = f.value.trim();
-    });
 
     try {
       const payload = {
@@ -506,54 +568,80 @@ const Measurements: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <div className="flex justify-between items-end mb-4">
-                  <label className="block text-base font-bold font-serif text-slate-900">
-                    Measurement Dimensions
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleAddField}
-                    className="text-sm font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" /> Add Dimension
-                  </button>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-base font-bold font-serif text-slate-900 mb-3">
+                    Standard Dimensions
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    {DEFAULT_FIELDS.map((field) => (
+                      <div key={field} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all flex flex-col justify-between">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1.5 block">{field}</span>
+                        <input
+                          type="text"
+                          value={standardFields[field] || ''}
+                          onChange={e => handleStandardFieldChange(field, e.target.value)}
+                          placeholder="—"
+                          className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md focus:outline-none focus:bg-white text-sm font-bold text-slate-800 text-center transition-all"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="space-y-4">
-                  {fields.map((field, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all group">
-                      <div className="w-1/2">
-                        <input
-                          type="text"
-                          value={field.name}
-                          onChange={e => handleFieldChange(idx, 'name', e.target.value)}
-                          placeholder="Dimension Name (e.g. Chest)"
-                          className="w-full px-3 py-2 bg-transparent border-none focus:outline-none focus:ring-0 text-base font-bold text-slate-800 placeholder-slate-400"
-                          required
-                        />
-                      </div>
-                      <div className="w-px h-8 bg-slate-300"></div>
-                      <div className="w-1/2">
-                        <input
-                          type="text"
-                          value={field.value}
-                          onChange={e => handleFieldChange(idx, 'value', e.target.value)}
-                          placeholder="Value (e.g. 42)"
-                          className="w-full px-3 py-2 bg-transparent border-none focus:outline-none focus:ring-0 text-base font-semibold text-slate-800 placeholder-slate-400"
-                        />
-                      </div>
-                      {fields.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveField(idx)}
-                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors mr-1"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      )}
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-base font-bold font-serif text-slate-900">
+                      Additional Dimensions
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={handleAddCustomField}
+                      className="text-xs font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-2.5 py-1.5 rounded-md hover:bg-blue-100 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Custom Field
+                    </button>
+                  </div>
+
+                  {customFields.length === 0 ? (
+                    <p className="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200 text-center">
+                      No custom dimensions added yet. Click "Add Custom Field" to add extra details like Sleeve, Collar, etc.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {customFields.map((field, idx) => (
+                        <div key={idx} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all group">
+                          <div className="w-1/2">
+                            <input
+                              type="text"
+                              value={field.name}
+                              onChange={e => handleCustomFieldChange(idx, 'name', e.target.value)}
+                              placeholder="Dimension Name (e.g. Cuff)"
+                              className="w-full px-3 py-2 bg-transparent border-none focus:outline-none focus:ring-0 text-base font-bold text-slate-800 placeholder-slate-400"
+                              required
+                            />
+                          </div>
+                          <div className="w-px h-8 bg-slate-300"></div>
+                          <div className="w-1/2">
+                            <input
+                              type="text"
+                              value={field.value}
+                              onChange={e => handleCustomFieldChange(idx, 'value', e.target.value)}
+                              placeholder="Value (e.g. 9)"
+                              className="w-full px-3 py-2 bg-transparent border-none focus:outline-none focus:ring-0 text-base font-semibold text-slate-800 placeholder-slate-400"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomField(idx)}
+                            className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors mr-1"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 

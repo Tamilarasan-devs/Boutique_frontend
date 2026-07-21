@@ -10,6 +10,7 @@ export interface Lead {
   requirement: string;
   status: 'New' | 'Contacted' | 'Qualified' | 'Won' | 'Lost';
   value: string;
+  common_id?: string;
 }
 
 export const leadApi = {

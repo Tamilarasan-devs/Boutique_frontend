@@ -10,6 +10,7 @@ export interface EmailLog {
   template_name?: string;
   status: 'sent' | 'failed';
   error_message?: string;
+  sender_email?: string;
   sent_at: string;
 }
 
