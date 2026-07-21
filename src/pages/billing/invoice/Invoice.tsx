@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { billingApi, BILLING_EVENTS_URL, Invoice as InvoiceType, InvoiceItemDetail } from '../../../api/billingApi';
 import { customerApi } from '../../../api/customerApi';
 import { useToast, useConfirm } from '../../../context';
+import { useSettings } from '../../../context/SettingsContext';
 
 const statusStyles: Record<InvoiceType['status'], string> = {
   'Paid': 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -18,6 +19,7 @@ const Invoice: React.FC = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { confirm } = useConfirm();
+  const { companySettings } = useSettings();
   const [invoices, setInvoices] = useState<InvoiceType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [customerFilter, setCustomerFilter] = useState('All');
@@ -844,8 +846,8 @@ const Invoice: React.FC = () => {
 
       {/* DETAIL & PRINT MODAL */}
       {isDetailModalOpen && selectedInvoice && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:p-0 print:bg-white print:static print:inset-auto">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-slate-100 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:max-h-none print:w-full print:h-auto">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div id="printable-invoice" className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-slate-100 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center print:hidden">
               <h2 className="text-xl font-bold text-slate-900">Invoice Details</h2>
               <div className="flex items-center gap-2">
@@ -871,9 +873,20 @@ const Invoice: React.FC = () => {
             {/* Printable Area */}
             <div className="flex-1 overflow-y-auto p-8 space-y-6 print:p-0 print:overflow-visible">
               <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-2xl font-black text-blue-600 tracking-tight">BOUTIQUE CREATIVE</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">High Fashion Tailoring & Couture</p>
+                <div className="flex gap-4 items-center">
+                  {(companySettings?.logo_url || companySettings?.logoUrl) && (
+                    <img src={companySettings?.logo_url || companySettings?.logoUrl} alt="Logo" className="w-14 h-14 object-cover rounded-lg" />
+                  )}
+                  <div>
+                    <h3 className="text-2xl font-black text-blue-600 tracking-tight">{(companySettings?.name || 'BOUTIQUE CREATIVE').toUpperCase()}</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">{companySettings?.tagline || 'High Fashion Tailoring & Couture'}</p>
+                    {(companySettings?.phone || companySettings?.email) && (
+                      <p className="text-xs text-slate-500 mt-1">{companySettings?.phone} {(companySettings?.phone && companySettings?.email) && ' | '} {companySettings?.email}</p>
+                    )}
+                    {companySettings?.address && (
+                      <p className="text-xs text-slate-500 mt-0.5 max-w-xs truncate">{companySettings?.address}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="text-right">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold border inline-block mb-2 ${statusStyles[selectedInvoice.status]}`}>
@@ -943,7 +956,7 @@ const Invoice: React.FC = () => {
 
               <div className="pt-6 border-t border-slate-100 text-center text-slate-400 text-xs">
                 <p>Thank you for your business!</p>
-                <p className="mt-0.5">For queries, please contact Boutique Creative Support.</p>
+                <p className="mt-0.5">For queries, please contact {companySettings?.name || 'Boutique Creative'} Support.</p>
               </div>
             </div>
 

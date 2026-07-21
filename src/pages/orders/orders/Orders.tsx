@@ -29,10 +29,10 @@ interface Order {
 }
 
 const statusStyles: Record<string, string> = {
-  'Received': 'bg-[#16132D]/[0.05] text-[#16132D]/70',
+  'Received': 'bg-[var(--primary-hex)]/[0.05] text-[var(--primary-hex)]/70',
   'Cutting': 'bg-[#7A5AA8]/10 text-[#5d4485]',
-  'Stitching': 'bg-[#8338EC]/10 text-[#6200EA]',
-  'Trial Scheduled': 'bg-[#7209B7]/10 text-[#a3531f]',
+  'Stitching': 'bg-[var(--primary-hex)]/10 text-[#6200EA]',
+  'Trial Scheduled': 'bg-[var(--primary-hex)]/10 text-[#a3531f]',
   'Completed': 'bg-[#10B981]/10 text-[#234638]',
 };
 
@@ -294,25 +294,25 @@ const Orders: React.FC = () => {
 
 
   return (
-    <div className="flex h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+    <div className="flex h-full bg-[#F4F3F8] text-[var(--primary-hex)] relative overflow-hidden">
       <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08] shrink-0">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[var(--primary-hex)]/[0.08] shrink-0">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1.5">
               Production
             </p>
-            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[#16132D]">
+            <h1 className="text-3xl md:text-[2rem] font-serif font-semibold tracking-tight text-[var(--primary-hex)]">
               Orders
             </h1>
-            <p className="text-sm text-[#16132D]/55 mt-1">
+            <p className="text-sm text-[var(--primary-hex)]/55 mt-1">
               Manage bespoke garment orders, financial advances, and delivery deadlines.
             </p>
           </div>
           <button 
               onClick={handleOpenCreateModal}
-              className="bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto"
+              className="bg-[var(--primary-hex)] hover:bg-[#2a3545] text-[#F4F3F8] px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition shadow-md shadow-[var(--primary-hex)]/10 self-start sm:self-auto"
             >
             <Plus className="w-4 h-4" /> New Order
           </button>
@@ -320,29 +320,29 @@ const Orders: React.FC = () => {
 
         {/* Filter Area & View Toggle */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="flex items-center bg-white border border-[#16132D]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 focus-within:border-[#7209B7]/40 transition">
-            <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
+          <div className="flex items-center bg-white border border-[var(--primary-hex)]/[0.08] rounded-xl px-4 py-2.5 w-full sm:w-80 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary-hex)]/25 focus-within:border-[var(--primary-hex)]/40 transition">
+            <Search className="w-4 h-4 text-[var(--primary-hex)]/35 mr-2 flex-shrink-0" />
             <input 
               type="text" 
               placeholder="Search by customer or garment..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-transparent border-none outline-none text-sm text-[#16132D] placeholder-[#16132D]/35 w-full"
+              className="bg-transparent border-none outline-none text-sm text-[var(--primary-hex)] placeholder-[var(--primary-hex)]/35 w-full"
             />
           </div>
 
           {/* View Toggle */}
-          <div className="flex bg-[#16132D]/[0.05] p-1 rounded-xl self-end sm:self-auto">
+          <div className="flex bg-[var(--primary-hex)]/[0.05] p-1 rounded-xl self-end sm:self-auto">
             <button 
               onClick={() => setViewMode('table')}
-              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'table' ? 'bg-white text-[#16132D] shadow-sm' : 'text-[#16132D]/50 hover:text-[#16132D]'}`}
+              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'table' ? 'bg-white text-[var(--primary-hex)] shadow-sm' : 'text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)]'}`}
               title="Table View"
             >
               <List className="w-4 h-4" />
             </button>
             <button 
               onClick={() => setViewMode('card')}
-              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'card' ? 'bg-white text-[#16132D] shadow-sm' : 'text-[#16132D]/50 hover:text-[#16132D]'}`}
+              className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${viewMode === 'card' ? 'bg-white text-[var(--primary-hex)] shadow-sm' : 'text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)]'}`}
               title="Card View"
             >
               <LayoutGrid className="w-4 h-4" />
@@ -356,11 +356,11 @@ const Orders: React.FC = () => {
           {/* Orders List Area */}
           <div className="flex-1 w-full h-full flex flex-col">
             {viewMode === 'table' ? (
-              <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col flex-1">
+              <div className="bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col flex-1">
                 <div className="overflow-x-auto flex-1">
-                  <table className="w-full text-left text-sm text-[#16132D]/75">
+                  <table className="w-full text-left text-sm text-[var(--primary-hex)]/75">
                     <thead>
-                      <tr className="border-b border-[#16132D]/[0.06] bg-[#16132D]/[0.02] text-[#16132D]/55 font-semibold text-xs tracking-wider uppercase">
+                      <tr className="border-b border-[var(--primary-hex)]/[0.06] bg-[var(--primary-hex)]/[0.02] text-[var(--primary-hex)]/55 font-semibold text-xs tracking-wider uppercase">
                         <th className="py-4 px-6">Order Details</th>
                         <th className="py-4 px-6">Financials</th>
                         <th className="py-4 px-6">Delivery Date</th>
@@ -368,7 +368,7 @@ const Orders: React.FC = () => {
                         <th className="py-4 px-6 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#16132D]/[0.04]">
+                    <tbody className="divide-y divide-[var(--primary-hex)]/[0.04]">
                       {isLoading ? (
                         <tr>
                           <td colSpan={5} className="p-0">
@@ -377,35 +377,35 @@ const Orders: React.FC = () => {
                         </tr>
                       ) : filteredOrders.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#16132D]/35">
+                          <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[var(--primary-hex)]/35">
                             No orders found.
                           </td>
                         </tr>
                       ) : (
                         filteredOrders.map((order) => (
-                          <tr key={order.id} className="hover:bg-[#16132D]/[0.02] transition">
+                          <tr key={order.id} className="hover:bg-[var(--primary-hex)]/[0.02] transition">
                             <td className="py-4 px-6">
                               <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-lg ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
+                                <div className={`p-2 rounded-lg ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[var(--primary-hex)]/5 text-[var(--primary-hex)]/55'}`}>
                                   <Scissors className="w-4 h-4" />
                                 </div>
                                 <div>
-                                  <div className="font-serif font-bold text-[#16132D] text-base">{order.category}</div>
-                                  <div className="text-xs text-[#16132D]/55 font-medium mt-0.5">For {order.customerName} ({order.displayId})</div>
-                                  {order.commonId && <div className="text-[10px] font-bold text-[#7209B7] tracking-widest mt-0.5 uppercase">{order.commonId}</div>}
+                                  <div className="font-serif font-bold text-[var(--primary-hex)] text-base">{order.category}</div>
+                                  <div className="text-xs text-[var(--primary-hex)]/55 font-medium mt-0.5">For {order.customerName} ({order.displayId})</div>
+                                  {order.commonId && <div className="text-[10px] font-bold text-[var(--primary-hex)] tracking-widest mt-0.5 uppercase">{order.commonId}</div>}
                                 </div>
                               </div>
                             </td>
                             <td className="py-4 px-6">
                               <div className="flex items-center gap-2">
-                                <div className="font-bold text-[#16132D]">₹{order.totalAmount.toLocaleString('en-IN')}</div>
+                                <div className="font-bold text-[var(--primary-hex)]">₹{order.totalAmount.toLocaleString('en-IN')}</div>
                                 {order.advancePaid >= order.totalAmount ? (
                                   <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#10B981]/15 text-[#10B981]">Paid</span>
                                 ) : (
                                   <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#F59E0B]/15 text-[#F59E0B]">Pending</span>
                                 )}
                               </div>
-                              <div className="text-[10px] font-semibold text-[#16132D]/50 uppercase tracking-wide mt-0.5">
+                              <div className="text-[10px] font-semibold text-[var(--primary-hex)]/50 uppercase tracking-wide mt-0.5">
                                 Adv: ₹{order.advancePaid.toLocaleString('en-IN')}
                                 {order.advancePaid < order.totalAmount && (
                                   <span className="text-[#F59E0B] ml-1 font-bold">
@@ -416,7 +416,7 @@ const Orders: React.FC = () => {
                             </td>
                             <td className="py-4 px-6 font-semibold">
                               <div className="flex flex-col">
-                                <span className="text-[#16132D]">{order.deliveryDate}</span>
+                                <span className="text-[var(--primary-hex)]">{order.deliveryDate}</span>
                                 {order.priority === 'Rush' && <span className="text-[10px] text-[#F43F5E] font-bold mt-0.5 tracking-wider uppercase">Rush Order</span>}
                               </div>
                             </td>
@@ -436,14 +436,14 @@ const Orders: React.FC = () => {
                                 onClick={() => {
                                   navigate('/orders/details', { state: { order } });
                                 }}
-                                className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                                className="p-1.5 rounded-lg text-[var(--primary-hex)]/45 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/10 transition"
                                 title="View Details"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button 
                                 onClick={() => handleDeleteOrder(order.id)}
-                                className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
+                                className="p-1.5 rounded-lg text-[var(--primary-hex)]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
                                 title="Delete Order"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -456,7 +456,7 @@ const Orders: React.FC = () => {
                   </table>
                 </div>
                 {totalPages > 0 && (
-                  <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 shrink-0">
+                  <div className="mt-auto border-t border-[var(--primary-hex)]/[0.06] bg-white p-2 shrink-0">
                     <Pagination
                       currentPage={page}
                       totalPages={totalPages}
@@ -472,47 +472,47 @@ const Orders: React.FC = () => {
                 </div>
               </div>
             ) : filteredOrders.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-sm font-semibold text-[#16132D]/35 bg-white rounded-2xl border border-[#16132D]/[0.06]">
+              <div className="col-span-full py-12 text-center text-sm font-semibold text-[var(--primary-hex)]/35 bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06]">
                 No orders found.
               </div>
             ) : (
               <div className="flex flex-col flex-1 h-full">
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 flex-1 content-start">
                   {filteredOrders.map((order) => (
-                <div key={order.id} className="bg-white p-5 rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-md transition flex flex-col relative h-full">
+                <div key={order.id} className="bg-white p-5 rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:shadow-md transition flex flex-col relative h-full">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[#16132D]/5 text-[#16132D]/55'}`}>
+                      <div className={`p-2.5 rounded-xl ${order.priority === 'Rush' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-[var(--primary-hex)]/5 text-[var(--primary-hex)]/55'}`}>
                         <Scissors className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="font-serif font-bold text-[#16132D] text-lg truncate" title={order.category}>{order.category}</div>
-                        <div className="text-sm text-[#16132D]/55 font-medium mt-0.5 truncate" title={`For ${order.customerName} (${order.id})`}>For {order.customerName} ({order.id})</div>
-                        {order.commonId && <div className="text-[10px] font-bold text-[#7209B7] tracking-widest mt-0.5 uppercase truncate">{order.commonId}</div>}
+                        <div className="font-serif font-bold text-[var(--primary-hex)] text-lg truncate" title={order.category}>{order.category}</div>
+                        <div className="text-sm text-[var(--primary-hex)]/55 font-medium mt-0.5 truncate" title={`For ${order.customerName} (${order.id})`}>For {order.customerName} ({order.id})</div>
+                        {order.commonId && <div className="text-[10px] font-bold text-[var(--primary-hex)] tracking-widest mt-0.5 uppercase truncate">{order.commonId}</div>}
                       </div>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2 mb-4">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-[#16132D]/60 font-semibold">Status:</span>
+                      <span className="text-[var(--primary-hex)]/60 font-semibold">Status:</span>
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusStyles[order.status] || statusStyles['Received']}`}>
                         {order.status}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-[#16132D]/60 font-semibold">Delivery:</span>
-                      <div className="flex items-center gap-1.5 text-[#16132D]/80 font-bold">
-                        <CalendarIcon className="w-3.5 h-3.5 text-[#16132D]/40" />
+                      <span className="text-[var(--primary-hex)]/60 font-semibold">Delivery:</span>
+                      <div className="flex items-center gap-1.5 text-[var(--primary-hex)]/80 font-bold">
+                        <CalendarIcon className="w-3.5 h-3.5 text-[var(--primary-hex)]/40" />
                         {order.deliveryDate}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-auto pt-4 border-t border-[#16132D]/[0.04] gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-auto pt-4 border-t border-[var(--primary-hex)]/[0.04] gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <div className="font-bold text-[#16132D] text-lg">₹{order.totalAmount.toLocaleString('en-IN')}</div>
+                        <div className="font-bold text-[var(--primary-hex)] text-lg">₹{order.totalAmount.toLocaleString('en-IN')}</div>
                         {order.advancePaid >= order.totalAmount ? (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#10B981]/15 text-[#10B981]">Paid</span>
                         ) : (
@@ -531,7 +531,7 @@ const Orders: React.FC = () => {
                     <div className="flex items-center gap-1">
                       <button 
                         onClick={() => handleOpenEditModal(order)}
-                        className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                        className="p-1.5 rounded-lg text-[var(--primary-hex)]/45 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/10 transition"
                         title="Edit Order"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -540,14 +540,14 @@ const Orders: React.FC = () => {
                         onClick={() => {
                           navigate('/orders/details', { state: { order } });
                         }}
-                        className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#7209B7] hover:bg-[#7209B7]/10 transition"
+                        className="p-1.5 rounded-lg text-[var(--primary-hex)]/45 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/10 transition"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDeleteOrder(order.id)}
-                        className="p-1.5 rounded-lg text-[#16132D]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
+                        className="p-1.5 rounded-lg text-[var(--primary-hex)]/45 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition"
                         title="Delete Order"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -557,13 +557,13 @@ const Orders: React.FC = () => {
                 </div>
               ))}
               {filteredOrders.length === 0 && (
-                <div className="col-span-full py-12 text-center text-sm font-semibold text-[#16132D]/35 bg-white rounded-2xl border border-[#16132D]/[0.06]">
+                <div className="col-span-full py-12 text-center text-sm font-semibold text-[var(--primary-hex)]/35 bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06]">
                   No orders found.
                 </div>
               )}
             </div>
             {totalPages > 0 && (
-              <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 rounded-xl shrink-0">
+              <div className="mt-auto border-t border-[var(--primary-hex)]/[0.06] bg-white p-2 rounded-xl shrink-0">
                 <Pagination
                   currentPage={page}
                   totalPages={totalPages}
@@ -577,10 +577,10 @@ const Orders: React.FC = () => {
       </div>
         {/* Create Order Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
-              <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-serif font-bold text-[#16132D]">
+          <div className="fixed inset-0 bg-[var(--primary-hex)]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl border border-[var(--primary-hex)]/[0.06] shadow-2xl shadow-[var(--primary-hex)]/20 w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+              <div className="px-6 py-5 border-b border-[var(--primary-hex)]/[0.08] flex justify-between items-center shrink-0">
+                <h2 className="text-xl font-serif font-bold text-[var(--primary-hex)]">
                   {isEditMode ? 'Edit Order' : 'Create New Order'}
                 </h2>
                 <button 
@@ -588,7 +588,7 @@ const Orders: React.FC = () => {
                     setIsModalOpen(false);
                     resetForm();
                   }}
-                  className="p-2 bg-[#16132D]/[0.03] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 hover:text-[#16132D] rounded-full transition"
+                  className="p-2 bg-[var(--primary-hex)]/[0.03] hover:bg-[var(--primary-hex)]/[0.08] text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)] rounded-full transition"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -598,7 +598,7 @@ const Orders: React.FC = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Phone Number</label>
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Phone Number</label>
                       <input 
                         type="text" 
                         value={customerPhone} 
@@ -611,53 +611,53 @@ const Orders: React.FC = () => {
                           }
                         }}
                         placeholder="e.g. +91 98765 43210" 
-                        className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
+                        className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Customer Name *</label>
                       <input 
                         type="text" 
                         value={customerName} 
                         onChange={(e) => setCustomerName(e.target.value)} 
                         required
                         placeholder="e.g. Shalini Roy" 
-                        className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
+                        className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Delivery Date *</label>
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Delivery Date *</label>
                       <input 
                         type="date" 
                         value={deliveryDate} 
                         onChange={(e) => setDeliveryDate(e.target.value)} 
                         required
-                        className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
+                        className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Garment Category *</label>
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Garment Category *</label>
                       <input 
                         type="text" 
                         value={category} 
                         onChange={(e) => setCategory(e.target.value)} 
                         required
                         placeholder="e.g. Silk Anarkali Suit" 
-                        className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition"
+                        className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Priority</label>
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Priority</label>
                       <select 
                         value={priority} 
                         onChange={(e) => setPriority(e.target.value as Order['priority'])}
-                        className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-white"
+                        className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition bg-white"
                       >
                         <option value="Normal">Normal</option>
                         <option value="Rush">Rush (Expedited)</option>
@@ -666,23 +666,23 @@ const Orders: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Fabric Details</label>
+                    <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Fabric Details</label>
                     <textarea 
                       value={fabricDetails} 
                       onChange={(e) => setFabricDetails(e.target.value)} 
                       placeholder="e.g. Banarasi Silk - Provided by customer" 
                       rows={2}
-                      className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition resize-none"
+                      className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition resize-none"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-[#F4F3F8] rounded-xl border border-[#16132D]/[0.04]">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-[#F4F3F8] rounded-xl border border-[var(--primary-hex)]/[0.04]">
                     <div className="md:col-span-3">
                       {matchedCustomer && matchedCustomer.loyalty_points > 0 && (
-                        <div className="mb-3 p-3 bg-[#7209B7]/5 rounded-lg border border-[#7209B7]/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div className="mb-3 p-3 bg-[var(--primary-hex)]/5 rounded-lg border border-[var(--primary-hex)]/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
                           <div>
-                            <span className="text-xs font-bold text-[#7209B7] flex items-center gap-1"><span className="text-[14px]">💎</span> Available Loyalty Points: {matchedCustomer.loyalty_points}</span>
-                            <span className="text-[10px] text-[#16132D]/50 block mt-0.5">Use points to give an instant discount on this order.</span>
+                            <span className="text-xs font-bold text-[var(--primary-hex)] flex items-center gap-1"><span className="text-[14px]">💎</span> Available Loyalty Points: {matchedCustomer.loyalty_points}</span>
+                            <span className="text-[10px] text-[var(--primary-hex)]/50 block mt-0.5">Use points to give an instant discount on this order.</span>
                           </div>
                           <div className="shrink-0 w-full md:w-32">
                             <input 
@@ -691,50 +691,50 @@ const Orders: React.FC = () => {
                               onChange={(e) => setPointsRedeemed(Number(e.target.value))}
                               max={matchedCustomer.loyalty_points}
                               placeholder="Redeem pts" 
-                              className="w-full px-3 py-2 border border-[#7209B7]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/50 text-xs bg-white text-[#7209B7] font-bold"
+                              className="w-full px-3 py-2 border border-[var(--primary-hex)]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/50 text-xs bg-white text-[var(--primary-hex)] font-bold"
                             />
                           </div>
                         </div>
                       )}
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Stitching Cost (₹)</label>
+                      <label className="block text-[10px] font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Stitching Cost (₹)</label>
                       <input 
                         type="number" 
                         value={stitchingCost} 
                         onChange={(e) => setStitchingCost(Number(e.target.value))} 
                         placeholder="0" 
-                        className="w-full px-3 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-white"
+                        className="w-full px-3 py-2.5 border border-[var(--primary-hex)]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition bg-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Total Amount (₹)</label>
+                      <label className="block text-[10px] font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Total Amount (₹)</label>
                       <input 
                         type="number" 
                         value={totalAmount} 
                         onChange={(e) => setTotalAmount(Number(e.target.value))} 
                         placeholder="0" 
-                        className="w-full px-3 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-white"
+                        className="w-full px-3 py-2.5 border border-[var(--primary-hex)]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition bg-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Advance Paid (₹)</label>
+                      <label className="block text-[10px] font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Advance Paid (₹)</label>
                       <input 
                         type="number" 
                         value={advancePaid} 
                         onChange={(e) => setAdvancePaid(Number(e.target.value))} 
                         placeholder="0" 
-                        className="w-full px-3 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-white"
+                        className="w-full px-3 py-2.5 border border-[var(--primary-hex)]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition bg-white"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Assigned Tailor</label>
+                    <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Assigned Tailor</label>
                     <select 
                       value={tailor} 
                       onChange={(e) => setTailor(e.target.value)} 
-                      className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-white"
+                      className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm transition bg-white"
                     >
                       <option value="">-- Select Tailor --</option>
                       {tailors.map(t => (
@@ -745,11 +745,11 @@ const Orders: React.FC = () => {
 
                 </form>
               </div>
-              <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
+              <div className="px-6 py-5 border-t border-[var(--primary-hex)]/[0.08] flex justify-end shrink-0 bg-[#F4F3F8]/50">
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition mr-3"
+                  className="px-5 py-2.5 text-sm font-semibold text-[var(--primary-hex)]/60 hover:text-[var(--primary-hex)] transition mr-3"
                 >
                   Cancel
                 </button>
@@ -757,7 +757,7 @@ const Orders: React.FC = () => {
                   type="submit"
                   form="orderForm"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 transition flex items-center justify-center gap-2 cursor-pointer"
+                  className="px-6 py-2.5 bg-[var(--primary-hex)] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md shadow-[var(--primary-hex)]/10 transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   {isSubmitting ? 'Saving...' : isEditMode ? 'Update Order' : 'Save Order'}

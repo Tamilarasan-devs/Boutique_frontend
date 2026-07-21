@@ -19,6 +19,8 @@ interface CompanySettings {
   loyalty_enabled?: boolean;
   points_per_unit?: number;
   redemption_value?: number;
+  logo_url?: string;
+  logoUrl?: string;
 }
 
 interface SettingsContextType {

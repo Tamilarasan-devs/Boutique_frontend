@@ -96,25 +96,25 @@ const Suppliers: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#F4F3F8] text-[#16132D] relative overflow-hidden">
+    <div className="flex flex-col h-full bg-[#F4F3F8] text-[var(--primary-hex)] relative overflow-hidden">
       <div className="flex flex-col flex-1 space-y-5 p-6 md:p-8 max-w-[1500px] mx-auto w-full min-h-0">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[var(--primary-hex)]/[0.08]">
           <div>
-            <p className="text-xs font-bold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Inventory</p>
-            <h1 className="text-3xl font-bold tracking-tight text-[#16132D]">Supplier Directory</h1>
-            <p className="text-sm font-medium text-[#16132D]/55 mt-1">Manage fabric, accessory and raw material suppliers.</p>
+            <p className="text-xs font-bold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1.5">Inventory</p>
+            <h1 className="text-3xl font-bold tracking-tight text-[var(--primary-hex)]">Supplier Directory</h1>
+            <p className="text-sm font-medium text-[var(--primary-hex)]/55 mt-1">Manage fabric, accessory and raw material suppliers.</p>
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold flex items-center gap-1.5 transition shadow-md self-start sm:self-auto">
+          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 bg-[var(--primary-hex)] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-bold flex items-center gap-1.5 transition shadow-md self-start sm:self-auto">
             <Plus className="w-4 h-4" /> Add Supplier
           </button>
         </div>
 
         {/* Search */}
-        <div className="flex items-center bg-white border border-[#16132D]/[0.1] rounded-xl px-4 py-3 w-full sm:w-96 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 transition shrink-0">
-          <Search className="w-4 h-4 text-[#16132D]/35 mr-2 flex-shrink-0" />
-          <input type="text" placeholder="Search by name or category..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[#16132D] placeholder-[#16132D]/35 w-full" />
+        <div className="flex items-center bg-white border border-[var(--primary-hex)]/[0.1] rounded-xl px-4 py-3 w-full sm:w-96 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary-hex)]/25 transition shrink-0">
+          <Search className="w-4 h-4 text-[var(--primary-hex)]/35 mr-2 flex-shrink-0" />
+          <input type="text" placeholder="Search by name or category..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[var(--primary-hex)] placeholder-[var(--primary-hex)]/35 w-full" />
         </div>
 
         {/* Grid */}
@@ -127,34 +127,34 @@ const Suppliers: React.FC = () => {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-[#16132D]/40 font-semibold">No suppliers found.</p>
-            <p className="text-[#16132D]/30 text-sm mt-1">Add your first supplier to get started.</p>
+            <p className="text-[var(--primary-hex)]/40 font-semibold">No suppliers found.</p>
+            <p className="text-[var(--primary-hex)]/30 text-sm mt-1">Add your first supplier to get started.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {filtered.map(s => (
-              <div key={s.id} className="bg-white p-6 rounded-2xl border border-[#16132D]/[0.06] shadow-sm hover:shadow-md transition space-y-4">
+              <div key={s.id} className="bg-white p-6 rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-sm hover:shadow-md transition space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-[#16132D] text-base">{s.name}</h3>
-                    {s.category && <span className="mt-1 inline-block text-[10px] bg-[#8338EC]/10 text-[#6200EA] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">{s.category}</span>}
+                    <h3 className="font-bold text-[var(--primary-hex)] text-base">{s.name}</h3>
+                    {s.category && <span className="mt-1 inline-block text-[10px] bg-[var(--primary-hex)]/10 text-[#6200EA] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">{s.category}</span>}
                   </div>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 ${i < s.rating ? 'text-[#8338EC] fill-[#8338EC]' : 'text-[#16132D]/15'}`} />
+                      <Star key={i} className={`w-3.5 h-3.5 ${i < s.rating ? 'text-[var(--primary-hex)] fill-[var(--accent-hex)]' : 'text-[var(--primary-hex)]/15'}`} />
                     ))}
                   </div>
                 </div>
 
-                <div className="space-y-2 text-sm font-semibold text-[#16132D]/60">
-                  {s.phone && <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-[#16132D]/35 flex-shrink-0" />{s.phone} {s.contact && `· ${s.contact}`}</p>}
-                  {s.email && <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-[#16132D]/35 flex-shrink-0" />{s.email}</p>}
-                  {s.location && <p className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[#16132D]/35 flex-shrink-0" />{s.location}</p>}
+                <div className="space-y-2 text-sm font-semibold text-[var(--primary-hex)]/60">
+                  {s.phone && <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-[var(--primary-hex)]/35 flex-shrink-0" />{s.phone} {s.contact && `· ${s.contact}`}</p>}
+                  {s.email && <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-[var(--primary-hex)]/35 flex-shrink-0" />{s.email}</p>}
+                  {s.location && <p className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[var(--primary-hex)]/35 flex-shrink-0" />{s.location}</p>}
                 </div>
 
-                <div className="pt-3 border-t border-[#16132D]/[0.05] flex justify-end gap-2">
-                  <button onClick={() => handleEdit(s)} className="p-1.5 text-[#16132D]/30 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
-                  <button onClick={() => handleDelete(s.id)} className="p-1.5 text-[#16132D]/30 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+                <div className="pt-3 border-t border-[var(--primary-hex)]/[0.05] flex justify-end gap-2">
+                  <button onClick={() => handleEdit(s)} className="p-1.5 text-[var(--primary-hex)]/30 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/10 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
+                  <button onClick={() => handleDelete(s.id)} className="p-1.5 text-[var(--primary-hex)]/30 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
             ))}
@@ -162,7 +162,7 @@ const Suppliers: React.FC = () => {
         )}
         
         {totalPages > 0 && (
-          <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 rounded-xl shrink-0">
+          <div className="mt-auto border-t border-[var(--primary-hex)]/[0.06] bg-white p-2 rounded-xl shrink-0">
             <Pagination
               currentPage={page}
               totalPages={totalPages}
@@ -174,57 +174,57 @@ const Suppliers: React.FC = () => {
 
         {/* Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl border border-[#16132D]/[0.06] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
-              <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center shrink-0">
-                <h2 className="text-xl font-bold text-[#16132D]">{editingId ? 'Edit Supplier' : 'Add New Supplier'}</h2>
-                <button onClick={() => { setIsModalOpen(false); resetForm(); }} className="p-2 bg-[#16132D]/[0.04] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 rounded-full transition"><X className="w-4 h-4" /></button>
+          <div className="fixed inset-0 bg-[var(--primary-hex)]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl border border-[var(--primary-hex)]/[0.06] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+              <div className="px-6 py-5 border-b border-[var(--primary-hex)]/[0.08] flex justify-between items-center shrink-0">
+                <h2 className="text-xl font-bold text-[var(--primary-hex)]">{editingId ? 'Edit Supplier' : 'Add New Supplier'}</h2>
+                <button onClick={() => { setIsModalOpen(false); resetForm(); }} className="p-2 bg-[var(--primary-hex)]/[0.04] hover:bg-[var(--primary-hex)]/[0.08] text-[var(--primary-hex)]/50 rounded-full transition"><X className="w-4 h-4" /></button>
               </div>
               <div className="overflow-y-auto p-6">
                 <form id="supForm" onSubmit={handleAdd} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Supplier / Company Name *</label>
-                    <input value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Kashi Silk Mills" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm" />
+                    <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Supplier / Company Name *</label>
+                    <input value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Kashi Silk Mills" className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Contact Person</label>
-                      <input value={contact} onChange={e => setContact(e.target.value)} placeholder="e.g. Rajesh Gupta" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm" />
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Contact Person</label>
+                      <input value={contact} onChange={e => setContact(e.target.value)} placeholder="e.g. Rajesh Gupta" className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Phone *</label>
-                      <input value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+91 94151 00001" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm" />
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Phone *</label>
+                      <input value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+91 94151 00001" className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Email Address</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="supplier@example.com" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm" />
+                    <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Email Address</label>
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="supplier@example.com" className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Location / City</label>
-                      <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Varanasi, UP" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm" />
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Location / City</label>
+                      <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Varanasi, UP" className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Category / Specialty</label>
-                      <input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Silk Fabrics" className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm" />
+                      <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Category / Specialty</label>
+                      <input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Silk Fabrics" className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Rating (1–5)</label>
+                    <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Rating (1–5)</label>
                     <div className="flex gap-2">
                       {[1,2,3,4,5].map(r => (
-                        <button key={r} type="button" onClick={() => setRating(r)} className={`p-1.5 rounded-lg transition ${r <= rating ? 'text-[#8338EC]' : 'text-[#16132D]/20'}`}>
-                          <Star className={`w-5 h-5 ${r <= rating ? 'fill-[#8338EC]' : ''}`} />
+                        <button key={r} type="button" onClick={() => setRating(r)} className={`p-1.5 rounded-lg transition ${r <= rating ? 'text-[var(--primary-hex)]' : 'text-[var(--primary-hex)]/20'}`}>
+                          <Star className={`w-5 h-5 ${r <= rating ? 'fill-[var(--accent-hex)]' : ''}`} />
                         </button>
                       ))}
                     </div>
                   </div>
                 </form>
               </div>
-              <div className="px-6 py-5 border-t border-[#16132D]/[0.08] flex justify-end gap-3 bg-[#F4F3F8]/50 shrink-0">
-                <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] transition">Cancel</button>
-                <button type="submit" form="supForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+              <div className="px-6 py-5 border-t border-[var(--primary-hex)]/[0.08] flex justify-end gap-3 bg-[#F4F3F8]/50 shrink-0">
+                <button type="button" onClick={() => { setIsModalOpen(false); resetForm(); }} className="px-5 py-2.5 text-sm font-semibold text-[var(--primary-hex)]/60 hover:text-[var(--primary-hex)] transition">Cancel</button>
+                <button type="submit" form="supForm" disabled={isSubmitting} className="px-6 py-2.5 bg-[var(--primary-hex)] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   {isSubmitting ? 'Saving...' : (editingId ? 'Update Supplier' : 'Save Supplier')}
                 </button>

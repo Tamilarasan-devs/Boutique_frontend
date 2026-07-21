@@ -112,36 +112,36 @@ const Delivery: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full space-y-5 p-6 bg-[#F4F3F8] relative overflow-hidden">
-      <div className="pb-5 border-b border-[#16132D]/[0.08] shrink-0">
-        <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Dispatch</p>
-        <h1 className="text-3xl md:text-[2rem] font-serif font-bold tracking-tight text-[#16132D] flex items-center gap-2">
-          <Truck className="w-8 h-8 text-[#7209B7]" />
+      <div className="pb-5 border-b border-[var(--primary-hex)]/[0.08] shrink-0">
+        <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1.5">Dispatch</p>
+        <h1 className="text-3xl md:text-[2rem] font-serif font-bold tracking-tight text-[var(--primary-hex)] flex items-center gap-2">
+          <Truck className="w-8 h-8 text-[var(--primary-hex)]" />
           Delivery Management
         </h1>
-        <p className="text-sm font-medium text-[#16132D]/60 mt-2">Track pickup readiness and dispatch status for completed garments.</p>
+        <p className="text-sm font-medium text-[var(--primary-hex)]/60 mt-2">Track pickup readiness and dispatch status for completed garments.</p>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex items-center bg-white border border-[#16132D]/[0.1] rounded-xl px-4 py-3 w-full sm:w-1/2 shadow-sm focus-within:ring-2 focus-within:ring-[#7209B7]/25 focus-within:border-[#7209B7]/40 transition-all">
-          <Search className="w-5 h-5 text-[#16132D]/40 mr-2" />
-          <input type="text" placeholder="Search deliveries by customer or order..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[#16132D] placeholder-[#16132D]/40 w-full" />
+        <div className="flex items-center bg-white border border-[var(--primary-hex)]/[0.1] rounded-xl px-4 py-3 w-full sm:w-1/2 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary-hex)]/25 focus-within:border-[var(--primary-hex)]/40 transition-all">
+          <Search className="w-5 h-5 text-[var(--primary-hex)]/40 mr-2" />
+          <input type="text" placeholder="Search deliveries by customer or order..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none outline-none text-sm font-medium text-[var(--primary-hex)] placeholder-[var(--primary-hex)]/40 w-full" />
         </div>
-        <div className="flex items-center bg-[#16132D]/[0.03] p-1 rounded-xl self-start sm:self-auto border border-[#16132D]/[0.06]">
-          <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'table' ? 'bg-white shadow-sm text-[#16132D] font-bold' : 'text-[#16132D]/50 hover:text-[#16132D] font-medium'}`}>
+        <div className="flex items-center bg-[var(--primary-hex)]/[0.03] p-1 rounded-xl self-start sm:self-auto border border-[var(--primary-hex)]/[0.06]">
+          <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'table' ? 'bg-white shadow-sm text-[var(--primary-hex)] font-bold' : 'text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)] font-medium'}`}>
             <List className="w-4 h-4" /> <span className="text-sm hidden sm:inline">Table</span>
           </button>
-          <button onClick={() => setViewMode('card')} className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'card' ? 'bg-white shadow-sm text-[#16132D] font-bold' : 'text-[#16132D]/50 hover:text-[#16132D] font-medium'}`}>
+          <button onClick={() => setViewMode('card')} className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'card' ? 'bg-white shadow-sm text-[var(--primary-hex)] font-bold' : 'text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)] font-medium'}`}>
             <LayoutGrid className="w-4 h-4" /> <span className="text-sm hidden sm:inline">Cards</span>
           </button>
         </div>
       </div>
 
       {viewMode === 'table' ? (
-        <div className="flex-1 bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col min-h-0">
+        <div className="flex-1 bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden flex flex-col min-h-0">
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm text-[#16132D]">
+            <table className="w-full text-left text-sm text-[var(--primary-hex)]">
             <thead>
-              <tr className="border-b border-[#16132D]/[0.06] bg-[#F4F3F8]/50 text-[#16132D]/60 font-bold uppercase tracking-wider text-xs">
+              <tr className="border-b border-[var(--primary-hex)]/[0.06] bg-[#F4F3F8]/50 text-[var(--primary-hex)]/60 font-bold uppercase tracking-wider text-xs">
                 <th className="py-4 px-6">Delivery ID</th>
                 <th className="py-4 px-6">Order</th>
                 <th className="py-4 px-6">Customer</th>
@@ -151,7 +151,7 @@ const Delivery: React.FC = () => {
                 <th className="py-4 px-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#16132D]/[0.04]">
+            <tbody className="divide-y divide-[var(--primary-hex)]/[0.04]">
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="p-0">
@@ -160,28 +160,28 @@ const Delivery: React.FC = () => {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-[#16132D]/50 font-medium">
+                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--primary-hex)]/50 font-medium">
                     No deliveries match your search.
                   </td>
                 </tr>
               ) : (
                 filtered.map(d => (
                   <tr key={d.id} className="hover:bg-[#F4F3F8]/50 transition-colors group">
-                    <td className="py-4 px-6 text-[#16132D]/70 font-semibold">{d.displayId}</td>
-                    <td className="py-4 px-6 font-bold text-[#16132D]">{d.order_id || 'N/A'}</td>
+                    <td className="py-4 px-6 text-[var(--primary-hex)]/70 font-semibold">{d.displayId}</td>
+                    <td className="py-4 px-6 font-bold text-[var(--primary-hex)]">{d.order_id || 'N/A'}</td>
                     <td className="py-4 px-6">
-                      <div className="font-bold text-[#16132D] text-base">{d.customer_name}</div>
-                      <div className="text-xs text-[#16132D]/60 font-medium flex items-center gap-1 mt-0.5"><Phone className="w-3 h-3" /> {d.phone || 'N/A'}</div>
+                      <div className="font-bold text-[var(--primary-hex)] text-base">{d.customer_name}</div>
+                      <div className="text-xs text-[var(--primary-hex)]/60 font-medium flex items-center gap-1 mt-0.5"><Phone className="w-3 h-3" /> {d.phone || 'N/A'}</div>
                     </td>
-                    <td className="py-4 px-6 font-semibold text-[#16132D]/80">{d.garment}</td>
-                    <td className="py-4 px-6 text-[#16132D]/70 font-medium">
+                    <td className="py-4 px-6 font-semibold text-[var(--primary-hex)]/80">{d.garment}</td>
+                    <td className="py-4 px-6 text-[var(--primary-hex)]/70 font-medium">
                       {d.ready_date ? new Date(d.ready_date).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="py-4 px-6">
                       <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                         d.status === 'Delivered' ? 'bg-[#10B981]/10 text-[#10B981]' :
                         d.status === 'Out for Delivery' ? 'bg-[#F59E0B]/10 text-[#F59E0B]' :
-                        'bg-[#7209B7]/10 text-[#7209B7]'
+                        'bg-[var(--primary-hex)]/10 text-[var(--primary-hex)]'
                       }`}>{d.status}</span>
                     </td>
                     <td className="py-4 px-6 text-right">
@@ -196,12 +196,12 @@ const Delivery: React.FC = () => {
                           <span className="px-3 py-1.5 text-xs text-[#10B981] font-bold flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> Done</span>
                         )}
                         
-                        <div className="w-px h-6 bg-[#16132D]/10 mx-1"></div>
+                        <div className="w-px h-6 bg-[var(--primary-hex)]/10 mx-1"></div>
 
-                        <button onClick={() => setViewingDelivery(d)} className="p-1.5 text-[#16132D]/40 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-lg transition" title="View Details">
+                        <button onClick={() => setViewingDelivery(d)} className="p-1.5 text-[var(--primary-hex)]/40 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/10 rounded-lg transition" title="View Details">
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(d.id)} className="p-1.5 text-[#16132D]/40 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition" title="Delete Delivery">
+                        <button onClick={() => handleDelete(d.id)} className="p-1.5 text-[var(--primary-hex)]/40 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition" title="Delete Delivery">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -213,7 +213,7 @@ const Delivery: React.FC = () => {
           </table>
           </div>
           {totalPages > 0 && (
-            <div className="mt-auto border-t border-[#16132D]/[0.06] bg-white p-2 shrink-0">
+            <div className="mt-auto border-t border-[var(--primary-hex)]/[0.06] bg-white p-2 shrink-0">
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
@@ -230,42 +230,42 @@ const Delivery: React.FC = () => {
               <CardSkeleton />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-[#16132D]/50 font-medium bg-white rounded-2xl border border-[#16132D]/[0.06]">
+            <div className="col-span-full py-12 text-center text-[var(--primary-hex)]/50 font-medium bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06]">
               No deliveries match your search.
             </div>
           ) : (
             filtered.map((d) => (
-              <div key={d.id} className="bg-white rounded-2xl p-5 border border-[#16132D]/[0.06] shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+              <div key={d.id} className="bg-white rounded-2xl p-5 border border-[var(--primary-hex)]/[0.06] shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider uppercase block mb-1">Order {d.order_id || 'N/A'} • {d.displayId}</span>
-                    <h3 className="font-serif font-bold text-xl text-[#16132D]">{d.customer_name}</h3>
-                    <div className="text-xs text-[#16132D]/60 font-medium flex items-center gap-1 mt-1"><Phone className="w-3 h-3" /> {d.phone || 'N/A'}</div>
+                    <span className="text-[10px] font-bold text-[var(--primary-hex)]/40 tracking-wider uppercase block mb-1">Order {d.order_id || 'N/A'} • {d.displayId}</span>
+                    <h3 className="font-serif font-bold text-xl text-[var(--primary-hex)]">{d.customer_name}</h3>
+                    <div className="text-xs text-[var(--primary-hex)]/60 font-medium flex items-center gap-1 mt-1"><Phone className="w-3 h-3" /> {d.phone || 'N/A'}</div>
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                     d.status === 'Delivered' ? 'bg-[#10B981]/10 text-[#10B981]' :
                     d.status === 'Out for Delivery' ? 'bg-[#F59E0B]/10 text-[#F59E0B]' :
-                    'bg-[#7209B7]/10 text-[#7209B7]'
+                    'bg-[var(--primary-hex)]/10 text-[var(--primary-hex)]'
                   }`}>{d.status}</span>
                 </div>
                 
-                <div className="bg-[#F4F3F8] p-3 rounded-xl border border-[#16132D]/[0.04] grid grid-cols-2 gap-2">
+                <div className="bg-[#F4F3F8] p-3 rounded-xl border border-[var(--primary-hex)]/[0.04] grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#16132D]/40">Garment</span>
-                    <p className="text-sm font-bold text-[#16132D]">{d.garment}</p>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary-hex)]/40">Garment</span>
+                    <p className="text-sm font-bold text-[var(--primary-hex)]">{d.garment}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#16132D]/40">Ready Date</span>
-                    <p className="text-sm font-semibold text-[#16132D]/80">{d.ready_date ? new Date(d.ready_date).toLocaleDateString() : 'N/A'}</p>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary-hex)]/40">Ready Date</span>
+                    <p className="text-sm font-semibold text-[var(--primary-hex)]/80">{d.ready_date ? new Date(d.ready_date).toLocaleDateString() : 'N/A'}</p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#16132D]/[0.06] flex items-center justify-between">
+                <div className="pt-3 border-t border-[var(--primary-hex)]/[0.06] flex items-center justify-between">
                   <div className="flex gap-1.5">
-                    <button onClick={() => setViewingDelivery(d)} className="p-2 text-[#16132D]/40 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-lg transition" title="View Details">
+                    <button onClick={() => setViewingDelivery(d)} className="p-2 text-[var(--primary-hex)]/40 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/10 rounded-lg transition" title="View Details">
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(d.id)} className="p-2 text-[#16132D]/40 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition" title="Delete Delivery">
+                    <button onClick={() => handleDelete(d.id)} className="p-2 text-[var(--primary-hex)]/40 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 rounded-lg transition" title="Delete Delivery">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -287,7 +287,7 @@ const Delivery: React.FC = () => {
           )}
           </div>
           {totalPages > 0 && (
-            <div className="mt-4 border-t border-[#16132D]/[0.06] bg-white p-2 rounded-xl shrink-0">
+            <div className="mt-4 border-t border-[var(--primary-hex)]/[0.06] bg-white p-2 rounded-xl shrink-0">
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
@@ -300,16 +300,16 @@ const Delivery: React.FC = () => {
 
       {/* View Details Modal */}
       {viewingDelivery && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#16132D]/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in border border-[#16132D]/[0.06]">
-            <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center bg-[#F4F3F8]/30">
-              <h3 className="text-xl font-bold font-serif text-[#16132D] flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#7209B7]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--primary-hex)]/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in border border-[var(--primary-hex)]/[0.06]">
+            <div className="px-6 py-5 border-b border-[var(--primary-hex)]/[0.08] flex justify-between items-center bg-[#F4F3F8]/30">
+              <h3 className="text-xl font-bold font-serif text-[var(--primary-hex)] flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[var(--primary-hex)]" />
                 Delivery Details
               </h3>
               <button 
                 onClick={() => setViewingDelivery(null)}
-                className="p-2 bg-[#16132D]/[0.03] hover:bg-[#16132D]/[0.08] text-[#16132D]/50 hover:text-[#16132D] rounded-full transition"
+                className="p-2 bg-[var(--primary-hex)]/[0.03] hover:bg-[var(--primary-hex)]/[0.08] text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)] rounded-full transition"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -318,41 +318,41 @@ const Delivery: React.FC = () => {
             <div className="p-6 space-y-6">
               <div className="flex justify-between items-start">
                 <div>
-                   <span className="text-xs font-bold tracking-[0.18em] uppercase text-[#7209B7] mb-1 block">ORDER REF</span>
-                   <span className="font-serif font-bold text-2xl text-[#16132D]">{viewingDelivery.order_id || 'N/A'}</span>
+                   <span className="text-xs font-bold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1 block">ORDER REF</span>
+                   <span className="font-serif font-bold text-2xl text-[var(--primary-hex)]">{viewingDelivery.order_id || 'N/A'}</span>
                 </div>
                 <div className="text-right">
                    <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
                       viewingDelivery.status === 'Delivered' ? 'bg-[#10B981]/10 text-[#10B981]' :
                       viewingDelivery.status === 'Out for Delivery' ? 'bg-[#F59E0B]/10 text-[#F59E0B]' :
-                      'bg-[#7209B7]/10 text-[#7209B7]'
+                      'bg-[var(--primary-hex)]/10 text-[var(--primary-hex)]'
                    }`}>
                       {viewingDelivery.status}
                    </span>
                 </div>
               </div>
 
-              <div className="bg-[#F4F3F8] p-5 rounded-2xl border border-[#16132D]/[0.04] space-y-4">
+              <div className="bg-[#F4F3F8] p-5 rounded-2xl border border-[var(--primary-hex)]/[0.04] space-y-4">
                 <div>
-                  <p className="text-[10px] font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Customer</p>
-                  <p className="text-lg font-bold text-[#16132D]">{viewingDelivery.customer_name}</p>
-                  <p className="text-sm font-medium text-[#16132D]/60 flex items-center gap-1.5 mt-1">
+                  <p className="text-[10px] font-bold text-[var(--primary-hex)]/40 uppercase tracking-wider mb-1">Customer</p>
+                  <p className="text-lg font-bold text-[var(--primary-hex)]">{viewingDelivery.customer_name}</p>
+                  <p className="text-sm font-medium text-[var(--primary-hex)]/60 flex items-center gap-1.5 mt-1">
                     <Phone className="w-3.5 h-3.5" /> {viewingDelivery.phone || 'N/A'}
                   </p>
                 </div>
-                <div className="h-px bg-[#16132D]/[0.06] w-full my-2"></div>
+                <div className="h-px bg-[var(--primary-hex)]/[0.06] w-full my-2"></div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Garment</p>
-                    <p className="text-sm font-semibold text-[#16132D]">{viewingDelivery.garment}</p>
+                    <p className="text-[10px] font-bold text-[var(--primary-hex)]/40 uppercase tracking-wider mb-1">Garment</p>
+                    <p className="text-sm font-semibold text-[var(--primary-hex)]">{viewingDelivery.garment}</p>
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider block mb-1">ID</span>
-                    <p className="text-sm font-semibold text-[#16132D]">{viewingDelivery.displayId}</p>
+                    <span className="text-xs font-bold text-[var(--primary-hex)]/40 uppercase tracking-wider block mb-1">ID</span>
+                    <p className="text-sm font-semibold text-[var(--primary-hex)]">{viewingDelivery.displayId}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-[#16132D]/40 uppercase tracking-wider mb-1">Ready Date</p>
-                    <p className="text-sm font-semibold text-[#16132D]">
+                    <p className="text-[10px] font-bold text-[var(--primary-hex)]/40 uppercase tracking-wider mb-1">Ready Date</p>
+                    <p className="text-sm font-semibold text-[var(--primary-hex)]">
                       {viewingDelivery.ready_date ? new Date(viewingDelivery.ready_date).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
@@ -360,10 +360,10 @@ const Delivery: React.FC = () => {
               </div>
             </div>
             
-            <div className="px-6 py-5 border-t border-[#16132D]/[0.08] bg-[#F4F3F8]/50 flex justify-end gap-3">
+            <div className="px-6 py-5 border-t border-[var(--primary-hex)]/[0.08] bg-[#F4F3F8]/50 flex justify-end gap-3">
               <button 
                 onClick={() => setViewingDelivery(null)}
-                className="px-6 py-2.5 bg-[#16132D] text-white rounded-xl text-sm font-bold shadow-md shadow-[#16132D]/10 hover:bg-[#2a3545] transition-all"
+                className="px-6 py-2.5 bg-[var(--primary-hex)] text-white rounded-xl text-sm font-bold shadow-md shadow-[var(--primary-hex)]/10 hover:bg-[#2a3545] transition-all"
               >
                 Close
               </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth, UserRole, MODULE_ROUTES } from '../../context/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
 import { Loader2, Scissors } from 'lucide-react';
 import { SplashScreen } from '../layout/SplashScreen';
 
@@ -10,16 +11,32 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const { companySettings, isLoading: settingsLoading } = useSettings();
   const location = useLocation();
 
-  if (isLoading) {
+  if (authLoading || (user && settingsLoading)) {
     return <SplashScreen />;
   }
 
   // If not logged in, redirect to login
   if (!user) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
+
+  // Enforce profile completion for the owner
+  if (user.role === 'owner' && companySettings) {
+    const isProfileComplete = 
+      companySettings.name && 
+      companySettings.email && 
+      companySettings.phone && 
+      companySettings.address && 
+      companySettings.city && 
+      companySettings.pincode;
+
+    if (!isProfileComplete && !location.pathname.startsWith('/settings')) {
+      return <Navigate to="/settings/company" replace />;
+    }
   }
 
   // Super admin has access to everything

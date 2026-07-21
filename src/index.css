@@ -7,36 +7,50 @@
 
 @import "tailwindcss";
 
+:root {
+  --primary-hex: #1b1c30;
+  --primary-rgb: 27, 28, 48;
+  --accent-hex: #e8dcc4;
+  --accent-rgb: 232, 220, 196;
+  
+  --accent-hover: #d9cdb4;
+  --accent-hover-2: #8a8791;
+  --accent-hover-3: #3d3f56;
+  
+  --accent-shade-1: #f4ede0;
+  --accent-shade-2: #eae1ce;
+  --accent-shade-3: #d9cdb4;
+}
+
 @theme {
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-serif: 'Playfair Display', serif;
   
   /* Boutique Light Theme (Purple & Lavender Gray) */
-  --color-slate-50: #F4F3F8; /* Light lavender gray Background */
-  --color-slate-100: rgba(22,19,45,0.05); /* Very faint ink */
-  --color-slate-200: rgba(22,19,45,0.1);  /* Faint border */
-  --color-slate-300: rgba(22,19,45,0.15);
-  --color-slate-400: rgba(22,19,45,0.45);  /* Muted text */
-  --color-slate-500: rgba(22,19,45,0.55);
-  --color-slate-600: rgba(22,19,45,0.65); /* Secondary text */
-  --color-slate-700: rgba(22,19,45,0.8);
-  --color-slate-800: #16132D; /* Primary Ink */
-  --color-slate-900: #16132D; /* Headings Ink */
+  --color-slate-50: #F8FAFC; /* Standard slate bg */
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B; /* Primary Ink */
+  --color-slate-900: #0F172A; /* Headings Ink */
 
   --color-white: #FFFFFF;
 
   /* Primary Violet/Purple (Replaces Blue) */
-  --color-blue-50: rgba(114,9,183,0.05);
-  --color-blue-100: rgba(114,9,183,0.1);
-  --color-blue-200: #E9D5FF;
-  --color-blue-300: #D8B4FE;
-  --color-blue-400: #C084FC;
-  --color-blue-50: rgba(114,9,183,0.05);
-  --color-blue-500: #8338EC; /* Main Purple Accent */
-  --color-blue-600: #7209B7; /* Main Violet */
-  --color-blue-700: #5E00B3; /* Hover Purple */
-  --color-blue-800: #4c0099;
-  --color-blue-900: #3b0080;
+  --color-blue-50: rgba(var(--accent-rgb),0.05);
+  --color-blue-100: rgba(var(--accent-rgb),0.1);
+  --color-blue-200: var(--accent-shade-1);
+  --color-blue-300: var(--accent-shade-2);
+  --color-blue-400: var(--accent-shade-3);
+  --color-blue-500: var(--primary-hex); /* Main Brand Accent */
+  --color-blue-600: var(--primary-hex); /* Main Brand Color */
+  --color-blue-700: var(--accent-hover); /* Hover brand color */
+  --color-blue-800: var(--accent-hover-2);
+  --color-blue-900: var(--accent-hover-3);
 
   /* Status mapping (Emerald for Success, Violet for Warning, Rose for Danger) */
   --color-emerald-50: rgba(16,185,129,0.1);
@@ -45,11 +59,11 @@
   --color-emerald-600: #10B981;
   --color-emerald-700: #059669;
 
-  --color-amber-50: rgba(114,9,183,0.1);
-  --color-amber-100: rgba(114,9,183,0.15);
-  --color-amber-500: #7209B7;
-  --color-amber-600: #7209B7;
-  --color-amber-700: #5E00B3;
+  --color-amber-50: rgba(var(--accent-rgb),0.1);
+  --color-amber-100: rgba(var(--accent-rgb),0.15);
+  --color-amber-500: var(--primary-hex);
+  --color-amber-600: var(--primary-hex);
+  --color-amber-700: #9ecd73;
 
   --color-red-50: rgba(244,63,94,0.1);
   --color-red-100: rgba(244,63,94,0.15);
@@ -58,10 +72,10 @@
   --color-red-700: #E11D48;
 
   /* Premium Shadows for Light Theme */
-  --shadow-sm: 0 1px 3px rgba(22,19,45,0.04);
-  --shadow-md: 0 4px 12px rgba(22,19,45,0.06);
-  --shadow-lg: 0 8px 20px rgba(22,19,45,0.08);
-  --shadow-xl: 0 12px 30px rgba(22,19,45,0.1);
+  --shadow-sm: 0 1px 3px rgba(var(--primary-rgb),0.04);
+  --shadow-md: 0 4px 12px rgba(var(--primary-rgb),0.06);
+  --shadow-lg: 0 8px 20px rgba(var(--primary-rgb),0.08);
+  --shadow-xl: 0 12px 30px rgba(var(--primary-rgb),0.1);
   
   /* Radii */
   --radius-xl: 16px;
@@ -314,7 +328,7 @@ body {
   transform: translate(-50%, -100%);
   width: calc(8 * var(--sz));
   height: calc(8 * var(--sz));
-  background-color: #8338EC; /* Soft purple glow */
+  background-color: var(--accent-hex); /* Soft purple glow */
   filter: blur(calc(10 * var(--sz)));
 }
 
@@ -325,8 +339,8 @@ body {
   width: calc(8 * var(--sz));
   height: calc(11 * var(--sz));
   border-radius: 51% 49% 47% 53%/44% 45% 55% 69%;
-  background-color: #e9d5ff; /* Lavender */
-  background-image: linear-gradient(to top, #7209B7, #e9d5ff);
+  background-color: #e9f5d8; /* Lavender */
+  background-image: linear-gradient(to top, var(--accent-hex), #e9f5d8);
   transform-origin: bottom center;
   opacity: 0.9;
   box-shadow: inset 0 0 calc(2 * var(--sz)) rgba(255, 255, 255, 0.5);
@@ -346,7 +360,7 @@ body {
   transform-origin: bottom left;
   border-radius: calc(4 * var(--sz)) calc(10 * var(--sz)) calc(4 * var(--sz)) calc(4 * var(--sz));
   transform: translate(0%, 18%) rotateX(70deg) rotate(-43deg);
-  background-image: linear-gradient(to top, #8338EC, #e9d5ff);
+  background-image: linear-gradient(to top, var(--accent-hex), #e9f5d8);
   z-index: 1;
   opacity: 0.8;
 }
@@ -360,6 +374,7 @@ body {
   border-radius: 50%;
   background-color: #fff;
 }
+
 .sidebar-flowers-container .flower__white-circle::after {
   content: "";
   position: absolute;
@@ -387,7 +402,7 @@ body {
       transparent,
       rgba(255, 255, 255, 0.2)
     ),
-    linear-gradient(to top, transparent 10%, #4c0099, #8338EC);
+    linear-gradient(to top, transparent 10%, #84ba56, var(--accent-hex));
   box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
   animation: sb-grow-flower-tree 4s backwards;
 }
@@ -402,7 +417,7 @@ body {
   height: var(--h);
   border-top-right-radius: var(--h);
   border-bottom-left-radius: var(--h);
-  background-image: linear-gradient(to top, rgba(114, 9, 183, 0.4), #c084fc);
+  background-image: linear-gradient(to top, rgba(var(--accent-rgb), 0.4), #d0e8b4);
 }
 .sidebar-flowers-container .flower__line__leaf--1 {
   transform: rotate(70deg) rotateY(30deg);
@@ -448,7 +463,7 @@ body {
   animation: sb-light-ans 4s linear infinite backwards;
 }
 .sidebar-flowers-container .flower__light:nth-child(odd) {
-  background-color: #c084fc;
+  background-color: #d0e8b4;
 }
 .sidebar-flowers-container .flower__light--1 { left: calc(-2 * var(--sz)); animation-delay: 1s; }
 .sidebar-flowers-container .flower__light--2 { left: calc(3 * var(--sz)); animation-delay: 0.5s; }
@@ -717,7 +732,7 @@ body {
   width: calc(10 * var(--sz));
   height: calc(10 * var(--sz));
   border-radius: 100% 0% 0% 100%/100% 100% 0% 0%;
-  box-shadow: inset 0 2px calc(1 * var(--sz)) rgba(131, 56, 236, 0.2);
+  box-shadow: inset 0 2px calc(1 * var(--sz)) rgba(var(--accent-rgb), 0.2);
   background-image: linear-gradient(
       to bottom left,
       transparent,
@@ -756,13 +771,13 @@ body {
   width: calc(10 * var(--sz));
   height: calc(10 * var(--sz));
   border-radius: 100% 0% 0% 100%/100% 100% 0% 0%;
-  box-shadow: inset 0 2px calc(1 * var(--sz)) rgba(131, 56, 236, 0.2);
+  box-shadow: inset 0 2px calc(1 * var(--sz)) rgba(var(--accent-rgb), 0.2);
   background-image: linear-gradient(
       to bottom left,
       transparent,
       var(--dark-color) 98%
     ),
-    linear-gradient(to bottom right, #c084fc 45%, transparent 50%, transparent);
+    linear-gradient(to bottom right, #d0e8b4 45%, transparent 50%, transparent);
   -webkit-mask-image: linear-gradient(
     135deg,
     #7C3AED 40%,
@@ -1053,4 +1068,38 @@ body {
 @keyframes sb-flower__g-fr-ans {
   0%, 100% { transform: rotate(2deg); }
   50% { transform: rotate(4deg); }
+}
+
+@media print {
+  /* Hide all elements in the body by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the printable invoice and its children */
+  #printable-invoice, #printable-invoice * {
+    visibility: visible;
+  }
+
+  /* Position the printable area at the absolute top-left of the page */
+  #printable-invoice {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  /* Remove any hidden elements within the printable area */
+  #printable-invoice .print\:hidden {
+    display: none !important;
+  }
 }

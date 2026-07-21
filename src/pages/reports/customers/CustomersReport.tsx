@@ -110,7 +110,7 @@ const CustomersReport: React.FC = () => {
                     {c.loyalty}
                   </span>
                 </td>
-                <td className="py-4 px-6 text-center font-bold text-[#7209B7]">
+                <td className="py-4 px-6 text-center font-bold text-[var(--primary-hex)]">
                   {c.loyaltyPoints}
                 </td>
                 <td className="py-4 px-6 text-slate-500">{c.lastOrder}</td>

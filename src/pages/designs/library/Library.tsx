@@ -12,7 +12,7 @@ interface DesignItem {
 
 const mockDesigns: DesignItem[] = [
   { id: 'DES-001', name: 'Royal Zardosi Lehenga', category: 'Bridal', style: 'Heavy Embroidery', colors: ['#b91c1c', '#eab308', '#f5f5f4'], isFavorite: true },
-  { id: 'DES-002', name: 'Modern Anarkali Suit', category: 'Ethnic', style: 'Thread Work', colors: ['#6d28d9', '#c084fc', '#fafaf9'], isFavorite: false },
+  { id: 'DES-002', name: 'Modern Anarkali Suit', category: 'Ethnic', style: 'Thread Work', colors: ['#6d28d9', '#d0e8b4', '#fafaf9'], isFavorite: false },
   { id: 'DES-003', name: 'Classic Sherwani Set', category: 'Menswear', style: 'Brocade Pattern', colors: ['#78350f', '#d97706', '#fef3c7'], isFavorite: true },
   { id: 'DES-004', name: 'Pastel Organza Saree', category: 'Sarees', style: 'Mirror Work', colors: ['#f9a8d4', '#fbcfe8', '#fdf2f8'], isFavorite: false },
   { id: 'DES-005', name: 'Indo-Western Gown', category: 'Fusion', style: 'Sequin Detailing', colors: ['#0f766e', '#5eead4', '#f0fdfa'], isFavorite: false },

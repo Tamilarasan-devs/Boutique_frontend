@@ -24,8 +24,8 @@ const MODULES = [
 
 const levelColor: Record<AccessLevel, string> = {
   Full: 'bg-[#10B981]/10 text-[#234638] ring-[#10B981]/20',
-  Read: 'bg-[#8338EC]/10 text-[#6200EA] ring-[#8338EC]/20',
-  None: 'bg-[#16132D]/[0.06] text-[#16132D]/40 ring-[#16132D]/[0.08]',
+  Read: 'bg-[var(--primary-hex)]/10 text-[#6200EA] ring-[var(--accent-hex)]/20',
+  None: 'bg-[var(--primary-hex)]/[0.06] text-[var(--primary-hex)]/40 ring-[var(--primary-hex)]/[0.08]',
 };
 
 const PermissionsSettings: React.FC = () => {
@@ -110,14 +110,14 @@ const PermissionsSettings: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
+    <div className="min-h-screen bg-[#F4F3F8] text-[var(--primary-hex)]">
       <div className="flex flex-col h-full space-y-6 p-6 md:p-8 max-w-5xl mx-auto">
         
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[var(--primary-hex)]/[0.08]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Settings</p>
-            <h1 className="text-3xl font-serif font-semibold text-[#16132D]">Permissions</h1>
-            <p className="text-sm text-[#16132D]/55 mt-1">Control module-level access for each role. Click a cell to toggle Full → Read → None.</p>
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1.5">Settings</p>
+            <h1 className="text-3xl font-serif font-semibold text-[var(--primary-hex)]">Permissions</h1>
+            <p className="text-sm text-[var(--primary-hex)]/55 mt-1">Control module-level access for each role. Click a cell to toggle Full → Read → None.</p>
           </div>
           <button
             onClick={handleSave}
@@ -125,7 +125,7 @@ const PermissionsSettings: React.FC = () => {
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-md self-start sm:self-auto ${
               saved
                 ? 'bg-[#10B981] text-white shadow-[#10B981]/20'
-                : 'bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] shadow-[#16132D]/10 cursor-pointer'
+                : 'bg-[var(--primary-hex)] hover:bg-[#2a3545] text-[#F4F3F8] shadow-[var(--primary-hex)]/10 cursor-pointer'
             } ${(isLoading || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
@@ -136,32 +136,32 @@ const PermissionsSettings: React.FC = () => {
         {isLoading ? (
           <TableSkeleton />
         ) : (
-          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
             {/* Legend */}
-            <div className="px-5 py-3 border-b border-[#16132D]/[0.07] bg-[#F4F3F8]/30 flex flex-wrap items-center gap-3">
-              <Shield className="w-4 h-4 text-[#16132D]/40" />
-              <span className="text-xs font-bold text-[#16132D]/50 uppercase tracking-wider">Access Legend:</span>
+            <div className="px-5 py-3 border-b border-[var(--primary-hex)]/[0.07] bg-[#F4F3F8]/30 flex flex-wrap items-center gap-3">
+              <Shield className="w-4 h-4 text-[var(--primary-hex)]/40" />
+              <span className="text-xs font-bold text-[var(--primary-hex)]/50 uppercase tracking-wider">Access Legend:</span>
               {(['Full', 'Read', 'None'] as AccessLevel[]).map(l => (
                 <span key={l} className={`text-[10px] font-bold px-2.5 py-1 rounded-full ring-1 ${levelColor[l]}`}>{l}</span>
               ))}
-              <span className="text-xs text-[#16132D]/40 ml-1 italic">(Click to toggle)</span>
+              <span className="text-xs text-[var(--primary-hex)]/40 ml-1 italic">(Click to toggle)</span>
             </div>
 
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#16132D]/[0.08] bg-[#F4F3F8]/70 text-[#16132D]/40 font-semibold text-xs uppercase tracking-wide">
+                  <tr className="border-b border-[var(--primary-hex)]/[0.08] bg-[#F4F3F8]/70 text-[var(--primary-hex)]/40 font-semibold text-xs uppercase tracking-wide">
                     <th className="py-4 px-6 min-w-[160px]">Module</th>
                     {roles.map(r => (
                       <th key={r.id} className="py-4 px-4 text-center min-w-[110px]">{r.name}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#16132D]/[0.05]">
+                <tbody className="divide-y divide-[var(--primary-hex)]/[0.05]">
                   {permissions.map((p, i) => (
                     <tr key={p.module} className="hover:bg-[#F4F3F8]/60 transition">
-                      <td className="py-4 px-6 font-semibold text-[#16132D]">{p.module}</td>
+                      <td className="py-4 px-6 font-semibold text-[var(--primary-hex)]">{p.module}</td>
                       {roles.map(r => {
                         const level = p[r.id] as AccessLevel;
                         const isOwner = r.id === 'owner';

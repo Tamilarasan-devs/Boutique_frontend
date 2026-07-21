@@ -26,10 +26,10 @@ interface Order {
 }
 
 const statusStyles: Record<string, string> = {
-  'Received': 'bg-[#16132D]/[0.05] text-[#16132D]/70',
+  'Received': 'bg-[var(--primary-hex)]/[0.05] text-[var(--primary-hex)]/70',
   'Cutting': 'bg-[#7A5AA8]/10 text-[#5d4485]',
-  'Stitching': 'bg-[#8338EC]/10 text-[#6200EA]',
-  'Trial Scheduled': 'bg-[#7209B7]/10 text-[#a3531f]',
+  'Stitching': 'bg-[var(--primary-hex)]/10 text-[#6200EA]',
+  'Trial Scheduled': 'bg-[var(--primary-hex)]/10 text-[#a3531f]',
   'Completed': 'bg-[#10B981]/10 text-[#234638]',
 };
 
@@ -175,7 +175,7 @@ const OrderDetails: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D] p-6 md:p-8">
+    <div className="min-h-screen bg-[#F4F3F8] text-[var(--primary-hex)] p-6 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Header */}
@@ -183,15 +183,15 @@ const OrderDetails: React.FC = () => {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigate('/orders/list')}
-              className="p-2 bg-white rounded-full text-[#16132D]/50 hover:text-[#16132D] hover:bg-[#16132D]/5 transition border border-[#16132D]/[0.08]"
+              className="p-2 bg-white rounded-full text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/5 transition border border-[var(--primary-hex)]/[0.08]"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1">
+              <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1">
                 Order details
               </p>
-              <h1 className="text-2xl font-serif font-bold text-[#16132D]">
+              <h1 className="text-2xl font-serif font-bold text-[var(--primary-hex)]">
                 {order.displayId} - {order.customerName}
               </h1>
             </div>
@@ -207,41 +207,41 @@ const OrderDetails: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
           <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Left Column: Details */}
             <div className="space-y-6">
-              <h3 className="text-lg font-serif font-bold border-b border-[#16132D]/[0.06] pb-3 text-[#16132D]">Overview</h3>
+              <h3 className="text-lg font-serif font-bold border-b border-[var(--primary-hex)]/[0.06] pb-3 text-[var(--primary-hex)]">Overview</h3>
               
               <div className="space-y-6">
                 
                 {/* Customer Info Card */}
-                <div className="bg-white border border-[#16132D]/[0.08] rounded-xl p-4 shadow-sm flex flex-col gap-3">
+                <div className="bg-white border border-[var(--primary-hex)]/[0.08] rounded-xl p-4 shadow-sm flex flex-col gap-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold tracking-wider uppercase text-[#16132D]/40">Customer Details</span>
+                    <span className="text-xs font-bold tracking-wider uppercase text-[var(--primary-hex)]/40">Customer Details</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#7209B7]/10 flex items-center justify-center text-[#7209B7] shrink-0 border border-[#7209B7]/20">
+                    <div className="w-12 h-12 rounded-full bg-[var(--primary-hex)]/10 flex items-center justify-center text-[var(--primary-hex)] shrink-0 border border-[var(--primary-hex)]/20">
                       <User className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="font-bold text-[#16132D] text-lg">{order.customerName}</div>
+                      <div className="font-bold text-[var(--primary-hex)] text-lg">{order.customerName}</div>
                       {customer?.phone && (
-                        <div className="text-sm font-medium text-[#16132D]/60 flex items-center gap-1.5 mt-0.5">
+                        <div className="text-sm font-medium text-[var(--primary-hex)]/60 flex items-center gap-1.5 mt-0.5">
                           <Phone className="w-3.5 h-3.5" /> {customer.phone}
                         </div>
                       )}
                       {customer?.email && (
-                        <div className="text-sm font-medium text-[#16132D]/60 flex items-center gap-1.5 mt-1">
+                        <div className="text-sm font-medium text-[var(--primary-hex)]/60 flex items-center gap-1.5 mt-1">
                           <Mail className="w-3.5 h-3.5" /> <span className="truncate">{customer.email}</span>
                         </div>
                       )}
                     </div>
                   </div>
                   {customer?.address && (
-                    <div className="text-sm font-medium text-[#16132D]/65 flex items-start gap-2 mt-2 pt-3 border-t border-[#16132D]/[0.06]">
-                      <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-[#16132D]/40" />
+                    <div className="text-sm font-medium text-[var(--primary-hex)]/65 flex items-start gap-2 mt-2 pt-3 border-t border-[var(--primary-hex)]/[0.06]">
+                      <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-[var(--primary-hex)]/40" />
                       <span className="leading-relaxed">{customer.address}</span>
                     </div>
                   )}
@@ -249,29 +249,29 @@ const OrderDetails: React.FC = () => {
 
                 <div className="space-y-4 pt-2">
                   <div>
-                    <span className="text-xs font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">GARMENT SPECIFICATION</span>
-                  <div className="flex items-center gap-2 text-[#16132D] font-medium text-lg">
-                    <Scissors className="w-4 h-4 text-[#7209B7]" />
+                    <span className="text-xs font-bold tracking-wider uppercase text-[var(--primary-hex)]/40 block mb-1">GARMENT SPECIFICATION</span>
+                  <div className="flex items-center gap-2 text-[var(--primary-hex)] font-medium text-lg">
+                    <Scissors className="w-4 h-4 text-[var(--primary-hex)]" />
                     {order.category}
                   </div>
                 </div>
                 
                 <div>
-                  <span className="text-xs font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">FABRIC DETAILS</span>
-                  <span className="text-[#16132D] whitespace-pre-wrap block bg-[#F4F3F8] p-3 rounded-lg border border-[#16132D]/5 text-sm">{order.fabricDetails || 'No fabric details provided.'}</span>
+                  <span className="text-xs font-bold tracking-wider uppercase text-[var(--primary-hex)]/40 block mb-1">FABRIC DETAILS</span>
+                  <span className="text-[var(--primary-hex)] whitespace-pre-wrap block bg-[#F4F3F8] p-3 rounded-lg border border-[var(--primary-hex)]/5 text-sm">{order.fabricDetails || 'No fabric details provided.'}</span>
                 </div>
                 
                 <div>
-                  <span className="text-xs font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">DELIVERY DATE</span>
-                  <div className="flex items-center gap-2 text-[#16132D] font-medium">
-                    <CalendarIcon className="w-4 h-4 text-[#16132D]/50" />
+                  <span className="text-xs font-bold tracking-wider uppercase text-[var(--primary-hex)]/40 block mb-1">DELIVERY DATE</span>
+                  <div className="flex items-center gap-2 text-[var(--primary-hex)] font-medium">
+                    <CalendarIcon className="w-4 h-4 text-[var(--primary-hex)]/50" />
                     {order.deliveryDate}
                   </div>
                 </div>
                 
                 <div>
-                  <span className="text-xs font-bold tracking-wider uppercase text-[#16132D]/40 block mb-1">ASSIGNED TAILOR</span>
-                  <span className="text-[#16132D] font-medium">{order.tailor || 'Unassigned'}</span>
+                  <span className="text-xs font-bold tracking-wider uppercase text-[var(--primary-hex)]/40 block mb-1">ASSIGNED TAILOR</span>
+                  <span className="text-[var(--primary-hex)] font-medium">{order.tailor || 'Unassigned'}</span>
                 </div>
                 </div>
               </div>
@@ -279,41 +279,41 @@ const OrderDetails: React.FC = () => {
 
             {/* Right Column: Financials & Status */}
             <div className="space-y-6">
-              <h3 className="text-lg font-serif font-bold border-b border-[#16132D]/[0.06] pb-3 text-[#16132D]">Financials & Actions</h3>
+              <h3 className="text-lg font-serif font-bold border-b border-[var(--primary-hex)]/[0.06] pb-3 text-[var(--primary-hex)]">Financials & Actions</h3>
               
-              <div className="bg-[#F4F3F8] p-4 rounded-xl border border-[#16132D]/[0.04] space-y-3">
+              <div className="bg-[#F4F3F8] p-4 rounded-xl border border-[var(--primary-hex)]/[0.04] space-y-3">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#16132D]/60 font-semibold">Total Amount</span>
-                  <span className="text-[#16132D] font-bold">₹{order.totalAmount.toLocaleString('en-IN')}</span>
+                  <span className="text-[var(--primary-hex)]/60 font-semibold">Total Amount</span>
+                  <span className="text-[var(--primary-hex)] font-bold">₹{order.totalAmount.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#16132D]/60 font-semibold">Advance Paid</span>
+                  <span className="text-[var(--primary-hex)]/60 font-semibold">Advance Paid</span>
                   <span className="text-[#10B981] font-bold">₹{order.advancePaid.toLocaleString('en-IN')}</span>
                 </div>
                 {(order.loyaltyDiscount || 0) > 0 && (
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-[#16132D]/60 font-semibold">Loyalty Discount</span>
+                    <span className="text-[var(--primary-hex)]/60 font-semibold">Loyalty Discount</span>
                     <span className="text-[#F43F5E] font-bold">- ₹{order.loyaltyDiscount?.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center pt-3 border-t border-[#16132D]/[0.06]">
-                  <span className="text-[#16132D]/80 font-bold">Balance Due</span>
+                <div className="flex justify-between items-center pt-3 border-t border-[var(--primary-hex)]/[0.06]">
+                  <span className="text-[var(--primary-hex)]/80 font-bold">Balance Due</span>
                   <span className="text-[#F43F5E] font-bold text-lg">₹{Math.max(0, order.totalAmount - order.advancePaid).toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
               {(order.pointsEarned || 0) > 0 && (
-                <div className="bg-gradient-to-r from-[#7209B7]/10 to-[#7209B7]/5 p-3 rounded-xl border border-[#7209B7]/20 flex items-center justify-center gap-2 text-[#7209B7]">
+                <div className="bg-gradient-to-r from-[var(--primary-hex)]/10 to-[var(--primary-hex)]/5 p-3 rounded-xl border border-[var(--primary-hex)]/20 flex items-center justify-center gap-2 text-[var(--primary-hex)]">
                   <span className="text-sm font-bold">💎 Earned {order.pointsEarned} Loyalty Points!</span>
                 </div>
               )}
 
               <div className="space-y-3">
-                <label className="block text-xs font-bold tracking-wider uppercase text-[#16132D]/40 mb-1">Update Status</label>
+                <label className="block text-xs font-bold tracking-wider uppercase text-[var(--primary-hex)]/40 mb-1">Update Status</label>
                 <select 
                   value={order.status} 
                   onChange={(e) => handleUpdateStatus(e.target.value)}
-                  className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm font-medium bg-white transition cursor-pointer"
+                  className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm font-medium bg-white transition cursor-pointer"
                 >
                   <option>Received</option>
                   <option>Cutting</option>
@@ -324,13 +324,13 @@ const OrderDetails: React.FC = () => {
               </div>
 
               {order.status === 'Received' && (
-                <div className="space-y-3 pt-4 border-t border-[#16132D]/[0.06]">
+                <div className="space-y-3 pt-4 border-t border-[var(--primary-hex)]/[0.06]">
                   <div>
-                    <label className="block text-xs font-bold tracking-wider uppercase text-[#16132D]/40 mb-1.5">Assign Tailor for Production</label>
+                    <label className="block text-xs font-bold tracking-wider uppercase text-[var(--primary-hex)]/40 mb-1.5">Assign Tailor for Production</label>
                     <select 
                       value={productionTailor}
                       onChange={(e) => setProductionTailor(e.target.value)}
-                      className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm bg-white transition cursor-pointer"
+                      className="w-full px-4 py-3 border border-[var(--primary-hex)]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/40 text-sm bg-white transition cursor-pointer"
                     >
                       <option value="">-- Select Tailor --</option>
                       {tailors.map(t => (
@@ -340,13 +340,13 @@ const OrderDetails: React.FC = () => {
                   </div>
                   <button
                     onClick={handleTakeMeasurements}
-                    className="w-full py-3 bg-white border border-[#7209B7] text-[#7209B7] hover:bg-[#7209B7]/5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
+                    className="w-full py-3 bg-white border border-[var(--primary-hex)] text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
                   >
                     <Scissors className="w-4 h-4" /> Record Measurements
                   </button>
                   <button
                     onClick={handleSendToProduction}
-                    className="w-full py-3 bg-[#7209B7] hover:bg-[#a3531f] text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition shadow-md shadow-[#7209B7]/20"
+                    className="w-full py-3 bg-[var(--primary-hex)] hover:opacity-90 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition shadow-md shadow-[var(--primary-hex)]/20"
                   >
                     Send to Production <ArrowRight className="w-4 h-4" />
                   </button>

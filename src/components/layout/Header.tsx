@@ -30,15 +30,15 @@ const Header: React.FC<HeaderProps> = ({ className, children, sidebarOpen, setSi
       <div className="flex items-center gap-2 pr-2">
         <button 
           onClick={toggleNavMode}
-          className="p-2 text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-full transition-colors hidden md:block" 
+          className="p-2 text-slate-500 hover:text-[var(--accent-hex)] hover:bg-[var(--accent-hex)]/10 rounded-full transition-colors hidden md:block" 
           title={`Switch to ${navMode === 'bottom' ? 'Sidebar' : 'Bottom Bar'}`}
         >
           <LayoutTemplate size={20} />
         </button>
-        <button className="p-2 text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-full transition-colors relative" title="Calendar">
+        <button className="p-2 text-slate-500 hover:text-[var(--accent-hex)] hover:bg-[var(--accent-hex)]/10 rounded-full transition-colors relative" title="Calendar">
           <Calendar size={20} />
         </button>
-        <button className="p-2 text-slate-500 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-full transition-colors relative" title="Notifications">
+        <button className="p-2 text-slate-500 hover:text-[var(--accent-hex)] hover:bg-[var(--accent-hex)]/10 rounded-full transition-colors relative" title="Notifications">
           <Bell size={20} />
           <span className="absolute top-2 right-2 w-2 h-2 bg-[#F43F5E] rounded-full border-2 border-white"></span>
         </button>

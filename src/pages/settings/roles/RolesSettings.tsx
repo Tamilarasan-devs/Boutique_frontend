@@ -46,10 +46,10 @@ const AVAILABLE_MODULES = [
 ];
 
 const AVAILABLE_COLORS = [
-  'bg-[#8338EC]/10 text-[#6200EA] ring-[#8338EC]/20',
+  'bg-[var(--primary-hex)]/10 text-[#6200EA] ring-[var(--accent-hex)]/20',
   'bg-[#7A5AA8]/10 text-[#5d4485] ring-[#7A5AA8]/20',
   'bg-[#10B981]/10 text-[#234638] ring-[#10B981]/20',
-  'bg-[#7209B7]/10 text-[#a3531f] ring-[#7209B7]/20',
+  'bg-[var(--primary-hex)]/10 text-[#a3531f] ring-[var(--accent-hex)]/20',
   'bg-blue-50 text-blue-700 ring-blue-200',
   'bg-amber-50 text-amber-700 ring-amber-200',
   'bg-rose-50 text-rose-700 ring-rose-200',
@@ -153,13 +153,13 @@ const RolesSettings: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
+    <div className="min-h-screen bg-[#F4F3F8] text-[var(--primary-hex)]">
       <div className="flex flex-col h-full space-y-6 p-6 md:p-8 max-w-5xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[var(--primary-hex)]/[0.08]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Settings</p>
-            <h1 className="text-3xl font-serif font-semibold text-[#16132D]">Roles & Access</h1>
-            <p className="text-sm text-[#16132D]/55 mt-1">Review the predefined roles and their allowed permissions.</p>
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1.5">Settings</p>
+            <h1 className="text-3xl font-serif font-semibold text-[var(--primary-hex)]">Roles & Access</h1>
+            <p className="text-sm text-[var(--primary-hex)]/55 mt-1">Review the predefined roles and their allowed permissions.</p>
           </div>
           <button 
             onClick={() => {
@@ -172,7 +172,7 @@ const RolesSettings: React.FC = () => {
               });
               setIsModalOpen(true);
             }}
-            className="px-4 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto"
+            className="px-4 py-2.5 bg-[var(--primary-hex)] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[var(--primary-hex)]/10 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" /> New Custom Role
           </button>
@@ -192,35 +192,35 @@ const RolesSettings: React.FC = () => {
                   }}
                   className={`w-full text-left p-4 rounded-2xl border transition hover:shadow-md cursor-pointer ${
                     selectedRole?.id === role.id 
-                      ? 'border-[#16132D]/30 ring-2 ring-[#16132D]/10 bg-white shadow-sm shadow-[#16132D]/5' 
-                      : 'bg-white border-[#16132D]/[0.08] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:border-[#16132D]/20'
+                      ? 'border-[var(--primary-hex)]/30 ring-2 ring-[var(--primary-hex)]/10 bg-white shadow-sm shadow-[var(--primary-hex)]/5' 
+                      : 'bg-white border-[var(--primary-hex)]/[0.08] shadow-[0_1px_3px_rgba(28,36,48,0.04)] hover:border-[var(--primary-hex)]/20'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Shield className={`w-4 h-4 ${selectedRole?.id === role.id ? 'text-[#7209B7]' : 'text-[#16132D]/40'}`} />
-                      <span className="font-bold text-[#16132D]">{role.name}</span>
+                      <Shield className={`w-4 h-4 ${selectedRole?.id === role.id ? 'text-[var(--primary-hex)]' : 'text-[var(--primary-hex)]/40'}`} />
+                      <span className="font-bold text-[var(--primary-hex)]">{role.name}</span>
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ring-1 ${role.color}`}>
                       {role.users} user{role.users !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <p className="text-xs text-[#16132D]/60 line-clamp-2 leading-relaxed">{role.description}</p>
+                  <p className="text-xs text-[var(--primary-hex)]/60 line-clamp-2 leading-relaxed">{role.description}</p>
                 </button>
               ))}
             </div>
 
             {/* Role detail */}
             {selectedRole && (
-              <div className="lg:col-span-2 bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
-                <div className="px-6 py-5 border-b border-[#16132D]/[0.07] flex justify-between items-center bg-[#F4F3F8]/30">
+              <div className="lg:col-span-2 bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-[0_1px_3px_rgba(28,36,48,0.04)] overflow-hidden">
+                <div className="px-6 py-5 border-b border-[var(--primary-hex)]/[0.07] flex justify-between items-center bg-[#F4F3F8]/30">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-[#16132D]/5 rounded-xl">
-                      <Shield className="w-5 h-5 text-[#16132D]" />
+                    <div className="p-2 bg-[var(--primary-hex)]/5 rounded-xl">
+                      <Shield className="w-5 h-5 text-[var(--primary-hex)]" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-serif font-bold text-[#16132D]">{selectedRole.name}</h2>
-                      <p className="text-xs text-[#16132D]/50 font-medium">
+                      <h2 className="text-lg font-serif font-bold text-[var(--primary-hex)]">{selectedRole.name}</h2>
+                      <p className="text-xs text-[var(--primary-hex)]/50 font-medium">
                         {selectedRole.is_system ? 'System Role' : 'Custom Role'}
                       </p>
                     </div>
@@ -241,7 +241,7 @@ const RolesSettings: React.FC = () => {
                           });
                           setIsModalOpen(true);
                         }}
-                        className="p-2 text-[#16132D]/60 hover:text-[#7209B7] hover:bg-[#7209B7]/10 rounded-xl transition flex items-center gap-2"
+                        className="p-2 text-[var(--primary-hex)]/60 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/10 rounded-xl transition flex items-center gap-2"
                         title="Edit Role"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -260,10 +260,10 @@ const RolesSettings: React.FC = () => {
                 </div>
                 
                 <div className="p-6 space-y-6">
-                  <p className="text-sm text-[#16132D]/70 leading-relaxed">{selectedRole.description}</p>
+                  <p className="text-sm text-[var(--primary-hex)]/70 leading-relaxed">{selectedRole.description}</p>
                   
                   <div>
-                    <h3 className="text-xs font-bold text-[#16132D]/40 uppercase tracking-wider mb-4">Allowed Modules & Features</h3>
+                    <h3 className="text-xs font-bold text-[var(--primary-hex)]/40 uppercase tracking-wider mb-4">Allowed Modules & Features</h3>
                     
                     {selectedRole.id === 'owner' ? (
                       <div className="flex items-center gap-2 px-4 py-3 bg-[#10B981]/10 rounded-xl border border-[#10B981]/20">
@@ -278,7 +278,7 @@ const RolesSettings: React.FC = () => {
                             <span key={moduleName} className={`px-3 py-1.5 border rounded-lg text-xs font-bold flex items-center gap-1.5 ${
                               access === 'Full' 
                                 ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' 
-                                : 'bg-[#8338EC]/10 text-[#8338EC] border-[#8338EC]/20'
+                                : 'bg-[var(--primary-hex)]/10 text-[var(--primary-hex)] border-[var(--primary-hex)]/20'
                             }`}>
                               <CheckCircle2 className="w-3.5 h-3.5" /> {moduleName} ({access})
                             </span>
@@ -288,10 +288,10 @@ const RolesSettings: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="p-4 bg-[#F4F3F8] rounded-xl border border-[#16132D]/[0.06] flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-[#7209B7] flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-[#16132D]/60 font-medium leading-relaxed">
-                      To edit these permissions, head over to the <a href="/settings/permissions" className="text-[#7209B7] font-semibold hover:underline">Permissions section</a>.
+                  <div className="p-4 bg-[#F4F3F8] rounded-xl border border-[var(--primary-hex)]/[0.06] flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-[var(--primary-hex)] flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-[var(--primary-hex)]/60 font-medium leading-relaxed">
+                      To edit these permissions, head over to the <a href="/settings/permissions" className="text-[var(--primary-hex)] font-semibold hover:underline">Permissions section</a>.
                     </p>
                   </div>
                 </div>
@@ -302,13 +302,13 @@ const RolesSettings: React.FC = () => {
 
         {/* Create / Edit Role Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-[#16132D]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[var(--primary-hex)]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-              <div className="px-6 py-4 border-b border-[#16132D]/[0.08] flex justify-between items-center bg-[#F4F3F8]/30">
-                <h2 className="text-lg font-serif font-bold text-[#16132D]">{modalMode === 'edit' ? 'Edit Role' : 'Create New Role'}</h2>
+              <div className="px-6 py-4 border-b border-[var(--primary-hex)]/[0.08] flex justify-between items-center bg-[#F4F3F8]/30">
+                <h2 className="text-lg font-serif font-bold text-[var(--primary-hex)]">{modalMode === 'edit' ? 'Edit Role' : 'Create New Role'}</h2>
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="p-1.5 text-[#16132D]/50 hover:text-[#16132D] hover:bg-[#16132D]/5 rounded-lg transition"
+                  className="p-1.5 text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/5 rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -318,31 +318,31 @@ const RolesSettings: React.FC = () => {
                 <form id="roleForm" onSubmit={handleSaveRole} className="space-y-6">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-semibold tracking-wide text-[#16132D]/60 uppercase mb-1.5">Role Name</label>
+                      <label className="block text-xs font-semibold tracking-wide text-[var(--primary-hex)]/60 uppercase mb-1.5">Role Name</label>
                       <input 
                         type="text"
                         required
                         disabled={modalMode === 'edit' && selectedRole?.is_system}
                         value={newRole.name}
                         onChange={(e) => setNewRole({...newRole, name: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-[#F4F3F8]/50 border border-[#16132D]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#7209B7]/20 focus:border-[#7209B7]/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-2.5 bg-[#F4F3F8]/50 border border-[var(--primary-hex)]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 focus:border-[var(--primary-hex)]/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="e.g. Senior Tailor"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-semibold tracking-wide text-[#16132D]/60 uppercase mb-1.5">Description</label>
+                      <label className="block text-xs font-semibold tracking-wide text-[var(--primary-hex)]/60 uppercase mb-1.5">Description</label>
                       <textarea 
                         required
                         value={newRole.description}
                         onChange={(e) => setNewRole({...newRole, description: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-[#F4F3F8]/50 border border-[#16132D]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#7209B7]/20 focus:border-[#7209B7]/30 transition resize-none h-20"
+                        className="w-full px-4 py-2.5 bg-[#F4F3F8]/50 border border-[var(--primary-hex)]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 focus:border-[var(--primary-hex)]/30 transition resize-none h-20"
                         placeholder="Briefly describe what this role does..."
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-semibold tracking-wide text-[#16132D]/60 uppercase mb-2">Color Theme</label>
+                      <label className="block text-xs font-semibold tracking-wide text-[var(--primary-hex)]/60 uppercase mb-2">Color Theme</label>
                       <div className="flex flex-wrap gap-2">
                         {AVAILABLE_COLORS.map(color => (
                           <button
@@ -357,14 +357,14 @@ const RolesSettings: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold tracking-wide text-[#16132D]/60 uppercase mb-3 border-t border-[#16132D]/[0.08] pt-6">Module Permissions</label>
+                    <label className="block text-xs font-semibold tracking-wide text-[var(--primary-hex)]/60 uppercase mb-3 border-t border-[var(--primary-hex)]/[0.08] pt-6">Module Permissions</label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {MODULE_CATEGORIES.map(mod => (
-                        <div key={mod} className="flex flex-col gap-1.5 p-3 rounded-xl border border-[#16132D]/[0.06] bg-[#F4F3F8]/30">
-                          <span className="text-sm font-semibold text-[#16132D]">{mod}</span>
+                        <div key={mod} className="flex flex-col gap-1.5 p-3 rounded-xl border border-[var(--primary-hex)]/[0.06] bg-[#F4F3F8]/30">
+                          <span className="text-sm font-semibold text-[var(--primary-hex)]">{mod}</span>
                           <div className="flex gap-2">
                             {['Full', 'Read', 'None'].map(level => (
-                              <label key={level} className="flex items-center gap-1.5 text-xs text-[#16132D]/70 cursor-pointer">
+                              <label key={level} className="flex items-center gap-1.5 text-xs text-[var(--primary-hex)]/70 cursor-pointer">
                                 <input 
                                   type="radio" 
                                   name={`perm-${mod}`}
@@ -374,7 +374,7 @@ const RolesSettings: React.FC = () => {
                                     ...newRole,
                                     permissions: { ...newRole.permissions, [mod]: level }
                                   })}
-                                  className="w-3.5 h-3.5 text-[#7209B7] focus:ring-[#7209B7]/20"
+                                  className="w-3.5 h-3.5 text-[var(--primary-hex)] focus:ring-[var(--primary-hex)]/20"
                                 />
                                 {level}
                               </label>
@@ -387,11 +387,11 @@ const RolesSettings: React.FC = () => {
                 </form>
               </div>
               
-              <div className="px-6 py-4 border-t border-[#16132D]/[0.08] bg-[#F4F3F8]/30 flex justify-end gap-3">
+              <div className="px-6 py-4 border-t border-[var(--primary-hex)]/[0.08] bg-[#F4F3F8]/30 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-semibold text-[#16132D]/60 hover:text-[#16132D] hover:bg-[#16132D]/5 rounded-xl transition"
+                  className="px-4 py-2 text-sm font-semibold text-[var(--primary-hex)]/60 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/5 rounded-xl transition"
                 >
                   Cancel
                 </button>
@@ -399,7 +399,7 @@ const RolesSettings: React.FC = () => {
                   type="submit"
                   form="roleForm"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-[#7209B7] hover:bg-[#5a0791] text-white text-sm font-semibold rounded-xl transition shadow-md shadow-[#7209B7]/20 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-[var(--primary-hex)] hover:bg-[#5a0791] text-white text-sm font-semibold rounded-xl transition shadow-md shadow-[var(--primary-hex)]/20 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {modalMode === 'edit' ? 'Save Changes' : 'Create Role'}

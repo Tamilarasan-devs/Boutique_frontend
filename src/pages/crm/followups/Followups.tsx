@@ -77,7 +77,7 @@ const Followups: React.FC = () => {
 
   // Helper to format notes for display
   const renderNotesHistory = (notes?: string) => {
-    if (!notes) return <div className="text-sm text-[#16132D]/40 italic">No notes logged yet.</div>;
+    if (!notes) return <div className="text-sm text-[var(--primary-hex)]/40 italic">No notes logged yet.</div>;
 
     // Notes are appended in the backend like: [06-Jul-2026]: Customer said yes\n[07-Jul-2026]: Another note
     const lines = notes.split('\n').filter(line => line.trim() !== '');
@@ -87,17 +87,17 @@ const Followups: React.FC = () => {
           const match = line.match(/^\[(.*?)\]:\s*(.*)$/);
           if (match) {
             return (
-              <div key={index} className="flex flex-col bg-white p-3 rounded-xl border border-[#16132D]/5 shadow-sm relative">
+              <div key={index} className="flex flex-col bg-white p-3 rounded-xl border border-[var(--primary-hex)]/5 shadow-sm relative">
                 <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1 flex items-center gap-1">
                   <Clock className="w-3 h-3" /> {match[1]}
                 </span>
-                <p className="text-sm text-[#16132D]/80 font-medium">{match[2]}</p>
+                <p className="text-sm text-[var(--primary-hex)]/80 font-medium">{match[2]}</p>
               </div>
             );
           }
           return (
-            <div key={index} className="bg-white p-3 rounded-xl border border-[#16132D]/5 shadow-sm">
-              <p className="text-sm text-[#16132D]/80 font-medium">{line}</p>
+            <div key={index} className="bg-white p-3 rounded-xl border border-[var(--primary-hex)]/5 shadow-sm">
+              <p className="text-sm text-[var(--primary-hex)]/80 font-medium">{line}</p>
             </div>
           );
         })}
@@ -404,28 +404,28 @@ const Followups: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#16132D] tracking-tight">Follow-ups</h1>
-            <p className="text-[#16132D]/60 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Keep your customer communications organized and close more deals.</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--primary-hex)] tracking-tight">Follow-ups</h1>
+            <p className="text-[var(--primary-hex)]/60 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Keep your customer communications organized and close more deals.</p>
           </div>
           <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-            <div className="flex bg-white rounded-xl shadow-sm border border-[#16132D]/10 p-1">
+            <div className="flex bg-white rounded-xl shadow-sm border border-[var(--primary-hex)]/10 p-1">
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#16132D] text-white shadow-sm' : 'text-[#16132D]/60 hover:bg-[#16132D]/5 hover:text-[#16132D]'}`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[var(--primary-hex)] text-white shadow-sm' : 'text-[var(--primary-hex)]/60 hover:bg-[var(--primary-hex)]/5 hover:text-[var(--primary-hex)]'}`}
                 title="List View"
               >
                 <List className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('card')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'card' ? 'bg-[#16132D] text-white shadow-sm' : 'text-[#16132D]/60 hover:bg-[#16132D]/5 hover:text-[#16132D]'}`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'card' ? 'bg-[var(--primary-hex)] text-white shadow-sm' : 'text-[var(--primary-hex)]/60 hover:bg-[var(--primary-hex)]/5 hover:text-[var(--primary-hex)]'}`}
                 title="Card View"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('calendar')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-[#16132D] text-white shadow-sm' : 'text-[#16132D]/60 hover:bg-[#16132D]/5 hover:text-[#16132D]'}`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-[var(--primary-hex)] text-white shadow-sm' : 'text-[var(--primary-hex)]/60 hover:bg-[var(--primary-hex)]/5 hover:text-[var(--primary-hex)]'}`}
                 title="Calendar View"
               >
                 <Calendar className="w-4 h-4" />
@@ -433,7 +433,7 @@ const Followups: React.FC = () => {
             </div>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 bg-[#16132D] hover:bg-[#2A3441] text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap"
+              className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 bg-[var(--primary-hex)] hover:bg-[#2A3441] text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">New Follow-up</span><span className="inline xs:hidden sm:hidden">New</span>
             </button>
@@ -441,15 +441,15 @@ const Followups: React.FC = () => {
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-6 gap-3 sm:gap-4 bg-white p-2 rounded-2xl shadow-sm border border-[#16132D]/5">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-6 gap-3 sm:gap-4 bg-white p-2 rounded-2xl shadow-sm border border-[var(--primary-hex)]/5">
           <div className="flex space-x-1 p-1 bg-[#F4F3F8] rounded-xl overflow-x-auto w-full sm:w-auto scrollbar-thin">
             {(['All', 'Pending', 'Completed', 'Overdue', 'Rejected'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-3 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex-shrink-0 ${activeTab === tab
-                  ? 'bg-white text-[#16132D] shadow-sm ring-1 ring-[#16132D]/5'
-                  : 'text-[#16132D]/50 hover:text-[#16132D]/80 hover:bg-[#16132D]/5'
+                  ? 'bg-white text-[var(--primary-hex)] shadow-sm ring-1 ring-[var(--primary-hex)]/5'
+                  : 'text-[var(--primary-hex)]/50 hover:text-[var(--primary-hex)]/80 hover:bg-[var(--primary-hex)]/5'
                   }`}
               >
                 {tab}
@@ -458,19 +458,19 @@ const Followups: React.FC = () => {
           </div>
 
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#16132D]/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--primary-hex)]/40" />
             <input
               type="text"
               placeholder="Search customers or tasks..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-[#F4F3F8] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium text-[#16132D] placeholder-[#16132D]/40 transition-shadow"
+              className="w-full pl-9 pr-4 py-2.5 bg-[#F4F3F8] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 text-sm font-medium text-[var(--primary-hex)] placeholder-[var(--primary-hex)]/40 transition-shadow"
             />
           </div>
         </div>
 
         {/* Table / Calendar */}
-        <div className="flex-1 bg-white rounded-2xl sm:rounded-3xl border border-[#16132D]/5 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
+        <div className="flex-1 bg-white rounded-2xl sm:rounded-3xl border border-[var(--primary-hex)]/5 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
           {viewMode === 'calendar' ? (
             <div className="flex-1 p-2 sm:p-6 h-[560px] sm:h-[700px]">
               <style dangerouslySetInnerHTML={{
@@ -479,11 +479,11 @@ const Followups: React.FC = () => {
                 @media (min-width: 640px) { .rbc-calendar { font-size: 14px; } }
                 .rbc-toolbar { flex-wrap: wrap; gap: 8px; }
                 .rbc-toolbar button { font-weight: 600; border-radius: 8px; border: 1px solid #e2e8f0; color: #475569; }
-                .rbc-toolbar button.rbc-active { background-color: #16132D; color: white; border-color: #16132D; }
+                .rbc-toolbar button.rbc-active { background-color: var(--primary-hex); color: white; border-color: var(--primary-hex); }
                 .rbc-toolbar button:hover:not(.rbc-active) { background-color: #f1f5f9; }
                 .rbc-event { background: transparent; padding: 0; border: none; }
                 .rbc-today { background-color: #F4F3F8; }
-                .rbc-header { padding: 8px 0; font-weight: 700; color: #16132D; border-bottom: 2px solid #f1f5f9; }
+                .rbc-header { padding: 8px 0; font-weight: 700; color: var(--primary-hex); border-bottom: 2px solid #f1f5f9; }
               `}} />
               <BigCalendar
                 localizer={localizer}
@@ -504,11 +504,12 @@ const Followups: React.FC = () => {
               />
             </div>
           ) : (
-            <div className={`flex-1 flex flex-col ${viewMode === 'list' ? 'overflow-x-auto' : 'overflow-y-auto overflow-x-hidden'}`}>
+            <>
+              <div className={`flex-1 flex flex-col ${viewMode === 'list' ? 'overflow-x-auto' : 'overflow-y-auto overflow-x-hidden'}`}>
               {isLoading ? (
                 <TableSkeleton />
               ) : filteredFollowUps.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-[#16132D]/40 py-16 px-4 text-center">
+                <div className="flex flex-col items-center justify-center h-full text-[var(--primary-hex)]/40 py-16 px-4 text-center">
                   <MessageSquare className="w-10 h-10 sm:w-12 sm:h-12 mb-3 opacity-20" />
                   <p className="font-semibold text-base sm:text-lg">No follow-ups found</p>
                   <p className="text-sm">You are all caught up!</p>
@@ -518,7 +519,7 @@ const Followups: React.FC = () => {
                 // outer wrapper's overflow-x-auto handle horizontal scrolling instead of squashing columns.
                 <table className="w-full min-w-[720px] text-left text-sm">
                   <thead className="sticky top-0 bg-white/95 backdrop-blur-sm z-10">
-                    <tr className="border-b border-[#16132D]/5 text-[#16132D]/60 font-bold uppercase tracking-wider text-xs">
+                    <tr className="border-b border-[var(--primary-hex)]/5 text-[var(--primary-hex)]/60 font-bold uppercase tracking-wider text-xs">
                       <th className="py-4 px-4 sm:px-6">Customer</th>
                       <th className="py-4 px-4 sm:px-6">Task & Status</th>
                       <th className="py-4 px-4 sm:px-6">Channel</th>
@@ -526,7 +527,7 @@ const Followups: React.FC = () => {
                       <th className="py-4 px-4 sm:px-6 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#16132D]/5">
+                  <tbody className="divide-y divide-[var(--primary-hex)]/5">
                     {filteredFollowUps.map((fol) => (
                       <tr
                         key={fol.id}
@@ -535,14 +536,14 @@ const Followups: React.FC = () => {
                       >
                         <td className="py-3.5 px-4 sm:px-6">
                           <div className="flex items-center gap-2">
-                            <span className="font-serif font-bold text-[#16132D] text-sm">{fol.customerName}</span>
-                            <span className="text-[9px] bg-[#16132D]/[0.05] text-[#16132D]/55 font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
+                            <span className="font-serif font-bold text-[var(--primary-hex)] text-sm">{fol.customerName}</span>
+                            <span className="text-[9px] bg-[var(--primary-hex)]/[0.05] text-[var(--primary-hex)]/55 font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
                               {fol.displayId}
                             </span>
                           </div>
                         </td>
                         <td className="py-3.5 px-4 sm:px-6 max-w-[300px]">
-                          <div className="font-medium text-[#16132D] truncate" title={fol.reason}>{fol.reason}</div>
+                          <div className="font-medium text-[var(--primary-hex)] truncate" title={fol.reason}>{fol.reason}</div>
                           <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide flex items-center gap-1 w-fit ${fol.status === 'Completed' ? 'bg-emerald-100 text-emerald-800'
                               : fol.status === 'Overdue' ? 'bg-rose-100 text-rose-800'
@@ -563,7 +564,7 @@ const Followups: React.FC = () => {
                           </div>
                         </td>
                         <td className="py-3.5 px-4 sm:px-6">
-                          <span className="flex items-center gap-1.5 text-xs font-bold text-[#16132D]/70">
+                          <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--primary-hex)]/70">
                             {fol.channel === 'WhatsApp' && <MessageSquare className="w-4 h-4 text-emerald-500" />}
                             {fol.channel === 'Call' && <Phone className="w-4 h-4 text-blue-500" />}
                             {fol.channel === 'Email' && <Mail className="w-4 h-4 text-purple-500" />}
@@ -571,8 +572,8 @@ const Followups: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3.5 px-4 sm:px-6">
-                          <div className="flex items-center gap-1.5 font-semibold text-[#16132D]/70 whitespace-nowrap">
-                            <Calendar className="w-4 h-4 text-[#16132D]/40" />
+                          <div className="flex items-center gap-1.5 font-semibold text-[var(--primary-hex)]/70 whitespace-nowrap">
+                            <Calendar className="w-4 h-4 text-[var(--primary-hex)]/40" />
                             {fol.dueDate}
                           </div>
                         </td>
@@ -604,7 +605,7 @@ const Followups: React.FC = () => {
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                            <ChevronRight className="w-5 h-5 text-[#16132D]/20 group-hover:text-[#16132D]/60 transition-colors ml-2" />
+                            <ChevronRight className="w-5 h-5 text-[var(--primary-hex)]/20 group-hover:text-[var(--primary-hex)]/60 transition-colors ml-2" />
 
                           </div>
                         </td>
@@ -613,18 +614,26 @@ const Followups: React.FC = () => {
                   </tbody>
                 </table>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 p-3 sm:p-6 bg-[#F4F3F8]/30 min-h-full shrink-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 p-4 sm:p-6 bg-[#F4F3F8]/30 flex-1">
                   {filteredFollowUps.map((fol) => (
                     <div
                       key={fol.id}
                       onClick={() => handleOpenDrawer(fol)}
-                      className="bg-white rounded-2xl p-4 sm:p-5 border border-[#16132D]/[0.06] shadow-[0_2px_10px_-4px_rgba(22,19,45,0.05)] hover:shadow-md transition-all cursor-pointer flex flex-col group relative overflow-hidden"
+                      className="bg-white rounded-2xl p-5 border border-[var(--primary-hex)]/[0.06] shadow-[0_2px_10px_-4px_rgba(var(--primary-rgb),0.05)] hover:shadow-md transition-all cursor-pointer flex flex-col group relative overflow-hidden h-fit"
                     >
                       <div className={`absolute top-0 left-0 w-full h-1 ${fol.status === 'Completed' ? 'bg-emerald-500' : fol.status === 'Overdue' ? 'bg-rose-500' : fol.status === 'Rejected' ? 'bg-slate-500' : 'bg-blue-500'}`} />
                       <div className="flex justify-between items-start mb-3 gap-2">
                         <div className="min-w-0">
-                          <span className="text-[10px] font-bold text-[#16132D]/40 tracking-wider uppercase block mb-1">{fol.displayId}</span>
-                          <h3 className="font-serif font-bold text-base sm:text-lg text-[#16132D] leading-tight truncate">{fol.customerName}</h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-bold text-[var(--primary-hex)]/40 tracking-wider uppercase">{fol.displayId}</span>
+                            {fol.notes && (
+                              <span className="text-[9px] font-bold bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded flex items-center gap-0.5" title="Notes logged">
+                                <MessageSquare className="w-2.5 h-2.5" />
+                                {fol.notes.split('\n').filter(line => line.trim() !== '').length}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="font-serif font-bold text-base sm:text-lg text-[var(--primary-hex)] leading-tight truncate">{fol.customerName}</h3>
                         </div>
                         <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 flex-shrink-0 ${fol.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : fol.status === 'Overdue' ? 'bg-rose-100 text-rose-800' : fol.status === 'Rejected' ? 'bg-slate-100 text-slate-700' : 'bg-blue-100 text-blue-800'
                           }`}>
@@ -634,20 +643,20 @@ const Followups: React.FC = () => {
                       </div>
 
                       <div className="flex-1 mt-1 mb-4">
-                        <p className="text-sm font-medium text-[#16132D]/80 line-clamp-2" title={fol.reason}>{fol.reason}</p>
+                        <p className="text-sm font-medium text-[var(--primary-hex)]/80 line-clamp-2" title={fol.reason}>{fol.reason}</p>
                       </div>
 
-                      <div className="bg-[#F4F3F8]/80 rounded-xl p-3 grid grid-cols-2 gap-2 mb-4 border border-[#16132D]/[0.03]">
+                      <div className="bg-[#F4F3F8]/80 rounded-xl p-3 grid grid-cols-2 gap-2 mb-4 border border-[var(--primary-hex)]/[0.03]">
                         <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#16132D]/40 block mb-0.5">Due Date</span>
-                          <div className="flex items-center gap-1 text-xs font-bold text-[#16132D]/80">
-                            <Calendar className="w-3.5 h-3.5 text-[#16132D]/40 flex-shrink-0" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary-hex)]/40 block mb-0.5">Due Date</span>
+                          <div className="flex items-center gap-1 text-xs font-bold text-[var(--primary-hex)]/80">
+                            <Calendar className="w-3.5 h-3.5 text-[var(--primary-hex)]/40 flex-shrink-0" />
                             <span className="truncate">{fol.dueDate}</span>
                           </div>
                         </div>
                         <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#16132D]/40 block mb-0.5">Channel</span>
-                          <span className="flex items-center gap-1 text-xs font-bold text-[#16132D]/80">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary-hex)]/40 block mb-0.5">Channel</span>
+                          <span className="flex items-center gap-1 text-xs font-bold text-[var(--primary-hex)]/80">
                             {fol.channel === 'WhatsApp' && <MessageSquare className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />}
                             {fol.channel === 'Call' && <Phone className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />}
                             {fol.channel === 'Email' && <Mail className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />}
@@ -657,79 +666,73 @@ const Followups: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-3 border-t border-[#16132D]/5 gap-3">
-                        <div className="flex items-center gap-2">
-                          {fol.notes && (
-                            <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md flex items-center gap-1" title="Notes added">
-                              <MessageSquare className="w-3 h-3" />
-                              {fol.notes.split('\n').filter(line => line.trim() !== '').length}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-end gap-1.5 sm:gap-2 w-full sm:w-auto">
-                          {fol.status !== 'Completed' && fol.status !== 'Rejected' && (
-                            <>
-                              <button onClick={(e) => handleConvert(fol, e)} className="flex-1 sm:flex-none py-2 px-2 sm:px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition flex justify-center items-center gap-1.5 cursor-pointer" title="Convert to Quotation">
-                                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                <span className="text-[11px] sm:text-xs font-bold">Convert</span>
-                              </button>
-                              <button onClick={(e) => handleMarkRejected(fol.id, e)} className="flex-1 sm:flex-none py-2 px-2 sm:px-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition flex justify-center items-center gap-1.5 cursor-pointer" title="Reject Follow-up">
-                                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                <span className="text-[11px] sm:text-xs font-bold">Reject</span>
-                              </button>
-                            </>
-                          )}
-                          <button onClick={(e) => handleDelete(fol, e)} className="p-2 sm:py-2 sm:px-3 bg-[#16132D]/5 text-[#16132D]/60 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition flex justify-center items-center gap-1.5 cursor-pointer" title="Delete Follow-up">
-                            <Trash2 className="w-4 h-4" />
-                            {/* <span className="text-xs font-bold hidden sm:block">Delete</span> */}
-                          </button>
-                        </div>
+                      <div className="pt-3 border-t border-[var(--primary-hex)]/5 flex items-center gap-2 mt-auto">
+                        {fol.status !== 'Completed' && fol.status !== 'Rejected' ? (
+                          <>
+                            <button onClick={(e) => handleConvert(fol, e)} className="flex-1 py-2 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl transition flex justify-center items-center gap-1.5 cursor-pointer" title="Convert to Quotation">
+                              <ArrowRight className="w-3.5 h-3.5" />
+                              <span className="text-[11px] font-extrabold">Convert</span>
+                            </button>
+                            <button onClick={(e) => handleMarkRejected(fol.id, e)} className="flex-1 py-2 px-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition flex justify-center items-center gap-1.5 cursor-pointer" title="Reject Follow-up">
+                              <X className="w-3.5 h-3.5" />
+                              <span className="text-[11px] font-extrabold">Reject</span>
+                            </button>
+                          </>
+                        ) : (
+                          <div className="flex-1 text-[11px] font-bold text-[var(--primary-hex)]/40 italic py-2">
+                            No actions pending
+                          </div>
+                        )}
+                        <button onClick={(e) => handleDelete(fol, e)} className="p-2 bg-[var(--primary-hex)]/5 text-[var(--primary-hex)]/60 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition flex justify-center items-center cursor-pointer shrink-0" title="Delete Follow-up">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-
-              {totalPages > 0 && (
-                <div className="mt-auto border-t border-[#16132D]/5 bg-white p-2">
-                  <Pagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    onPageChange={(p) => setPage(p)}
-                  />
-                </div>
-              )}
             </div>
+
+            {totalPages > 0 && (
+              <div className="border-t border-[var(--primary-hex)]/5 bg-white p-4 shrink-0">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={(p: number) => setPage(p)}
+                />
+              </div>
+            )}
+          </>
           )}
         </div>
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#16132D]/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+        <div className="fixed inset-0 bg-[var(--primary-hex)]/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
-            <div className="px-5 sm:px-6 py-4 sm:py-5 border-b border-[#16132D]/5 flex justify-between items-center bg-[#F4F3F8]/50 sticky top-0 z-10">
-              <h3 className="font-extrabold text-[#16132D] text-base sm:text-lg">New Follow-up</h3>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-[#16132D]/5 rounded-full text-[#16132D]/40 transition-colors">
+            <div className="px-5 sm:px-6 py-4 sm:py-5 border-b border-[var(--primary-hex)]/5 flex justify-between items-center bg-[#F4F3F8]/50 sticky top-0 z-10">
+              <h3 className="font-extrabold text-[var(--primary-hex)] text-base sm:text-lg">New Follow-up</h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-[var(--primary-hex)]/5 rounded-full text-[var(--primary-hex)]/40 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <form onSubmit={handleCreateFollowUp} className="p-5 sm:p-6 space-y-4 sm:space-y-5">
               <div>
-                <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Customer Name</label>
-                <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="E.g. Shalini Roy" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
+                <label className="block text-xs font-bold text-[var(--primary-hex)]/60 uppercase tracking-wider mb-2">Customer Name</label>
+                <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required placeholder="E.g. Shalini Roy" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[var(--primary-hex)]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 text-sm font-medium" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Customer Phone (Optional)</label>
-                <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="E.g. +91 9876543210" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
+                <label className="block text-xs font-bold text-[var(--primary-hex)]/60 uppercase tracking-wider mb-2">Customer Phone (Optional)</label>
+                <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="E.g. +91 9876543210" className="w-full px-4 py-3 bg-[#F4F3F8] border border-[var(--primary-hex)]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 text-sm font-medium" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Due Date</label>
-                  <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium" />
+                  <label className="block text-xs font-bold text-[var(--primary-hex)]/60 uppercase tracking-wider mb-2">Due Date</label>
+                  <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required className="w-full px-4 py-3 bg-[#F4F3F8] border border-[var(--primary-hex)]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 text-sm font-medium" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Channel</label>
-                  <select value={channel} onChange={(e) => setChannel(e.target.value as FollowUp['channel'])} className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium appearance-none">
+                  <label className="block text-xs font-bold text-[var(--primary-hex)]/60 uppercase tracking-wider mb-2">Channel</label>
+                  <select value={channel} onChange={(e) => setChannel(e.target.value as FollowUp['channel'])} className="w-full px-4 py-3 bg-[#F4F3F8] border border-[var(--primary-hex)]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 text-sm font-medium appearance-none">
                     <option>WhatsApp</option>
                     <option>Call</option>
                     <option>Email</option>
@@ -739,10 +742,10 @@ const Followups: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#16132D]/60 uppercase tracking-wider mb-2">Reason</label>
-                <textarea value={reason} onChange={(e) => setReason(e.target.value)} required placeholder="Why are we following up?" rows={3} className="w-full px-4 py-3 bg-[#F4F3F8] border border-[#16132D]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16132D]/20 text-sm font-medium resize-none" />
+                <label className="block text-xs font-bold text-[var(--primary-hex)]/60 uppercase tracking-wider mb-2">Reason</label>
+                <textarea value={reason} onChange={(e) => setReason(e.target.value)} required placeholder="Why are we following up?" rows={3} className="w-full px-4 py-3 bg-[#F4F3F8] border border-[var(--primary-hex)]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/20 text-sm font-medium resize-none" />
               </div>
-              <button type="submit" disabled={isSubmitting} className="w-full py-3.5 bg-[#16132D] hover:bg-[#2A3441] disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all shadow-md mt-2 flex items-center justify-center gap-2 cursor-pointer">
+              <button type="submit" disabled={isSubmitting} className="w-full py-3.5 bg-[var(--primary-hex)] hover:bg-[#2A3441] disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all shadow-md mt-2 flex items-center justify-center gap-2 cursor-pointer">
                 {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSubmitting ? 'Creating...' : 'Create Follow-up'}
               </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, Scissors } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Scissors, User, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../api/authApi';
 
@@ -17,11 +17,10 @@ const Register: React.FC = () => {
   const [error, setError] = useState('');
 
   // Redirect if already logged in
+
   useEffect(() => {
     if (isAuthenticated) navigate('/', { replace: true });
   }, [isAuthenticated, navigate]);
-
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,116 +49,229 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Brand Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#16132D] mb-4 shadow-lg shadow-[#16132D]/20">
-            <Scissors className="w-7 h-7 text-[#7209B7]" />
+    <div className="min-h-screen flex bg-white">
+      {/* Left — brand / dashboard showcase panel */}
+      <div 
+        className="hidden lg:flex lg:w-[54%] relative overflow-hidden flex-col justify-between px-14 py-12 xl:px-20"
+        style={{
+          background: 'linear-gradient(180deg, #e8dcc4 0%, #d9cdb4 20%, #8a8791 45%, #3d3f56 70%, #1b1c30 100%)',
+        }}
+      >
+        {/* Dot-grid texture */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.15]"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
+          }}
+        />
+        <div className="pointer-events-none absolute -top-32 -left-10 w-[420px] h-[420px] rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 w-[380px] h-[380px] rounded-full bg-black/20 blur-3xl" />
+
+        {/* Logo */}
+        <div className="relative z-10 flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center backdrop-blur-sm">
+            <Scissors className="w-4.5 h-4.5 text-white" />
           </div>
-          <h1 className="text-3xl font-serif font-semibold text-[#16132D] tracking-tight">Boutique CRM</h1>
-          <p className="text-sm text-[#16132D]/50 mt-2 font-medium">First-time setup — Register your boutique</p>
+          <span className="text-[1.05rem] tracking-tight">
+            <span className="font-bold text-white">Boutique</span>
+            <span className="font-medium text-white/70"> CRM</span>
+          </span>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-3xl border border-[#16132D]/[0.07] shadow-[0_8px_40px_rgba(28,36,48,0.08)] p-8">
-          <div className="mb-6">
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1">Owner Registration</p>
-            <h2 className="text-xl font-serif font-semibold text-[#16132D]">Create your owner account</h2>
-            <p className="text-sm text-[#16132D]/50 mt-1">This account will have full access to all features.</p>
+        {/* Floating dashboard cards */}
+        <div className="relative z-10 flex-1 flex items-center">
+          <div className="relative w-full max-w-md h-[230px] mx-auto">
+            {/* Live badge */}
+            <span className="absolute -top-3 right-6 z-20 flex items-center gap-1.5 bg-white/90 text-[var(--primary-hex)] text-[11px] font-bold px-3 py-1 rounded-full shadow-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Live
+            </span>
+
+            {/* Main revenue card */}
+            <div className="absolute top-0 left-0 w-[62%] rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md p-5 shadow-2xl">
+              <div className="flex items-center gap-1.5 mb-3">
+                <span className="w-2 h-2 rounded-full bg-white/30" />
+                <span className="w-2 h-2 rounded-full bg-white/30" />
+                <span className="h-1.5 w-16 rounded-full bg-white/25 ml-1" />
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-3xl font-bold text-white tracking-tight">₹8.4L</span>
+                <span className="flex items-center gap-0.5 text-[11px] font-bold text-emerald-300 bg-emerald-400/15 rounded-full px-2 py-0.5">
+                  ▲ 18.2%
+                </span>
+              </div>
+              <svg viewBox="0 0 200 60" className="w-full h-14" preserveAspectRatio="none">
+                <polyline
+                  points="0,45 30,38 60,42 90,26 120,30 150,14 180,18 200,4"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity="0.9"
+                />
+                <circle cx="200" cy="4" r="4" fill="white" />
+              </svg>
+            </div>
+
+            {/* Bar chart card */}
+            <div className="absolute bottom-0 left-0 w-[38%] h-[110px] rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md p-4 flex items-end gap-1.5 shadow-2xl">
+              {[28, 40, 34, 52, 46, 66].map((h, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-sm bg-white/70"
+                  style={{ height: `${h}%`, opacity: 0.5 + i * 0.08 }}
+                />
+              ))}
+            </div>
+
+            {/* Circular progress card */}
+            <div className="absolute bottom-[-18px] right-0 w-[46%] rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md p-4 flex items-center gap-4 shadow-2xl">
+              <div
+                className="relative w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  background: 'conic-gradient(#34D399 0% 92%, rgba(255,255,255,0.15) 92% 100%)',
+                }}
+              >
+                <div className="absolute inset-[3px] rounded-full bg-[var(--primary-hex)]" />
+                <span className="relative text-white text-sm font-bold">92%</span>
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <span className="h-1.5 w-full block rounded-full bg-white/25" />
+                <span className="h-1.5 w-3/4 block rounded-full bg-white/25" />
+                <span className="h-1.5 w-1/2 block rounded-full bg-white/25" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Headline block */}
+        <div className="relative z-10">
+          <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.14em] uppercase text-white/80 bg-white/10 border border-white/15 rounded-full px-3 py-1 mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            One Platform · Every Boutique
+          </span>
+          <h1 className="font-serif text-4xl xl:text-[2.75rem] leading-[1.15] font-semibold text-white max-w-md">
+            Run your whole boutique in one place.
+          </h1>
+          <p className="text-white/60 text-sm mt-4 max-w-sm leading-relaxed">
+            Sales, fittings, orders and clients — unified on a single platform your team can rely on.
+          </p>
+        </div>
+      </div>
+
+      {/* Right — Registration form */}
+      <div className="w-full lg:w-[46%] flex items-center justify-center px-6 sm:px-12 lg:px-16 py-12">
+        <div className="w-full max-w-sm">
+          {/* Mobile-only brand mark */}
+          <div className="flex items-center gap-2.5 mb-10 lg:hidden">
+            <div className="w-9 h-9 rounded-xl bg-[var(--primary-hex)] flex items-center justify-center">
+              <Scissors className="w-4.5 h-4.5 text-white" />
+            </div>
+            <span className="text-[1.05rem] tracking-tight">
+              <span className="font-bold text-gray-900">Boutique</span>
+              <span className="font-medium text-gray-500"> CRM</span>
+            </span>
           </div>
 
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Create your account</h2>
+          <p className="text-sm text-gray-500 mt-2 mb-8">
+            Register your boutique to get started — this account gets full access.
+          </p>
+
           {error && (
-            <div className="mb-4 px-4 py-3 bg-[#F43F5E]/[0.08] border border-[#F43F5E]/20 rounded-xl text-sm font-medium text-[#F43F5E]">
+            <div className="mb-5 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-sm font-medium text-red-600">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                placeholder="e.g. Priya Sharma"
-                className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-[#F4F3F8]/50 text-[#16132D]"
-              />
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
+              <div className="relative flex items-center">
+                <User className="absolute left-3.5 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  placeholder="Enter your full name"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/50 text-sm placeholder:text-slate-400 bg-white transition duration-200 text-gray-900"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">
-                Email Address *
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                placeholder="owner@boutique.com"
-                className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-[#F4F3F8]/50 text-[#16132D]"
-              />
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+              <div className="relative flex items-center">
+                <Mail className="absolute left-3.5 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  placeholder="Enter your registered email address"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/50 text-sm placeholder:text-slate-400 bg-white transition duration-200 text-gray-900"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">
-                Password *
-              </label>
-              <div className="relative">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Password</label>
+              <div className="relative flex items-center">
+                <Lock className="absolute left-3.5 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Min. 6 characters"
-                  className="w-full px-4 py-3 pr-11 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-[#F4F3F8]/50 text-[#16132D]"
+                  placeholder="Enter your password"
+                  className="w-full pl-10 pr-11 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/50 text-sm placeholder:text-slate-400 bg-white transition duration-200 text-gray-900"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#16132D]/35 hover:text-[#16132D]/70 transition"
+                  className="absolute right-3.5 text-slate-400 hover:text-slate-600 transition"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <p className="text-[10px] text-slate-400 mt-1.5">Minimum 6 characters.</p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">
-                Confirm Password *
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                required
-                placeholder="Re-enter password"
-                className="w-full px-4 py-3 border border-[#16132D]/[0.1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 focus:border-[#7209B7]/40 text-sm transition bg-[#F4F3F8]/50 text-[#16132D]"
-              />
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Confirm Password</label>
+              <div className="relative flex items-center">
+                <Lock className="absolute left-3.5 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  required
+                  placeholder="Re-enter your password"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 focus:border-[var(--primary-hex)]/50 text-sm placeholder:text-slate-400 bg-white transition duration-200 text-gray-900"
+                />
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-[#7209B7] hover:bg-[#a3531f] disabled:opacity-60 text-white rounded-xl text-sm font-semibold transition shadow-md shadow-[#7209B7]/20 flex items-center justify-center gap-2 mt-2 cursor-pointer"
+              className="w-full py-3.5 bg-[var(--primary-hex)] hover:opacity-95 transform active:scale-[0.98] disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all duration-150 shadow-md shadow-[var(--primary-hex)]/20 flex items-center justify-center gap-2 mt-2 cursor-pointer"
             >
               {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               {isLoading ? 'Creating account…' : 'Create Owner Account'}
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-[#16132D]/[0.06] text-center">
-            <p className="text-xs text-[#16132D]/45">
-              Already have an account?{' '}
-              <Link to="/auth/login" className="font-semibold text-[#7209B7] hover:text-[#a3531f] transition">
-                Sign in
-              </Link>
-            </p>
-          </div>
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Already have an account?{' '}
+            <Link to="/auth/login" className="font-semibold text-[var(--primary-hex)] hover:opacity-80 transition">
+              Sign In
+            </Link>
+          </p>
         </div>
       </div>
     </div>

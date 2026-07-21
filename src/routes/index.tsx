@@ -60,20 +60,18 @@ const Tailors = lazy(() => import('../pages/staff/tailors/Tailors'));
 const Attendance = lazy(() => import('../pages/staff/attendance/Attendance'));
 
 // Marketing
-const Customers = lazy(() => import('../pages/marketing/customers/Customers.tsx'));
+const Customers = lazy(() => import('../pages/marketing/customers/Customers'));
 const Campaigns = lazy(() => import('../pages/marketing/campaigns/Campaigns'));
 const Whatsapp = lazy(() => import('../pages/marketing/whatsapp/Whatsapp'));
 const Email = lazy(() => import('../pages/marketing/email/Email'));
 const Sms = lazy(() => import('../pages/marketing/sms/Sms'));
 const Loyalty = lazy(() => import('../pages/marketing/loyalty/Loyalty'));
-
-// Products
-const ProductUpload = lazy(() => import('../pages/products/ProductUpload.tsx'));
-const ProductList = lazy(() => import('../pages/products/ProductList.tsx'));
-
+const ProductUpload = lazy(() => import('../pages/products/ProductUpload'));
+const ProductList = lazy(() => import('../pages/products/ProductList'));
 
 // Settings
 const CompanySettings = lazy(() => import('../pages/settings/company/CompanySettings'));
+const ThemeSettings = lazy(() => import('../pages/settings/theme/ThemeSettings'));
 const UsersSettings = lazy(() => import('../pages/settings/users/UsersSettings'));
 const RolesSettings = lazy(() => import('../pages/settings/roles/RolesSettings'));
 const PermissionsSettings = lazy(() => import('../pages/settings/permissions/PermissionsSettings'));
@@ -167,6 +165,7 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute allowedRoles={['owner']}><SettingsLayout /></ProtectedRoute>,
     children: [
       { path: 'company', element: <CompanySettings /> },
+      { path: 'theme', element: <ThemeSettings /> },
       { path: 'users', element: <UsersSettings /> },
       { path: 'roles', element: <RolesSettings /> },
       { path: 'permissions', element: <PermissionsSettings /> },

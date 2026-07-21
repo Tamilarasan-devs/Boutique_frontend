@@ -11,18 +11,22 @@ const DashboardLayout: React.FC = () => {
   const { navMode } = useUIStore();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900">
-      <Sidebar 
-        mobileOpen={mobileSidebarOpen} 
-        onMobileClose={() => setMobileSidebarOpen(false)} 
-      />
+    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900 print:h-auto print:overflow-visible print:bg-white">
+      <div className="print:hidden">
+        <Sidebar 
+          mobileOpen={mobileSidebarOpen} 
+          onMobileClose={() => setMobileSidebarOpen(false)} 
+        />
+      </div>
       
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative w-full">
-        <Header sidebarOpen={mobileSidebarOpen} setSidebarOpen={setMobileSidebarOpen} />
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative w-full print:h-auto print:overflow-visible print:bg-white">
+        <div className="print:hidden">
+          <Header sidebarOpen={mobileSidebarOpen} setSidebarOpen={setMobileSidebarOpen} />
+        </div>
 
         {/* Content */}
         <main className={clsx(
-          "flex-1 overflow-x-hidden overflow-y-auto pb-6",
+          "flex-1 overflow-x-hidden overflow-y-auto pb-6 print:overflow-visible print:pb-0",
           navMode === 'bottom' && "md:pb-24"
         )}>
           <Suspense
@@ -39,7 +43,9 @@ const DashboardLayout: React.FC = () => {
           </Suspense>
         </main>
       </div>
-      <BottomBar />
+      <div className="print:hidden">
+        <BottomBar />
+      </div>
     </div>
   );
 };

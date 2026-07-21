@@ -140,18 +140,18 @@ const UsersSettings: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F3F8] text-[#16132D]">
+    <div className="min-h-screen bg-[#F4F3F8] text-[var(--primary-hex)]">
       <div className="flex flex-col h-full space-y-6 p-6 md:p-8 max-w-5xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[#16132D]/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 border-b border-[var(--primary-hex)]/[0.08]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1.5">Settings</p>
-            <h1 className="text-3xl font-serif font-semibold text-[#16132D]">Staff Users</h1>
-            <p className="text-sm text-[#16132D]/55 mt-1">Manage staff accounts and their access roles.</p>
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1.5">Settings</p>
+            <h1 className="text-3xl font-serif font-semibold text-[var(--primary-hex)]">Staff Users</h1>
+            <p className="text-sm text-[var(--primary-hex)]/55 mt-1">Manage staff accounts and their access roles.</p>
           </div>
           <button
             onClick={openAddModal}
-            className="px-4 py-2.5 bg-[#16132D] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[#16132D]/10 self-start sm:self-auto cursor-pointer"
+            className="px-4 py-2.5 bg-[var(--primary-hex)] hover:bg-[#2a3545] text-[#F4F3F8] rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-md shadow-[var(--primary-hex)]/10 self-start sm:self-auto cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Add Staff User
           </button>
@@ -167,11 +167,11 @@ const UsersSettings: React.FC = () => {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-sm overflow-hidden">
           {isLoading ? (
           <TableSkeleton />
         ) : users.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-[#16132D]/40 gap-2">
+            <div className="flex flex-col items-center justify-center h-48 text-[var(--primary-hex)]/40 gap-2">
               <Shield className="w-8 h-8 opacity-40" />
               <p className="text-sm font-medium">No staff users yet</p>
               <p className="text-xs">Add a staff member to get started</p>
@@ -180,7 +180,7 @@ const UsersSettings: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#16132D]/[0.08] bg-[#F4F3F8]/70 text-[#16132D]/40 font-semibold text-xs uppercase tracking-wide">
+                  <tr className="border-b border-[var(--primary-hex)]/[0.08] bg-[#F4F3F8]/70 text-[var(--primary-hex)]/40 font-semibold text-xs uppercase tracking-wide">
                     <th className="py-4 px-6">Staff Member</th>
                     <th className="py-4 px-6">Role</th>
                     <th className="py-4 px-6">Status</th>
@@ -188,17 +188,17 @@ const UsersSettings: React.FC = () => {
                     <th className="py-4 px-6 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#16132D]/[0.05]">
+                <tbody className="divide-y divide-[var(--primary-hex)]/[0.05]">
                   {users.map(u => (
                     <tr key={u.id} className="hover:bg-[#F4F3F8]/60 transition">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-[#16132D]/[0.06] border border-[#16132D]/[0.08] text-[#16132D]/70 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                          <div className="w-9 h-9 rounded-xl bg-[var(--primary-hex)]/[0.06] border border-[var(--primary-hex)]/[0.08] text-[var(--primary-hex)]/70 flex items-center justify-center font-bold text-xs flex-shrink-0">
                             {u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-[#16132D]">{u.name}</p>
-                            <p className="text-xs text-[#16132D]/40">{u.email}</p>
+                            <p className="font-semibold text-[var(--primary-hex)]">{u.name}</p>
+                            <p className="text-xs text-[var(--primary-hex)]/40">{u.email}</p>
                           </div>
                         </div>
                       </td>
@@ -226,21 +226,21 @@ const UsersSettings: React.FC = () => {
                           {u.is_active ? 'Active' : 'Inactive'}
                         </button>
                       </td>
-                      <td className="py-4 px-6 text-xs text-[#16132D]/40 font-medium">
+                      <td className="py-4 px-6 text-xs text-[var(--primary-hex)]/40 font-medium">
                         {new Date(u.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => openEditModal(u)}
-                            className="p-2 hover:bg-[#8338EC]/10 rounded-lg text-[#16132D]/40 hover:text-[#8338EC] transition cursor-pointer"
+                            className="p-2 hover:bg-[var(--primary-hex)]/10 rounded-lg text-[var(--primary-hex)]/40 hover:text-[var(--primary-hex)] transition cursor-pointer"
                             title="Edit user"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setDeleteTarget(u)}
-                            className="p-2 hover:bg-[#F43F5E]/10 rounded-lg text-[#16132D]/40 hover:text-[#F43F5E] transition cursor-pointer"
+                            className="p-2 hover:bg-[#F43F5E]/10 rounded-lg text-[var(--primary-hex)]/40 hover:text-[#F43F5E] transition cursor-pointer"
                             title="Delete user"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -258,18 +258,18 @@ const UsersSettings: React.FC = () => {
 
       {/* Add / Edit Modal */}
       {modalMode && (
-        <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-md overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#16132D]/[0.08] flex justify-between items-center">
+        <div className="fixed inset-0 bg-[var(--primary-hex)]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-2xl shadow-[var(--primary-hex)]/20 w-full max-w-md overflow-hidden">
+            <div className="px-6 py-5 border-b border-[var(--primary-hex)]/[0.08] flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#7209B7] mb-1">
+                <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--primary-hex)] mb-1">
                   {modalMode === 'add' ? 'New Staff Member' : 'Edit Access'}
                 </p>
-                <h3 className="font-serif font-semibold text-[#16132D] text-lg">
+                <h3 className="font-serif font-semibold text-[var(--primary-hex)] text-lg">
                   {modalMode === 'add' ? 'Create Staff Account' : 'Update Staff User'}
                 </h3>
               </div>
-              <button onClick={closeModal} className="p-2 rounded-lg text-[#16132D]/35 hover:text-[#16132D] hover:bg-[#16132D]/[0.05] transition cursor-pointer">
+              <button onClick={closeModal} className="p-2 rounded-lg text-[var(--primary-hex)]/35 hover:text-[var(--primary-hex)] hover:bg-[var(--primary-hex)]/[0.05] transition cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -278,35 +278,35 @@ const UsersSettings: React.FC = () => {
                 <div className="px-4 py-3 bg-[#F43F5E]/[0.08] border border-[#F43F5E]/20 rounded-xl text-sm text-[#F43F5E]">{error}</div>
               )}
               <div>
-                <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Full Name *</label>
+                <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Full Name *</label>
                 <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Ritu Sharma"
-                  className="w-full px-4 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm bg-white" />
+                  className="w-full px-4 py-2.5 border border-[var(--primary-hex)]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm bg-white" />
               </div>
               {modalMode === 'add' && (
                 <div>
-                  <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Email Address *</label>
+                  <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Email Address *</label>
                   <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="staff@boutique.com"
-                    className="w-full px-4 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm bg-white" />
+                    className="w-full px-4 py-2.5 border border-[var(--primary-hex)]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm bg-white" />
                 </div>
               )}
               {modalMode === 'add' && (
                 <div>
-                  <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Temporary Password *</label>
+                  <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Temporary Password *</label>
                   <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min. 6 characters"
-                    className="w-full px-4 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm bg-white" />
+                    className="w-full px-4 py-2.5 border border-[var(--primary-hex)]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm bg-white" />
                 </div>
               )}
               <div>
-                <label className="block text-xs font-bold text-[#16132D]/45 uppercase tracking-wider mb-1.5">Role *</label>
+                <label className="block text-xs font-bold text-[var(--primary-hex)]/45 uppercase tracking-wider mb-1.5">Role *</label>
                 <select value={role} onChange={e => setRole(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-[#16132D]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7209B7]/25 text-sm bg-white cursor-pointer">
+                  className="w-full px-4 py-2.5 border border-[var(--primary-hex)]/[0.1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-hex)]/25 text-sm bg-white cursor-pointer">
                   {roles.map(r => (
                     <option key={r.id} value={r.id}>{r.name} — {r.description}</option>
                   ))}
                 </select>
               </div>
               <button type="submit" disabled={isSaving}
-                className="w-full py-2.5 bg-[#16132D] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-lg text-sm font-semibold transition mt-2 flex items-center justify-center gap-2 cursor-pointer">
+                className="w-full py-2.5 bg-[var(--primary-hex)] hover:bg-[#2a3545] disabled:opacity-60 text-[#F4F3F8] rounded-lg text-sm font-semibold transition mt-2 flex items-center justify-center gap-2 cursor-pointer">
                 {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSaving ? 'Saving…' : modalMode === 'add' ? 'Create Account' : 'Save Changes'}
               </button>
@@ -317,20 +317,20 @@ const UsersSettings: React.FC = () => {
 
       {/* Delete Confirmation */}
       {deleteTarget && (
-        <div className="fixed inset-0 bg-[#16132D]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl border border-[#16132D]/[0.06] shadow-2xl shadow-[#16132D]/20 w-full max-w-sm p-6 space-y-4">
+        <div className="fixed inset-0 bg-[var(--primary-hex)]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[var(--primary-hex)]/[0.06] shadow-2xl shadow-[var(--primary-hex)]/20 w-full max-w-sm p-6 space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-[#F43F5E]/10 border border-[#F43F5E]/15 flex items-center justify-center">
               <Trash2 className="w-5 h-5 text-[#F43F5E]" />
             </div>
             <div>
-              <h3 className="font-serif font-semibold text-[#16132D] text-lg">Delete User?</h3>
-              <p className="text-sm text-[#16132D]/55 mt-1">
-                Remove <span className="font-semibold text-[#16132D]">{deleteTarget.name}</span> from your staff roster? They will lose all access immediately.
+              <h3 className="font-serif font-semibold text-[var(--primary-hex)] text-lg">Delete User?</h3>
+              <p className="text-sm text-[var(--primary-hex)]/55 mt-1">
+                Remove <span className="font-semibold text-[var(--primary-hex)]">{deleteTarget.name}</span> from your staff roster? They will lose all access immediately.
               </p>
             </div>
             <div className="flex gap-3 pt-2">
               <button onClick={() => setDeleteTarget(null)}
-                className="flex-1 py-2.5 bg-[#F4F3F8] hover:bg-[#16132D]/[0.04] border border-[#16132D]/[0.08] rounded-xl text-sm font-semibold text-[#16132D]/80 transition cursor-pointer">
+                className="flex-1 py-2.5 bg-[#F4F3F8] hover:bg-[var(--primary-hex)]/[0.04] border border-[var(--primary-hex)]/[0.08] rounded-xl text-sm font-semibold text-[var(--primary-hex)]/80 transition cursor-pointer">
                 Cancel
               </button>
               <button onClick={handleDeleteUser} disabled={isDeleting}
